@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fontfind"
+version = "0.1.0"
+
+description = "Analyses the Unicode scripts used by strings, and locates fonts that can help display those strings."
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+]
+
+[project.urls]
+# "Documentation" = ""
+"Source" = "https://github.com/multiscript/fontfind"
+"Issue Tracker" = "https://github.com/multiscript/fontfind/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]  
+include = ["fontfind*"]  
+exclude = ["tests*"] 
+namespaces = false
