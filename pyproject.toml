@@ -10,6 +10,8 @@ description = "Analyses the Unicode scripts used by strings, and locates fonts t
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
+    "unicodedataplus",
+    "requests"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -17,6 +19,11 @@ classifiers = [
     "Operating System :: OS Independent",
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
 ]
 
 [project.urls]
