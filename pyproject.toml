@@ -26,6 +26,10 @@ test = [
   "pytest",
 ]
 
+unihan = [
+  "unihan-etl", "typing_extensions"
+]
+
 [project.urls]
 # "Documentation" = ""
 "Source" = "https://github.com/multiscript/fontfinder"
