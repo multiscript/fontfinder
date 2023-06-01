@@ -16,7 +16,7 @@ class FontFinder:
     def load_data(self):
         self.noto_data = requests.get("https://notofonts.github.io/noto.json").json()
         
-        with open(Path(__file__, "../../../data/small_unihan.json").resolve()) as small_unihan_file:
+        with open(SMALL_UNIHAN_PATH) as small_unihan_file:
             self.small_unihan_data = json.load(small_unihan_file)
     
     def count_scripts(self, text):
