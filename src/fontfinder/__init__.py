@@ -1,9 +1,11 @@
+from collections import Counter
+import dataclasses
 import json
 from pathlib import Path
+from pprint import pprint
+
 import requests
 import unicodedataplus as udp
-from pprint import pprint
-from collections import Counter
 
 DATA_DIR_PATH = Path(__file__, "../data").resolve()
 DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
@@ -19,7 +21,7 @@ class FontFinder:
         with open(SMALL_UNIHAN_PATH) as small_unihan_file:
             self.small_unihan_data = json.load(small_unihan_file)
     
-    def count_scripts(self, text):
+    def get_text_info(self, text):
         script_count = Counter()
         unihan_count = Counter()
         ignore_scripts = set(['Common', 'Inherited', 'Unknown'])
@@ -33,3 +35,8 @@ class FontFinder:
 
         return script_count, unihan_count
 
+
+@dataclasses.dataclass
+class TextInfo:
+    main_script: str
+    lang_tag: str | None
