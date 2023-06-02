@@ -22,9 +22,11 @@ class FontFinder:
     def count_scripts(self, text):
         script_count = Counter()
         unihan_count = Counter()
+        ignore_scripts = set(['Common', 'Inherited', 'Unknown'])
         for char in text:
             script = udp.script(char)
-            script_count[script] += 1
+            if script not in ignore_scripts:
+                script_count[script] += 1
             if char in self.small_unihan_data:
                 for key in self.small_unihan_data[char].keys():
                     unihan_count[key] += 1
