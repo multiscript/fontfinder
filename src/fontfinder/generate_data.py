@@ -11,6 +11,9 @@ _FULL_UNIHAN_PATH = Path(fontfinder._DATA_DIR_PATH, "full_unihan.json").resolve(
 
 
 def generate_small_unihan():
+    '''Utility function for creating a subset of the Unicode Unihan database needed by `fontfinder`.
+    This function recreates the local subset. As `fontfinder` is distributed with a working copy
+    of the subset (`small_unihan.json`) you should never need to call this method.'''
     with tempfile.TemporaryDirectory() as work_dir:
         packager_options = {
             "destination": str(_FULL_UNIHAN_PATH),

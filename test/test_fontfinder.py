@@ -1,19 +1,29 @@
-
-from fontfinder import FontFinder
-import unicodedataplus as udp
 from pprint import pprint
+
+import unicodedataplus as udp
+
+from fontfinder import *
 
 
 class TestFontFinder:
 
-    def test_initial_devel(self):
+    def test_get_text_info(self):
         ff = FontFinder()
         for sample_text in sample_texts:
             text_info = ff.get_text_info(sample_text['text'])
             assert sample_text['main_script'] == text_info.main_script
 
+    def test_known_fonts(self):
+        ff = FontFinder()
+        fonts = ff.known_fonts() # Ensure no errors in creating list
+        # fonts = [font for font in fonts if font.family == "Noto Sans"]
+        print(len(fonts))
+        # pprint(fonts[-10:])
 
+
+#
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.
+#
 sample_texts = [
 {'language': 'English',
  'main_script': 'Latin',
