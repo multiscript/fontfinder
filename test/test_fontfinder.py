@@ -9,8 +9,11 @@ class TestFontFinder:
     def test_initial_devel(self):
         ff = FontFinder()
         for sample_text in sample_texts:
-            pprint(ff.count_scripts(sample_text['text']))
-            print()
+            text_info = ff.get_text_info(sample_text['text'])
+            assert sample_text['main_script'] == text_info.main_script
+            print(text_info.script_order)
+
+
 
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.
 sample_texts = [
@@ -58,7 +61,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 '''},
 
 {'language': 'Chinese (Simplified)',
- 'main_script': 'Han',
+ 'main_script': 'Chinese (Simplified)',
  'text':
 '''
 地球是太阳系中由內及外的第三顆行星，距离太阳149 597 870.7公里/1天文單位，是宇宙中人類已知唯一存在生命的天体[3]，也
@@ -81,7 +84,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 '''},
 
 {'Language': 'Cantonese',
- 'main_script': 'Han',
+ 'main_script': 'Chinese (Traditional)',
  'text':
 '''
 佢距離太陽 1.5 億公里（1個天文單位）遠，係太陽系嘅行星入面第三近太陽嘅－排正喺水星同金星之後。佢嘅質量係 5.97 ×
@@ -138,7 +141,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 '''},
 
 {'language': 'Japanese',
- 'main_script': 'Hirogana',
+ 'main_script': 'Japanese',
  'text':
 '''
 地球とは人類が住んでいる天体、つまり人類の足元にある天体のことである。「地」という字・概念と「球」という字・概念で
@@ -182,7 +185,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 '''},
 
 {'language': 'Korean',
- 'main_script': 'Hangul',
+ 'main_script': 'Korean',
  'text':
 '''
 지구(地球, 영어: Earth)는 태양으로부터 세 번째 행성이며, 조금 두꺼운 대기층으로 둘러싸여 있고, 지금까지 발견된
