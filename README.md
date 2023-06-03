@@ -1,2 +1,4 @@
 # fontfinder
-Analyses the Unicode scripts used by strings, and locates fonts that can help display those strings.
+Analyses the majority Unicode script used in a text string, and locates fonts that can help display that string.
+For now, only locates fonts in the Google Noto font collection.
+

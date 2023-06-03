@@ -7,15 +7,13 @@ import unihan_etl.process
 
 import fontfinder
 
-DATA_DIR_PATH = fontfinder.DATA_DIR_PATH
-SMALL_UNIHAN_PATH = fontfinder.SMALL_UNIHAN_PATH
-FULL_UNIHAN_PATH = Path(DATA_DIR_PATH, "full_unihan.json").resolve()
+_FULL_UNIHAN_PATH = Path(fontfinder._DATA_DIR_PATH, "full_unihan.json").resolve()
 
 
 def generate_small_unihan():
     with tempfile.TemporaryDirectory() as work_dir:
         packager_options = {
-            "destination": str(FULL_UNIHAN_PATH),
+            "destination": str(_FULL_UNIHAN_PATH),
             "work_dir": work_dir,
             "format": "json"
         }
@@ -23,8 +21,8 @@ def generate_small_unihan():
         packager.download()
         packager.export()
 
-    with open(FULL_UNIHAN_PATH) as full_unihan_file:
-        with open(SMALL_UNIHAN_PATH, "w") as small_unihan_file:
+    with open(_FULL_UNIHAN_PATH) as full_unihan_file:
+        with open(fontfinder._SMALL_UNIHAN_PATH, "w") as small_unihan_file:
             full_records = json.load(full_unihan_file)
             selected_keys = ['kTraditionalVariant', 'kSimplifiedVariant']
             small_records = {}
@@ -34,7 +32,7 @@ def generate_small_unihan():
                     small_records[full_record['char']] = small_entry
             json.dump(small_records, small_unihan_file)
     
-    FULL_UNIHAN_PATH.unlink()
+    _FULL_UNIHAN_PATH.unlink()
 
 
 if __name__ == '__main__':

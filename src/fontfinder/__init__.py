@@ -1,39 +1,52 @@
+'''
+Analyses the majority Unicode script used in a text string, and locates fonts that can help display that string.
+For now, only locates fonts in the Google Noto font collection.
+'''
 from collections import Counter
-import dataclasses
+from dataclasses import dataclass, field
 import json
 from pathlib import Path
 
 import requests
 import unicodedataplus as udp
 
+MAX_CHARS_TO_ANALYSE: int = 2048
+'''Maximum number of characters of a string to analyse for script information.'''
 
-DATA_DIR_PATH = Path(__file__, "../data").resolve()
-DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
-SMALL_UNIHAN_PATH = Path(DATA_DIR_PATH, "small_unihan.json").resolve()
-MAX_CHARS_TO_ANALYSE = 2048
+_DATA_DIR_PATH = Path(__file__, "../data").resolve()
+_DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
+_SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
+
+_noto_data = None
 
 
 class FontFinder:
     def __init__(self):
-        self.load_data()
+        if _noto_data is None:
+            _noto_data = requests.get("https://notofonts.github.io/noto.json").json()
 
-    def load_data(self):
-        self.noto_data = requests.get("https://notofonts.github.io/noto.json").json()
-        
-        with open(SMALL_UNIHAN_PATH) as small_unihan_file:
+        with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
             self.small_unihan_data = json.load(small_unihan_file)
     
-    def get_text_info(self, text):
+    def get_text_info(self, text: str):
+        '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
+        object with the analysis results.
+
+        Only the first `MAX_CHARS_TO_ANALYSE` characters are analysed.
+        '''
         script_counter = Counter()
         unihan_counter = Counter()
-        ignore_scripts = set(['Common', 'Inherited', 'Unknown'])
         for char in text[0:min(len(text), MAX_CHARS_TO_ANALYSE)]:
             script = udp.script(char)
-            if script not in ignore_scripts:
-                script_counter[script] += 1
+            script_counter[script] += 1
             if char in self.small_unihan_data:
                 for key in self.small_unihan_data[char].keys():
                     unihan_counter[key] += 1
+        text_info = TextInfo(script_count=script_counter.most_common())
+
+        ignore_scripts = set(['Common', 'Inherited', 'Unknown'])
+        for ignore_script in ignore_scripts:
+            del script_counter[ignore_script]
 
         main_script = script_counter.most_common(1)[0][0]
 
@@ -57,11 +70,20 @@ class FontFinder:
         elif main_script in ['Hiragana', 'Katakana']:
             main_script = 'Japanese'
 
-        text_info = TextInfo(main_script=main_script, script_order=script_counter.most_common())
+        text_info.main_script=main_script
         return text_info
 
 
-@dataclasses.dataclass
+@dataclass
 class TextInfo:
-    main_script: str
-    script_order: list[tuple[str, int]]
+    main_script: str = None
+    '''The most frequent Unicode script used in a piece of text, subject to the following conditions:
+    
+    The Unicode script property values `Common`, `Inherited`, and `Unknown` are ignored. If the most frequently used
+    script is one of `Han`, `Hangul`, `Hiragana` or `Katakana`, this field is set to one of the following strings
+    instead, representing an estimate of the language used in the text:
+        `Chinese (Traditional)`, `Chinese (Simplified)`, `Japanese`, `Korean`
+    '''
+    script_count: list[tuple[str, int]] = field(default_factory=list)
+    '''The raw character counts of each Unicode script value analysed for the text, as a list of tuples.
+    Each tuple is of the form `('script', count)`, listed from most-to-least frequent.'''

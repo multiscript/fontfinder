@@ -11,8 +11,6 @@ class TestFontFinder:
         for sample_text in sample_texts:
             text_info = ff.get_text_info(sample_text['text'])
             assert sample_text['main_script'] == text_info.main_script
-            print(text_info.script_order)
-
 
 
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.
