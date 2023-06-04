@@ -136,12 +136,13 @@ class FontFinder:
             import Cocoa
             font_manager = Cocoa.NSFontManager.sharedFontManager()
             installed_families = list(font_manager.availableFontFamilies())
+        
         elif platform.system() == "Windows":
             import win32gui
 
             def enum_font_fam_proc(log_font, text_metric, font_type, installed_families):
                 installed_families.append(log_font.lfFaceName)
-                return 1
+                return 1 # A postive return value is needed to continue enumeration
             
             installed_families = []
             hDC = win32gui.GetDC(None) # None as window handle is acceptable (gives DC for entire screen)
