@@ -135,7 +135,7 @@ class FontFinder:
         if platform.system() == "Darwin":
             import Cocoa
             font_manager = Cocoa.NSFontManager.sharedFontManager()
-            installed_families = list(font_manager.availableFontFamilies())
+            installed_families = list(font_manager.availableFonts())
         
         elif platform.system() == "Windows":
             import win32gui
@@ -153,6 +153,11 @@ class FontFinder:
             raise Exception("Unsupported platform for get_installed_families()")
         
         return sorted(installed_families)
+
+    def get_installed_filenames(self):
+        import find_system_fonts_filename
+        return find_system_fonts_filename.get_system_fonts_filename()
+
 
 @dataclass
 class TextInfo:

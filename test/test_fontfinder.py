@@ -25,6 +25,9 @@ class TestFontFinder:
         installed_families = ff.get_installed_families()
         pprint(installed_families)
 
+    def test_get_installed_filenames(self):
+        ff = FontFinder()
+        pprint(ff.get_installed_filenames())
 #
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.
 #
