@@ -141,15 +141,16 @@ class FontFinder:
             import win32gui
 
             def enum_font_fam_proc(log_font, text_metric, font_type, installed_families):
+                '''Callback for win32gui.EnumFontFamilies()'''
                 installed_families.append(log_font.lfFaceName)
                 return 1 # A postive return value is needed to continue enumeration
             
             installed_families = []
-            hDC = win32gui.GetDC(None) # None as window handle is acceptable (gives DC for entire screen)
+            hDC = win32gui.GetDC(None) # None for the window handle is acceptable (returns DC for entire screen)
             win32gui.EnumFontFamilies(hDC, None, enum_font_fam_proc, installed_families)
             win32gui.ReleaseDC(None, hDC)
         else:
-            raise Exception("Unsupport platform for get_installed_families()")
+            raise Exception("Unsupported platform for get_installed_families()")
         
         return sorted(installed_families)
 
