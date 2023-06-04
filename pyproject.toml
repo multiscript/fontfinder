@@ -13,7 +13,8 @@ dependencies = [
     "unicodedataplus",
     "requests",
     "pyobjc-core;platform_system=='Darwin'",
-    "pyobjc-framework-Cocoa;platform_system=='Darwin'"
+    "pyobjc-framework-Cocoa;platform_system=='Darwin'",
+    "pywin32;platform_system=='Windows'",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
