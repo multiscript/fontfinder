@@ -20,6 +20,10 @@ class TestFontFinder:
         print(len(fonts))
         # pprint(fonts[-10:])
 
+    def test_get_installed_families(self):
+        ff = FontFinder()
+        installed_families = ff.get_installed_families()
+        pprint(installed_families)
 
 #
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.

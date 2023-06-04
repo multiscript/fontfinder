@@ -11,7 +11,9 @@ readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
     "unicodedataplus",
-    "requests"
+    "requests",
+    "pyobjc-core;platform_system=='Darwin'",
+    "pyobjc-framework-Cocoa;platform_system=='Darwin'"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

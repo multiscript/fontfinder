@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import json
 from pathlib import Path
+import platform
 
 import requests
 import unicodedataplus as udp
@@ -130,6 +131,12 @@ class FontFinder:
         self._load_known_fonts()
         return _known_fonts
 
+    def get_installed_families(self):
+        if platform.system() == "Darwin":
+            import Cocoa
+            font_manager = Cocoa.NSFontManager.sharedFontManager()
+            installed_families = list(font_manager.availableFontFamilies())
+            return installed_families
 
 @dataclass
 class TextInfo:
