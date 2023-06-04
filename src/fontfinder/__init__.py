@@ -137,6 +137,8 @@ class FontFinder:
             font_manager = Cocoa.NSFontManager.sharedFontManager()
             installed_families = list(font_manager.availableFontFamilies())
             return installed_families
+        elif platform.system() == "Windwos":
+            import win32gui
 
 @dataclass
 class TextInfo:
