@@ -3,7 +3,7 @@ from pprint import pprint
 import unicodedataplus as udp
 
 from fontfinder import *
-
+import fontfinder.mac
 
 class TestFontFinder:
 
@@ -28,6 +28,12 @@ class TestFontFinder:
     def test_get_installed_filenames(self):
         ff = FontFinder()
         pprint(ff.get_installed_filenames())
+
+    def test_get_mac_system_fonts(self):
+        fontfinder.mac.get_mac_system_fonts()
+
+
+
 #
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.
 #

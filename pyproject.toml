@@ -12,6 +12,7 @@ requires-python = ">=3.7"
 dependencies = [
     "unicodedataplus",
     "requests",
+    "semver",
     "pyobjc-core;platform_system=='Darwin'",
     "pyobjc-framework-Cocoa;platform_system=='Darwin'",
     "pywin32;platform_system=='Windows'",
