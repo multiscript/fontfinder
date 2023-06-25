@@ -31,14 +31,18 @@ def get_mac_system_fonts():
         style_name = cf.cf_string_ref_to_python_str(style_cfstr)
         cf.CFRelease(style_cfstr)
 
+        display_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontDisplayNameAttribute)
+        display_name = cf.cf_string_ref_to_python_str(display_cfstr)
+        cf.CFRelease(display_cfstr)
+
         postscript_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontNameAttribute)
         postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
         cf.CFRelease(postscript_cfstr)
 
         if family_name not in font_dict:
-            font_dict[family_name] = set()
+            font_dict[family_name] = {}
         
-        font_dict[family_name].add((style_name, postscript_name))
+        font_dict[family_name][style_name] = display_name
 
     cf.CFRelease(font_array)
     cf.CFRelease(font_collection)
@@ -136,7 +140,7 @@ class CoreTextLibrary(CTypesLibrary):
                                                        (self.IN, c_void_p, "attribute_name")
         )
 
-        self.kCTFontDisplayNameAttribute = c_void_p.in_dll(self.lib, "kCTFontDisplayNameAttribute")
         self.kCTFontFamilyNameAttribute = c_void_p.in_dll(self.lib, "kCTFontFamilyNameAttribute")
         self.kCTFontStyleNameAttribute = c_void_p.in_dll(self.lib, "kCTFontStyleNameAttribute")
+        self.kCTFontDisplayNameAttribute = c_void_p.in_dll(self.lib, "kCTFontDisplayNameAttribute")
         self.kCTFontNameAttribute = c_void_p.in_dll(self.lib, "kCTFontNameAttribute")
