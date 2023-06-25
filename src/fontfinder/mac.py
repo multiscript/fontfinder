@@ -1,6 +1,7 @@
-from ctypes import c_bool, c_char_p, c_long, c_uint32, c_void_p, CFUNCTYPE
+from ctypes import c_bool, c_char_p, c_long, c_uint32, c_void_p, CFUNCTYPE, create_string_buffer
 import ctypes.util
 import platform
+from pprint import pprint
 
 import semver
 
@@ -18,13 +19,31 @@ def get_mac_system_fonts():
     font_collection = ct.CTFontCollectionCreateFromAvailableFonts(None)
     font_array = ct.CTFontCollectionCreateMatchingFontDescriptors(font_collection)
     font_array_len = cf.CFArrayGetCount(font_array)
+    font_dict = {}
     for i in range(font_array_len):
         font_descriptor = cf.CFArrayGetValueAtIndex(font_array, i)
-        attribute = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontDisplayNameAttribute)
 
-        cf.CFRelease(attribute)
+        family_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontFamilyNameAttribute)
+        family_name = cf.cf_string_ref_to_python_str(family_cfstr)
+        cf.CFRelease(family_cfstr)
+
+        style_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontStyleNameAttribute)
+        style_name = cf.cf_string_ref_to_python_str(style_cfstr)
+        cf.CFRelease(style_cfstr)
+
+        postscript_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontNameAttribute)
+        postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
+        cf.CFRelease(postscript_cfstr)
+
+        if family_name not in font_dict:
+            font_dict[family_name] = set()
+        
+        font_dict[family_name].add((style_name, postscript_name))
+
     cf.CFRelease(font_array)
     cf.CFRelease(font_collection)
+
+    pprint(font_dict)
 
 
 class CTypesLibrary:
@@ -58,11 +77,15 @@ class CTypesLibrary:
             param_flags.append(tuple(param_flag))
         return CFUNCTYPE(result_type, *arg_types)((func_name, self.lib), tuple(param_flags))
 
+
 class CoreFoundationLibrary(CTypesLibrary):
     def __init__(self):
         super().__init__("CoreFoundation", "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation")
         # Note hack for compatibility with macOS 11.0 and later
         # From: https://github.com/pyglet/pyglet/blob/a44e83a265e7df8ece793de865bcf3690f66adbd/pyglet/libs/darwin/cocoapy/cocoalibs.py#L10-L14
+
+        self.CFRelease = self.prototype(
+            None, "CFRelease", (self.IN, c_void_p, "cf_object"))
 
         self.CFArrayGetCount = self.prototype(
             c_long, "CFArrayGetCount", (self.IN, c_void_p, "cf_array"))
@@ -70,10 +93,31 @@ class CoreFoundationLibrary(CTypesLibrary):
         self.CFArrayGetValueAtIndex = self.prototype(
             c_void_p, "CFArrayGetValueAtIndex", (self.IN, c_void_p, "cf_array"), (self.IN, c_long, "index"))
 
-        self.CFRelease = self.prototype(
-            None, "CFRelease", (self.IN, c_void_p, "cf_object"))
+        self.CFStringGetMaximumSizeForEncoding = self.prototype(
+            c_long, "CFStringGetMaximumSizeForEncoding", (self.IN, c_long, "length"), (self.IN, c_uint32, "encoding"))
+
+        self.CFStringGetLength = self.prototype(
+            c_long, "CFStringGetLength", (self.IN, c_void_p, "the_string"))
+
+        self.CFStringGetCString = self.prototype(
+            c_bool, "CFStringGetCString", (self.IN, c_void_p, "the_string"),
+                                          (self.IN, c_char_p, "buffer"),
+                                          (self.IN, c_long,   "buffer_size"),
+                                          (self.IN, c_uint32, "encoding")
+        )
 
         self.kCFStringEncodingUTF8 = c_uint32(0x08000100)
+
+    def cf_string_ref_to_python_str(self, cf_string_ref: c_void_p):
+        cf_str_len = self.CFStringGetLength(cf_string_ref)
+        buffer_size = self.CFStringGetMaximumSizeForEncoding(cf_str_len, self.kCFStringEncodingUTF8)
+        buffer = create_string_buffer(buffer_size)
+        success = self.CFStringGetCString(cf_string_ref, buffer, buffer_size, self.kCFStringEncodingUTF8)
+        if not success:
+            raise Exception("Couldn't encode string as UTF-8 into buffer")
+        python_str = buffer.raw.strip(b'\x00').decode(encoding='utf-8')
+        return python_str
+
 
 class CoreTextLibrary(CTypesLibrary):
     def __init__(self):
@@ -93,3 +137,6 @@ class CoreTextLibrary(CTypesLibrary):
         )
 
         self.kCTFontDisplayNameAttribute = c_void_p.in_dll(self.lib, "kCTFontDisplayNameAttribute")
+        self.kCTFontFamilyNameAttribute = c_void_p.in_dll(self.lib, "kCTFontFamilyNameAttribute")
+        self.kCTFontStyleNameAttribute = c_void_p.in_dll(self.lib, "kCTFontStyleNameAttribute")
+        self.kCTFontNameAttribute = c_void_p.in_dll(self.lib, "kCTFontNameAttribute")
