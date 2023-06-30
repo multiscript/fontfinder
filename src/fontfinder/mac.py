@@ -42,7 +42,7 @@ def get_mac_system_fonts():
         if family_name not in font_dict:
             font_dict[family_name] = {}
         
-        font_dict[family_name][style_name] = display_name
+        font_dict[family_name][style_name] = postscript_name
 
     cf.CFRelease(font_array)
     cf.CFRelease(font_collection)

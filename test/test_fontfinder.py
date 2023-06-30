@@ -16,9 +16,9 @@ class TestFontFinder:
     def test_known_fonts(self):
         ff = FontFinder()
         fonts = ff.known_fonts() # Ensure no errors in creating list
-        # fonts = [font for font in fonts if font.family == "Noto Sans"]
+        fonts = [font for font in fonts if font.family == "Noto Sans"]
         print(len(fonts))
-        # pprint(fonts[-10:])
+        pprint(fonts[-10:])
 
     def test_get_installed_families(self):
         ff = FontFinder()
