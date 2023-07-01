@@ -55,9 +55,9 @@ class FontFinder:
                             for relative_url in relative_url_list:
                                 url = noto_font_base_url + relative_url
                                 postscript_name = PurePosixPath(relative_url).stem
-                                font_file_info = FontFileInfo(script, family, form, build,
-                                                              postscript_name=postscript_name, url=url,
-                                                              from_str=relative_url)
+                                style_name = postscript_name.split('-')[-1]
+                                font_file_info = FontFileInfo(script, family, style_name, postscript_name, url,
+                                                              form, build=build, from_str=relative_url)
                                 _known_fonts.append(font_file_info)
 
     def _load_small_unihan_data(self):
