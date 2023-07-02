@@ -7,6 +7,19 @@ import fontfinder.mac
 
 class TestFontFinder:
 
+    def test_all_unicode_scripts(self):
+        ff = FontFinder()
+        pprint(ff.all_unicode_scripts)
+
+    def test_all_known_font_scripts(self):
+        ff = FontFinder()
+        pprint(ff.all_known_font_scripts)
+
+    def test_scripts_not_covered(self):
+        ff = FontFinder()
+        pprint(ff.scripts_not_covered)
+        pprint(list(set(ff.all_known_font_scripts) - set(ff.all_unicode_scripts)))
+
     def test_get_text_info(self):
         ff = FontFinder()
         for sample_text in sample_texts:
@@ -15,7 +28,7 @@ class TestFontFinder:
 
     def test_known_fonts(self):
         ff = FontFinder()
-        fonts = ff.known_fonts() # Ensure no errors in creating list
+        fonts = ff.known_fonts # Ensure no errors in creating list
         fonts = [font for font in fonts if font.family_name == "Noto Sans"]
         print(len(fonts))
         pprint(fonts[-10:])

@@ -25,11 +25,34 @@ _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 _known_fonts = None
 _small_unihan_data = None
 
+
 class FontFinder:
     def __init__(self):
         pass
-    
+
+    @property
+    def all_unicode_scripts(self):
+        return list(udp.property_value_aliases['script'].keys())
+
+    @property
+    def all_known_font_scripts(self):
+        return sorted(set([info.script_name for info in self.known_fonts]))
+
+    @property
+    def scripts_not_covered(self):
+        return sorted(set(self.all_unicode_scripts) - set(self.all_known_font_scripts) -
+                      set(["Commoon", "Inherited", "Unknown"]))
+
+    @property
+    def known_fonts(self):
+        if _known_fonts is None:
+            self._load_known_fonts()
+        return _known_fonts
+
     def _load_known_fonts(self):
+        self._load_noto_fonts()
+
+    def _load_noto_fonts(self):
         global _known_fonts
         if _known_fonts is None:
             noto_data = requests.get("https://notofonts.github.io/noto.json").json()
@@ -48,6 +71,8 @@ class FontFinder:
                 for script in script_set:
                     # Make the Noto script formatting match the Unicode script formatting.
                     script = script.replace('-', '_').title()
+                    if script == 'Sign_Writing':
+                        script = 'SignWriting' # Mismatch in Noto / Unicode script name
                     for family, family_data in script_data['families'].items():
                         form = FontForm.from_str(family)
                         for build, relative_url_list in family_data['files'].items():
@@ -58,6 +83,10 @@ class FontFinder:
                                 style_name = postscript_name.split('-')[-1]
                                 font_file_info = FontFileInfo(script, family, style_name, postscript_name, url,
                                                               form, build=build, from_str=relative_url)
+                                if font_file_info.weight is FontWeight.VARIABLE or \
+                                   font_file_info.width is FontWidth.VARIABLE:
+                                    style_name = ""
+                                    postscript_name = ""
                                 _known_fonts.append(font_file_info)
 
     def _load_small_unihan_data(self):
@@ -111,10 +140,6 @@ class FontFinder:
 
         text_info.main_script=main_script
         return text_info
-
-    def known_fonts(self):
-        self._load_known_fonts()
-        return _known_fonts
 
     def get_installed_families(self):
         if platform.system() == "Darwin":

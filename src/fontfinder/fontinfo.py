@@ -86,7 +86,7 @@ font_form_data = {
 
 class FontWidth(Enum):
     NORMAL      = auto()
-    VAR_WIDTH   = auto()
+    VARIABLE    = auto()
     EXTRA_COND  = auto()
     CONDENSED   = auto()
     SEMI_COND   = auto()
@@ -105,7 +105,7 @@ class FontWidth(Enum):
 
 
 font_width_data = {
-    FontWidth.VAR_WIDTH:    ("wdth",           re.compile(r"wdth",             re.IGNORECASE)),
+    FontWidth.VARIABLE:    ("wdth",           re.compile(r"wdth",             re.IGNORECASE)),
     FontWidth.CONDENSED:    ("Condensed",      re.compile(r"Condensed",        re.IGNORECASE)),
     FontWidth.EXTRA_COND:   ("ExtraCondensed", re.compile(r"Extra.?Condensed", re.IGNORECASE)),
     FontWidth.SEMI_COND:    ("SemiCondensed",  re.compile(r"Semi.?Condensed",  re.IGNORECASE)),
@@ -114,7 +114,7 @@ font_width_data = {
 
 class FontWeight(Enum):
     REGULAR     = auto()
-    VAR_WEIGHT  = auto()
+    VARIABLE    = auto()
     EXTRA_LIGHT = auto()
     LIGHT       = auto()
     THIN        = auto()
@@ -138,7 +138,7 @@ class FontWeight(Enum):
 
 
 font_weight_data = {
-    FontWeight.VAR_WEIGHT:      ("wght",       re.compile(r"wght",             re.IGNORECASE)),
+    FontWeight.VARIABLE:      ("wght",       re.compile(r"wght",             re.IGNORECASE)),
     FontWeight.LIGHT:           ("Light",      re.compile(r"Light",            re.IGNORECASE)),
     FontWeight.EXTRA_LIGHT:     ("ExtraLight", re.compile(r"Extra.?Light",     re.IGNORECASE)),
     FontWeight.THIN:            ("Thin",       re.compile(r"Thin",             re.IGNORECASE)),
