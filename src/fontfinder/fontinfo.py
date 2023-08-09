@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+import csv
+import dataclasses
 import re
 from enum import Enum, auto
 
 
-@dataclass
-class FontFileInfo:
+@dataclasses.dataclass
+class FontInfo:
     script_name: str
     '''Primary Unicode script covered by the font.'''
 
@@ -17,9 +18,6 @@ class FontFileInfo:
     postscript_name: str
     '''Font PostScript name'''
 
-    url: str
-    '''URL download source for the font.'''
-
     form: 'FontForm'
 
     width: 'FontWidth'
@@ -31,6 +29,9 @@ class FontFileInfo:
     format: 'FontFormat'
 
     build: 'FontBuild'
+
+    url: str
+    '''URL download source for the font.'''
 
     def __init__(self, script_name: str = None, family_name: str = None, style_name: str = None,
                  postscript_name: str = None, url: str  = None, form: 'FontForm' = None, 
@@ -58,6 +59,44 @@ class FontFileInfo:
         self.style_name = "" if style_name is None else style_name
         self.postscript_name = "" if postscript_name is None else postscript_name
         self.url = "" if url is None else url
+
+    def str_dict(self):
+        str_dict = dataclasses.asdict(self)
+        # Convert Enum-type fields to their string names without the Enum type-name
+        for field_name, field_value in str_dict.items():
+            if isinstance(field_value, Enum):
+                str_dict[field_name] = str(field_value.name)
+        return str_dict
+    
+    @classmethod
+    def from_str_dict(cls, str_dict):
+        # Convert the string names of Enum-type fields to Enum instances
+        # Use an empty (but initialized) instance to confirm actual field types. (This is because we've used forward
+        # references for their type declaration, which results in their dataclasses.field type showing
+        # as str, not Enum)
+        blank_obj_dict = dataclasses.asdict(cls())
+        for field_name, field_value in blank_obj_dict.items():
+            if isinstance(field_value, Enum):
+                # Indexing an Enum with the string member name returns the member
+                str_dict[field_name] = type(field_value)[str_dict[field_name]]
+        return cls(**str_dict)
+
+
+def write_font_infos_to_csv(font_infos, csv_path):
+    with open(csv_path, "w") as file:
+        field_names = [field.name for field in dataclasses.fields(FontInfo)]
+        writer = csv.DictWriter(file, field_names)
+        writer.writeheader()
+        for font in font_infos:
+            writer.writerow(font.str_dict())
+
+def read_font_infos_from_csv(csv_path):
+    font_infos = []
+    with open(csv_path, "r") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            font_infos.append(FontInfo.from_str_dict(row))
+    return font_infos
 
 
 class FontForm(Enum):
@@ -105,7 +144,7 @@ class FontWidth(Enum):
 
 
 font_width_data = {
-    FontWidth.VARIABLE:    ("wdth",           re.compile(r"wdth",             re.IGNORECASE)),
+    FontWidth.VARIABLE:     ("wdth",           re.compile(r"wdth",             re.IGNORECASE)),
     FontWidth.CONDENSED:    ("Condensed",      re.compile(r"Condensed",        re.IGNORECASE)),
     FontWidth.EXTRA_COND:   ("ExtraCondensed", re.compile(r"Extra.?Condensed", re.IGNORECASE)),
     FontWidth.SEMI_COND:    ("SemiCondensed",  re.compile(r"Semi.?Condensed",  re.IGNORECASE)),
@@ -138,7 +177,7 @@ class FontWeight(Enum):
 
 
 font_weight_data = {
-    FontWeight.VARIABLE:      ("wght",       re.compile(r"wght",             re.IGNORECASE)),
+    FontWeight.VARIABLE:        ("wght",       re.compile(r"wght",             re.IGNORECASE)),
     FontWeight.LIGHT:           ("Light",      re.compile(r"Light",            re.IGNORECASE)),
     FontWeight.EXTRA_LIGHT:     ("ExtraLight", re.compile(r"Extra.?Light",     re.IGNORECASE)),
     FontWeight.THIN:            ("Thin",       re.compile(r"Thin",             re.IGNORECASE)),

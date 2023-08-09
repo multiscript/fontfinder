@@ -1,9 +1,18 @@
+import contextlib
 from pprint import pprint
+import tempfile
 
 import unicodedataplus as udp
 
 from fontfinder import *
 import fontfinder.mac
+
+
+class TestMode(Enum):
+    TEST    = auto()    # Run the test as normal
+    CREATE  = auto()    # Create the expected output, rather than testing for it
+    OBSERVE = auto()    # Observe output: Use known instead of temp directories, don't unzip word docs, don't test
+
 
 class TestFontFinder:
 
@@ -45,7 +54,25 @@ class TestFontFinder:
     def test_get_mac_system_fonts(self):
         fontfinder.mac.get_mac_system_fonts()
 
+    def test_font_list_to_csv(self, test_mode = TestMode.TEST):
+        if test_mode is TestMode.TEST:
+            context_manager = tempfile.TemporaryDirectory()
+        elif test_mode is TestMode.OBSERVE:
+            dir_path = Path("~/Desktop/TestFontFinder/").expanduser()
+            dir_path.mkdir(parents=True, exist_ok=True)
+            context_manager = contextlib.nullcontext(dir_path)
+        else:
+            assert False
 
+        ff = FontFinder()
+        write_fonts = ff.known_fonts
+
+        with context_manager as output_dir:
+            csv_path = Path(output_dir, "font_info.csv")
+            write_font_infos_to_csv(write_fonts, csv_path)
+            read_fonts = read_font_infos_from_csv(csv_path)
+        
+        assert write_fonts == read_fonts
 
 #
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.

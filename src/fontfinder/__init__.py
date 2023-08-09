@@ -12,7 +12,7 @@ import platform
 import requests
 import unicodedataplus as udp
 
-from fontfinder.fontinfo import FontFileInfo, FontForm, FontBuild, FontWidth, FontWeight, FontStyle, FontFormat
+from fontfinder.fontinfo import *
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -81,7 +81,7 @@ class FontFinder:
                                 url = noto_font_base_url + relative_url
                                 postscript_name = PurePosixPath(relative_url).stem
                                 style_name = postscript_name.split('-')[-1]
-                                font_file_info = FontFileInfo(script, family, style_name, postscript_name, url,
+                                font_file_info = FontInfo(script, family, style_name, postscript_name, url,
                                                               form, build=build, from_str=relative_url)
                                 if font_file_info.weight is FontWeight.VARIABLE or \
                                    font_file_info.width is FontWidth.VARIABLE:
