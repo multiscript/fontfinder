@@ -85,8 +85,8 @@ class FontFinder:
                                                               form, build=build, from_str=relative_url)
                                 if font_file_info.weight is FontWeight.VARIABLE or \
                                    font_file_info.width is FontWidth.VARIABLE:
-                                    style_name = ""
-                                    postscript_name = ""
+                                    font_file_info.style_name = ""
+                                    font_file_info.postscript_name = ""
                                 _known_fonts.append(font_file_info)
 
     def _load_small_unihan_data(self):
