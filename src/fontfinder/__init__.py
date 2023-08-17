@@ -68,26 +68,24 @@ class FontFinder:
                 else:
                     script_set = [script_tag]
 
-                for script in script_set:
+                for script_name in script_set:
                     # Make the Noto script formatting match the Unicode script formatting.
-                    script = script.replace('-', '_').title()
-                    if script == 'Sign_Writing':
-                        script = 'SignWriting' # Mismatch in Noto / Unicode script name
-                    for family, family_data in script_data['families'].items():
-                        form = FontForm.from_str(family)
+                    script_name = script_name.replace('-', '_').title()
+                    if script_name == 'Sign_Writing':
+                        script_name = 'SignWriting' # Mismatch in Noto / Unicode script name
+                    for family_name, family_data in script_data['families'].items():
+                        form = FontForm.from_str(family_name)
                         for build, relative_url_list in family_data['files'].items():
                             build = FontBuild.from_str(build)
                             for relative_url in relative_url_list:
                                 url = noto_font_base_url + relative_url
-                                postscript_name = PurePosixPath(relative_url).stem
-                                style_name = postscript_name.split('-')[-1]
-                                font_file_info = FontInfo(script, family, style_name, postscript_name, url,
-                                                              form, build=build, from_str=relative_url)
-                                if font_file_info.weight is FontWeight.VARIABLE or \
-                                   font_file_info.width is FontWidth.VARIABLE:
-                                    font_file_info.style_name = ""
-                                    font_file_info.postscript_name = ""
-                                _known_fonts.append(font_file_info)
+                                font_info = FontInfo(script_name=script_name, family_name=family_name, url=url)
+                                font_info.set_from_noto_url(url)
+                                # Form and build have already been set from the URL, but we can ensure the values are
+                                # correct from the other JSON data.
+                                font_info.form = form
+                                font_info.build = build
+                                _known_fonts.append(font_info)
 
     def _load_small_unihan_data(self):
         global _small_unihan_data

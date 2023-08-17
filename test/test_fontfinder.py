@@ -72,6 +72,11 @@ class TestFontFinder:
             write_font_infos_to_csv(write_fonts, csv_path)
             read_fonts = read_font_infos_from_csv(csv_path)
         
+        # for item in zip(write_fonts, read_fonts):
+        #     if item[0] != item[1]:
+        #         print(item[0])
+        #         print(item[1])
+        #         assert False
         assert write_fonts == read_fonts
 
 #
