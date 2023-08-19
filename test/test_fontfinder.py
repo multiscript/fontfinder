@@ -54,7 +54,7 @@ class TestFontFinder:
     def test_get_mac_system_fonts(self):
         fontfinder.mac.get_mac_system_fonts()
 
-    def test_font_list_to_csv(self, test_mode = TestMode.TEST):
+    def test_font_list_to_csv(self, test_mode = TestMode.OBSERVE):
         if test_mode is TestMode.TEST:
             context_manager = tempfile.TemporaryDirectory()
         elif test_mode is TestMode.OBSERVE:
