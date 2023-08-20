@@ -11,7 +11,7 @@ class FontInfo:
     script_name: str
     '''Primary Unicode script covered by the font.'''
 
-    variant_name: str
+    script_variant: str
     '''Script variant covered by the font.'''
 
     family_name: str
@@ -40,14 +40,14 @@ class FontInfo:
     url: str
     '''URL download source for the font.'''
 
-    def __init__(self, script_name: str = None, variant_name: str = None, family_name: str = None,
+    def __init__(self, script_name: str = None, script_variant: str = None, family_name: str = None,
                  subfamily_name: str = None, postscript_name: str = None, form: 'FontForm' = None,
                  width: 'FontWidth' = None, weight: 'FontWeight' = None, style: 'FontStyle' = None,
                  format: 'FontFormat' = None, build: 'FontBuild' = None, tags: 'FontTag' = None, url: str  = None, 
                 ):
 
         self.script_name = "" if script_name is None else script_name
-        self.variant_name = "" if variant_name is None else variant_name
+        self.script_variant = "" if script_variant is None else script_variant
         self.family_name = "" if family_name is None else family_name
         self.subfamily_name = "" if subfamily_name is None else subfamily_name
         self.postscript_name = "" if postscript_name is None else postscript_name
@@ -89,7 +89,7 @@ class FontInfo:
             pass
         match = re.match(r"NotoSansTifinagh(?P<variant>.*?)-", self.postscript_name)
         if match is not None:
-            self.variant_name = match['variant']
+            self.script_variant = match['variant']
         self.url = url
 
     def str_dict(self):
