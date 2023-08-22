@@ -36,7 +36,7 @@ class FontFinder:
 
     @property
     def all_known_font_scripts(self):
-        return sorted(set([info.script_name for info in self.known_fonts]))
+        return sorted(set([info.main_script for info in self.known_fonts]))
 
     @property
     def scripts_not_covered(self):
