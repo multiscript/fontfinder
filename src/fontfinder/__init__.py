@@ -68,18 +68,18 @@ class FontFinder:
                 else:
                     script_set = [script_tag]
 
-                for script_name in script_set:
+                for main_script in script_set:
                     # Make the Noto script formatting match the Unicode script formatting.
-                    script_name = script_name.replace('-', '_').title()
-                    if script_name == 'Sign_Writing':
-                        script_name = 'SignWriting' # Mismatch in Noto / Unicode script name
+                    main_script = main_script.replace('-', '_').title()
+                    if main_script == 'Sign_Writing':
+                        main_script = 'SignWriting' # Mismatch in Noto / Unicode script name
                     for family_name, family_data in script_data['families'].items():
                         form = FontForm.from_str(family_name)
                         for build, relative_url_list in family_data['files'].items():
                             build = FontBuild.from_str(build)
                             for relative_url in relative_url_list:
                                 url = noto_font_base_url + relative_url
-                                font_info = FontInfo(script_name=script_name, family_name=family_name, url=url)
+                                font_info = FontInfo(main_script=main_script, family_name=family_name, url=url)
                                 font_info.set_from_noto_url(url)
                                 # Form and build have already been set from the URL, but we can ensure the values are
                                 # correct from the other JSON data.
@@ -98,6 +98,8 @@ class FontFinder:
         object with the analysis results.
 
         Only the first `MAX_CHARS_TO_ANALYSE` characters are analysed.
+
+
         '''
         self._load_small_unihan_data()
         script_counter = Counter()
@@ -169,8 +171,11 @@ class FontFinder:
 
 @dataclass
 class TextInfo:
-    main_script: str = None
-    '''The most frequent Unicode script used in a piece of text, subject to the following conditions:
+    main_script: str = ""
+    '''Name of the most frequent Unicode script used in a piece of text.'''
+
+    script_variant: str = ""
+    '''A secondary string to provide extra information when main_script name is insufficient for choosing a font.
     
     The Unicode script property values `Common`, `Inherited`, and `Unknown` are ignored. If the most frequently used
     script is one of `Han`, `Hangul`, `Hiragana` or `Katakana`, this field is set to one of the following strings

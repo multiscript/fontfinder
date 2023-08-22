@@ -1,8 +1,10 @@
+from collections import Counter
 import contextlib
 from pprint import pprint
 import tempfile
 
 import unicodedataplus as udp
+import pytest
 
 from fontfinder import *
 import fontfinder.mac
@@ -78,6 +80,15 @@ class TestFontFinder:
         #         print(item[1])
         #         assert False
         assert write_fonts == read_fonts
+
+    @pytest.mark.skip("Investigation test to examine script of emoji codepoints")
+    def test_script_of_emoji(self):
+        script_counter = Counter()
+        for i in range(0x10ffff):
+            char = chr(i)
+            if udp.is_emoji_presentation(char) or udp.is_extended_pictographic(char):
+                script_counter[udp.script(char)] += 1
+        print(script_counter)
 
 #
 # These sample texts are taken from the Wikipedia article for 'Earth' in various languages.

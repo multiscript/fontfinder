@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 @dataclasses.dataclass
 class FontInfo:
-    script_name: str
+    main_script: str
     '''Primary Unicode script covered by the font.'''
 
     script_variant: str
@@ -40,13 +40,13 @@ class FontInfo:
     url: str
     '''URL download source for the font.'''
 
-    def __init__(self, script_name: str = None, script_variant: str = None, family_name: str = None,
+    def __init__(self, main_script: str = None, script_variant: str = None, family_name: str = None,
                  subfamily_name: str = None, postscript_name: str = None, form: 'FontForm' = None,
                  width: 'FontWidth' = None, weight: 'FontWeight' = None, style: 'FontStyle' = None,
                  format: 'FontFormat' = None, build: 'FontBuild' = None, tags: 'FontTag' = None, url: str  = None, 
                 ):
 
-        self.script_name = "" if script_name is None else script_name
+        self.main_script = "" if main_script is None else main_script
         self.script_variant = "" if script_variant is None else script_variant
         self.family_name = "" if family_name is None else family_name
         self.subfamily_name = "" if subfamily_name is None else subfamily_name
