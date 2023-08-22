@@ -200,6 +200,7 @@ font_width_str_data = {
 class FontWeight(Enum):
     REGULAR     = auto()
     VARIABLE    = auto()
+    DEMI_LIGHT  = auto()
     EXTRA_LIGHT = auto()
     LIGHT       = auto()
     THIN        = auto()
@@ -226,6 +227,7 @@ font_weight_str_data = {
     FontWeight.VARIABLE:        ("wght",       re.compile(r"wght",             re.IGNORECASE)),
     FontWeight.REGULAR:         ("Regular",    re.compile(r"Regular",          re.IGNORECASE)),
     FontWeight.LIGHT:           ("Light",      re.compile(r"Light",            re.IGNORECASE)),
+    FontWeight.DEMI_LIGHT:      ("DemiLight",  re.compile(r"Demi.?Light",      re.IGNORECASE)),
     FontWeight.EXTRA_LIGHT:     ("ExtraLight", re.compile(r"Extra.?Light",     re.IGNORECASE)),
     FontWeight.THIN:            ("Thin",       re.compile(r"Thin",             re.IGNORECASE)),
     FontWeight.MEDIUM:          ("Medium",     re.compile(r"Medium",           re.IGNORECASE)),
