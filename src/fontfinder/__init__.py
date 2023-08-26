@@ -206,6 +206,15 @@ class FontFinder:
         return find_system_fonts_filename.get_system_fonts_filename()
 
 
+@dataclass(frozen=True)
+class ScriptInfo:
+    script_name: str = ""
+    '''Unicode name of the script'''
+
+    script_variant: str = ""
+    '''A secondary string to provide extra information when main_script name is insufficient for choosing a font.'''
+
+
 @dataclass
 class TextInfo:
     main_script: str = ""
