@@ -72,6 +72,7 @@ def get_noto_cjk_fonts():
             form_name = "Sans" if form is FontForm.SANS_SERIF else "Serif"
             lang_fonts = []
             for weight_name, weight in cjk_weights:
+                # We're using the language-specific OTF versions of the Noto CJK fonts.
                 family_name = f"Noto {form_name} CJK {cjk_code.upper()}"
                 postscript_name = f"Noto{form_name}CJK{cjk_code.lower()}-{weight_name}"
                 url = f"{cjk_base_url}{form_name}/OTF/{url_component}{postscript_name}.otf"
