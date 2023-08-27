@@ -1,4 +1,6 @@
-from fontfinder.fontinfo import ScriptInfo, FontWeight
+import copy
+
+from fontfinder.fontinfo import FontInfo, FontForm, FontWidth, FontWeight, FontStyle, FontFormat, FontBuild 
 
 cjk_base_url = "https://github.com/notofonts/noto-cjk/blob/main/"
 
@@ -12,50 +14,80 @@ cjk_weights =   [
     ("Thin",        FontWeight.THIN),                
 ]
 
+SCRIPT_INFO_KEY = "script_info"
+URL_COMPONENT_KEY = "url_component"
+CJK_CODE_KEY = "cjk_code"
+
 cjk_data = {
     "chinese-simplified":
         {
-            "script_infos": [
-                ScriptInfo("Han", "zh-Hans")
+            SCRIPT_INFO_KEY: [
+                ("Han", "zh-Hans")
             ],
-            "url_component":    "Sans/OTF/SimplifiedChinese/",
-            "cjk_suffix":       "sc",
-            "url_suffix":       ".otf",
+            URL_COMPONENT_KEY:    "SimplifiedChinese/",
+            CJK_CODE_KEY:         "SC",
         },
     "chinese-traditional":
         {
-            "script_infos": [
-                ScriptInfo("Han", "zh-Hant"), ScriptInfo("Bopomofo"),
+            SCRIPT_INFO_KEY: [
+                ("Han", "zh-Hant"), ("Bopomofo", ""),
             ],
-            "url_component":    "Sans/OTF/TraditionalChinese/",
-            "cjk_suffix":       "tc",
-            "url_suffix":       ".otf",
+            URL_COMPONENT_KEY:    "TraditionalChinese/",
+            CJK_CODE_KEY:         "TC",
         },
     "chinese-hongkong":
         {
-            "script_infos": [
-                ScriptInfo("Han", "zh-Hant-HK")
+            SCRIPT_INFO_KEY: [
+                ("Han", "zh-Hant-HK")
             ],
-            "url_component":    "Sans/OTF/TraditionalChineseHK/",
-            "cjk_suffix":       "hk",
-            "url_suffix":       ".otf",
+            URL_COMPONENT_KEY:    "TraditionalChineseHK/",
+            CJK_CODE_KEY:         "HK",
         },
     "japanese":
         {
-            "script_infos": [
-                ScriptInfo("Hiragana"), ScriptInfo("Katakana"), ScriptInfo("Han", "ja")
+            SCRIPT_INFO_KEY: [
+                ("Hiragana", ""), ("Katakana", ""), ("Han", "ja")
             ],
-            "url_component":    "Sans/OTF/Japanese/",
-            "cjk_suffix":       "jp",
-            "url_suffix":       ".otf",
+            URL_COMPONENT_KEY:    "Japanese/",
+            CJK_CODE_KEY:         "JP",
         },
     "korean":
         {
-            "script_infos": [
-                ScriptInfo("Hangul" ), ScriptInfo("Han", "ko")
+            SCRIPT_INFO_KEY: [
+                ("Hangul", ""), ("Han", "ko")
             ],
-            "url_component":    "Sans/OTF/Korean/",
-            "cjk_suffix":       "kr",
-            "url_suffix":       ".otf",
+            URL_COMPONENT_KEY:    "Korean/",
+            CJK_CODE_KEY:         "KR",
         },
 }
+
+
+def get_noto_cjk_fonts():
+    cjk_fonts = []
+    for lang, lang_data in cjk_data.items():
+        cjk_code = lang_data[CJK_CODE_KEY]
+        url_component = lang_data[URL_COMPONENT_KEY]
+        script_infos = lang_data[SCRIPT_INFO_KEY]
+        for form in [FontForm.SANS_SERIF, FontForm.SERIF]:
+            form_name = "Sans" if form is FontForm.SANS_SERIF else "Serif"
+            lang_fonts = []
+            for weight_name, weight in cjk_weights:
+                family_name = f"Noto {form_name} CJK {cjk_code.upper()}"
+                postscript_name = f"Noto{form_name}CJK{cjk_code.lower()}-{weight_name}"
+                url = f"{cjk_base_url}{form_name}/OTF/{url_component}{postscript_name}.otf"
+                lang_fonts.append(
+                    FontInfo(main_script="", script_variant="", family_name=family_name, subfamily_name=weight_name,
+                            postscript_name=postscript_name, form=form, width=FontWidth.NORMAL,
+                            weight=weight, style=FontStyle.UPRIGHT, format=FontFormat.OTF,
+                            build=FontBuild.FULL, url=url
+                            )                
+                )
+            
+            for main_script, script_variant in script_infos:
+                for font_info in lang_fonts:
+                    font_info = copy.copy(font_info)
+                    font_info.main_script = main_script
+                    font_info.script_variant = script_variant
+                    cjk_fonts.append(font_info)
+
+    return cjk_fonts

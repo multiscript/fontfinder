@@ -14,6 +14,7 @@ import requests
 import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
+from fontfinder.cjk import get_noto_cjk_fonts
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -87,42 +88,8 @@ class FontFinder:
                                 font_info.form = form
                                 font_info.build = build
                                 _known_fonts.append(font_info)
-        self._load_noto_cjk_fonts()
-
-    def _load_noto_cjk_fonts(self):
-        global _known_fonts
-        cjk_fonts = []
-
-        base_url = "https://github.com/notofonts/noto-cjk/blob/main/"
-        chinese_font_variants = [
-            ("Black",       "NotoSansCJKsc-Black",      FontWeight.BLACK,       "NotoSansSC-Black.otf"),
-            ("Bold",        "NotoSansCJKsc-Bold",       FontWeight.BOLD,        "NotoSansSC-Bold.otf"),
-            ("DemiLight",   "NotoSansCJKsc-DemiLight",  FontWeight.DEMI_LIGHT,  "NotoSansSC-DemiLight.otf"),
-            ("Light",       "NotoSansCJKsc-Light",      FontWeight.LIGHT,       "NotoSansSC-Light.otf"),
-            ("Medium",      "NotoSansCJKsc-Medium",     FontWeight.MEDIUM,      "NotoSansSC-Medium.otf"),
-            ("Regular",     "NotoSansCJKsc-Regular",    FontWeight.REGULAR,     "NotoSansSC-Regular.otf"),
-            ("Thin",        "NotoSansCJKsc-Thin",       FontWeight.THIN,        "NotoSansSC-Thin.otf"),
-        ]
-        chinese_simplified_fonts = []
-        for variant in chinese_font_variants:
-            subfamily_name, postscript_name, weight, filename = variant
-            chinese_simplified_fonts.append(
-                FontInfo(main_script="", script_variant="", family_name="Noto Sans CJK SC", subfamily_name=subfamily_name,
-                         postscript_name=postscript_name, form=FontForm.SANS_SERIF, width=FontWidth.NORMAL,
-                         weight=weight, style=FontStyle.UPRIGHT, format=FontFormat.OTF,
-                         build=FontBuild.FULL, url=(base_url + "Sans/SubsetOTF/SC/" + filename)
-                         )                
-            )
-        chinese_simplified_scripts = [("Han", "zh-Hans")]
-        for main_script, script_variant in chinese_simplified_scripts:
-            for font_info in chinese_simplified_fonts:
-                font_info = copy.copy(font_info)
-                font_info.main_script = main_script
-                font_info.script_variant = script_variant
-                cjk_fonts.append(font_info)
         
-        _known_fonts.extend(cjk_fonts)
-       
+        _known_fonts.extend(get_noto_cjk_fonts())      
 
     def _load_small_unihan_data(self):
         global _small_unihan_data
@@ -204,15 +171,6 @@ class FontFinder:
     def get_installed_filenames(self):
         import find_system_fonts_filename
         return find_system_fonts_filename.get_system_fonts_filename()
-
-
-@dataclass(frozen=True)
-class ScriptInfo:
-    script_name: str = ""
-    '''Unicode name of the script'''
-
-    script_variant: str = ""
-    '''A secondary string to provide extra information when main_script name is insufficient for choosing a font.'''
 
 
 @dataclass
