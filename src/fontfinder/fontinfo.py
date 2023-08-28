@@ -1,186 +1,13 @@
 import csv
 import dataclasses
+import functools
 from enum import Enum, Flag, auto
 from pathlib import PurePosixPath
 import re
 from urllib.parse import urlparse
 
 
-class FontForm(Enum):
-    UNSET       = auto()
-    SERIF       = auto()
-    SANS_SERIF  = auto()
-
-    @property
-    def text(self):
-        return font_form_str_data[self][0]
-
-    @classmethod
-    def from_str(cls, string: str):
-        result = FontForm.UNSET
-        for font_form, data in font_form_str_data.items():
-            if data[1].search(string):
-                result = font_form
-        return result
-
-
-font_form_str_data = {
-    FontForm.SERIF:         ("Serif", re.compile(r"Serif",    re.IGNORECASE)),
-    FontForm.SANS_SERIF:    ("Sans",  re.compile(r"Sans",     re.IGNORECASE))
-}
-
-
-class FontWidth(Enum):
-    NORMAL      = auto()
-    VARIABLE    = auto()
-    EXTRA_COND  = auto()
-    CONDENSED   = auto()
-    SEMI_COND   = auto()
-
-    @property
-    def text(self):
-        return font_width_str_data[self][0]
-
-    @classmethod
-    def from_str(cls, string: str):
-        result = FontWidth.NORMAL
-        for font_width, data in font_width_str_data.items():
-            if data[1].search(string):
-                result = font_width
-        return result
-
-
-font_width_str_data = {
-    FontWidth.VARIABLE:     ("wdth",           re.compile(r"wdth",             re.IGNORECASE)),
-    FontWidth.CONDENSED:    ("Condensed",      re.compile(r"Condensed",        re.IGNORECASE)),
-    FontWidth.EXTRA_COND:   ("ExtraCondensed", re.compile(r"Extra.?Condensed", re.IGNORECASE)),
-    FontWidth.SEMI_COND:    ("SemiCondensed",  re.compile(r"Semi.?Condensed",  re.IGNORECASE)),
-}
-
-
-class FontWeight(Enum):
-    REGULAR     = auto()
-    VARIABLE    = auto()
-    DEMI_LIGHT  = auto()
-    EXTRA_LIGHT = auto()
-    LIGHT       = auto()
-    THIN        = auto()
-    MEDIUM      = auto()
-    SEMI_BOLD   = auto()
-    BOLD        = auto()
-    EXTRA_BOLD  = auto()
-    BLACK       = auto()
-
-    @property
-    def text(self):
-        return font_weight_str_data[self][0]
-
-    @classmethod
-    def from_str(cls, string: str):
-        result = FontWeight.REGULAR
-        for font_width, data in font_weight_str_data.items():
-            if data[1].search(string):
-                result = font_width
-        return result
-
-
-font_weight_str_data = {
-    FontWeight.VARIABLE:        ("wght",       re.compile(r"wght",             re.IGNORECASE)),
-    FontWeight.REGULAR:         ("Regular",    re.compile(r"Regular",          re.IGNORECASE)),
-    FontWeight.LIGHT:           ("Light",      re.compile(r"Light",            re.IGNORECASE)),
-    FontWeight.DEMI_LIGHT:      ("DemiLight",  re.compile(r"Demi.?Light",      re.IGNORECASE)),
-    FontWeight.EXTRA_LIGHT:     ("ExtraLight", re.compile(r"Extra.?Light",     re.IGNORECASE)),
-    FontWeight.THIN:            ("Thin",       re.compile(r"Thin",             re.IGNORECASE)),
-    FontWeight.MEDIUM:          ("Medium",     re.compile(r"Medium",           re.IGNORECASE)),
-    FontWeight.BOLD:            ("Bold",       re.compile(r"Bold",             re.IGNORECASE)),
-    FontWeight.SEMI_BOLD:       ("SemiBold",   re.compile(r"Semi.?Bold",       re.IGNORECASE)),
-    FontWeight.EXTRA_BOLD:      ("ExtraBold",  re.compile(r"Extra.?Bold",      re.IGNORECASE)),
-    FontWeight.BLACK:           ("Black",      re.compile(r"Black",            re.IGNORECASE)),
-}
-
-
-class FontStyle(Enum):
-    UPRIGHT     = auto()
-    ITALIC      = auto()
- 
-    @property
-    def text(self):
-        return font_style_str_data[self][0]
-
-    @classmethod
-    def from_str(cls, string: str):
-        result = FontStyle.UPRIGHT
-        for font_style, data in font_style_str_data.items():
-            if data[1].search(string):
-                result = font_style
-        return result
-
-
-font_style_str_data = {
-    FontStyle.ITALIC:          ("Italic", re.compile(r"Italic",            re.IGNORECASE)),
-}
-
-
-class FontFormat(Enum):
-    UNSET       = ""
-    OTF         = "OTF"
-    OTC         = "OTC"
-    TTF         = "TTF"
-
-    @property
-    def text(self):
-        return font_format_str_data[self][0]
-
-    @classmethod
-    def from_str(cls, string: str):
-        result = FontFormat.UNSET
-        for font_format, data in font_format_str_data.items():
-            if data[1].search(string):
-                result = font_format
-        return result
-
-
-font_format_str_data = {
-    FontFormat.OTF:             ("OTF", re.compile(r"\.OTF",            re.IGNORECASE)),
-    FontFormat.OTC:             ("OTC", re.compile(r"\.OTC",            re.IGNORECASE)),
-    FontFormat.TTF:             ("TTF", re.compile(r"\.TTF",            re.IGNORECASE)),
-}
-
-
-class FontBuild(Enum):
-    UNSET       = auto()
-    UNHINTED    = auto()
-    HINTED      = auto()
-    FULL        = auto()
-
-    @property
-    def text(self):
-        return font_build_str_data[self][0]
-
-    @classmethod
-    def from_str(cls, string: str):
-        result = FontBuild.UNSET
-        for font_build, data in font_build_str_data.items():
-            if data[1].search(string):
-                result = font_build
-        return result
-
-
-font_build_str_data = {
-    FontBuild.HINTED:      ("Hinted",   re.compile(r"Hinted",    re.IGNORECASE)),
-    FontBuild.UNHINTED:    ("Unhinted", re.compile(r"Unhinted",  re.IGNORECASE)),
-    FontBuild.FULL:        ("Full",     re.compile(r"Full",      re.IGNORECASE))
-}
-
-
-class FontTag(Flag):
-    MONO        = auto()
-    UI          = auto() # UI font
-    DISPLAY     = auto()
-    SLIM        = auto() # Noto slim-build variable font
-
-
-@dataclasses.dataclass
+@dataclasses.dataclass(order=True)
 class FontInfo:
     main_script: str
     '''Primary Unicode script covered by the font.'''
@@ -197,19 +24,19 @@ class FontInfo:
     postscript_name: str
     '''Font PostScript name'''
 
-    form: FontForm = FontForm.UNSET
+    form: 'FontForm'
 
-    width: FontWidth = FontWidth.NORMAL
-    
-    weight: FontWeight = FontWeight.REGULAR
+    width: 'FontWidth'
 
-    style: FontStyle = FontStyle.UPRIGHT
+    weight: 'FontWeight'
 
-    format: FontFormat = FontFormat.UNSET
+    style: 'FontStyle'
 
-    build: FontBuild = FontBuild.UNSET
+    format: 'FontFormat'
 
-    tags: FontTag = FontTag(0)
+    build: 'FontBuild'
+
+    tags: 'FontTag'
 
     url: str = ""
     '''URL download source for the font.'''
@@ -317,3 +144,219 @@ def read_font_infos_from_csv(csv_path):
         for row in reader:
             font_infos.append(FontInfo.from_str_dict(row))
     return font_infos
+
+
+@functools.total_ordering
+class FontForm(Enum):
+    UNSET       = auto()
+    SERIF       = auto()
+    SANS_SERIF  = auto()
+
+    @property
+    def text(self):
+        return font_form_str_data[self][0]
+
+    @classmethod
+    def from_str(cls, string: str):
+        result = FontForm.UNSET
+        for font_form, data in font_form_str_data.items():
+            if data[1].search(string):
+                result = font_form
+        return result
+    
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value
+
+
+font_form_str_data = {
+    FontForm.SERIF:         ("Serif", re.compile(r"Serif",    re.IGNORECASE)),
+    FontForm.SANS_SERIF:    ("Sans",  re.compile(r"Sans",     re.IGNORECASE))
+}
+
+
+@functools.total_ordering
+class FontWidth(Enum):
+    NORMAL      = auto()
+    VARIABLE    = auto()
+    EXTRA_COND  = auto()
+    CONDENSED   = auto()
+    SEMI_COND   = auto()
+
+    @property
+    def text(self):
+        return font_width_str_data[self][0]
+
+    @classmethod
+    def from_str(cls, string: str):
+        result = FontWidth.NORMAL
+        for font_width, data in font_width_str_data.items():
+            if data[1].search(string):
+                result = font_width
+        return result
+
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value
+
+
+font_width_str_data = {
+    FontWidth.VARIABLE:     ("wdth",           re.compile(r"wdth",             re.IGNORECASE)),
+    FontWidth.CONDENSED:    ("Condensed",      re.compile(r"Condensed",        re.IGNORECASE)),
+    FontWidth.EXTRA_COND:   ("ExtraCondensed", re.compile(r"Extra.?Condensed", re.IGNORECASE)),
+    FontWidth.SEMI_COND:    ("SemiCondensed",  re.compile(r"Semi.?Condensed",  re.IGNORECASE)),
+}
+
+
+@functools.total_ordering
+class FontWeight(Enum):
+    REGULAR     = auto()
+    VARIABLE    = auto()
+    DEMI_LIGHT  = auto()
+    EXTRA_LIGHT = auto()
+    LIGHT       = auto()
+    THIN        = auto()
+    MEDIUM      = auto()
+    SEMI_BOLD   = auto()
+    BOLD        = auto()
+    EXTRA_BOLD  = auto()
+    BLACK       = auto()
+
+    @property
+    def text(self):
+        return font_weight_str_data[self][0]
+
+    @classmethod
+    def from_str(cls, string: str):
+        result = FontWeight.REGULAR
+        for font_width, data in font_weight_str_data.items():
+            if data[1].search(string):
+                result = font_width
+        return result
+
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value
+
+
+font_weight_str_data = {
+    FontWeight.VARIABLE:        ("wght",       re.compile(r"wght",             re.IGNORECASE)),
+    FontWeight.REGULAR:         ("Regular",    re.compile(r"Regular",          re.IGNORECASE)),
+    FontWeight.LIGHT:           ("Light",      re.compile(r"Light",            re.IGNORECASE)),
+    FontWeight.DEMI_LIGHT:      ("DemiLight",  re.compile(r"Demi.?Light",      re.IGNORECASE)),
+    FontWeight.EXTRA_LIGHT:     ("ExtraLight", re.compile(r"Extra.?Light",     re.IGNORECASE)),
+    FontWeight.THIN:            ("Thin",       re.compile(r"Thin",             re.IGNORECASE)),
+    FontWeight.MEDIUM:          ("Medium",     re.compile(r"Medium",           re.IGNORECASE)),
+    FontWeight.BOLD:            ("Bold",       re.compile(r"Bold",             re.IGNORECASE)),
+    FontWeight.SEMI_BOLD:       ("SemiBold",   re.compile(r"Semi.?Bold",       re.IGNORECASE)),
+    FontWeight.EXTRA_BOLD:      ("ExtraBold",  re.compile(r"Extra.?Bold",      re.IGNORECASE)),
+    FontWeight.BLACK:           ("Black",      re.compile(r"Black",            re.IGNORECASE)),
+}
+
+
+@functools.total_ordering
+class FontStyle(Enum):
+    UPRIGHT     = auto()
+    ITALIC      = auto()
+ 
+    @property
+    def text(self):
+        return font_style_str_data[self][0]
+
+    @classmethod
+    def from_str(cls, string: str):
+        result = FontStyle.UPRIGHT
+        for font_style, data in font_style_str_data.items():
+            if data[1].search(string):
+                result = font_style
+        return result
+
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value
+
+
+font_style_str_data = {
+    FontStyle.ITALIC:          ("Italic", re.compile(r"Italic",            re.IGNORECASE)),
+}
+
+
+@functools.total_ordering
+class FontFormat(Enum):
+    UNSET       = ""
+    OTF         = "OTF"
+    OTC         = "OTC"
+    TTF         = "TTF"
+
+    @property
+    def text(self):
+        return font_format_str_data[self][0]
+
+    @classmethod
+    def from_str(cls, string: str):
+        result = FontFormat.UNSET
+        for font_format, data in font_format_str_data.items():
+            if data[1].search(string):
+                result = font_format
+        return result
+
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value
+
+
+font_format_str_data = {
+    FontFormat.OTF:             ("OTF", re.compile(r"\.OTF",            re.IGNORECASE)),
+    FontFormat.OTC:             ("OTC", re.compile(r"\.OTC",            re.IGNORECASE)),
+    FontFormat.TTF:             ("TTF", re.compile(r"\.TTF",            re.IGNORECASE)),
+}
+
+
+@functools.total_ordering
+class FontBuild(Enum):
+    UNSET       = auto()
+    UNHINTED    = auto()
+    HINTED      = auto()
+    FULL        = auto()
+
+    @property
+    def text(self):
+        return font_build_str_data[self][0]
+
+    @classmethod
+    def from_str(cls, string: str):
+        result = FontBuild.UNSET
+        for font_build, data in font_build_str_data.items():
+            if data[1].search(string):
+                result = font_build
+        return result
+
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value
+
+
+font_build_str_data = {
+    FontBuild.HINTED:      ("Hinted",   re.compile(r"Hinted",    re.IGNORECASE)),
+    FontBuild.UNHINTED:    ("Unhinted", re.compile(r"Unhinted",  re.IGNORECASE)),
+    FontBuild.FULL:        ("Full",     re.compile(r"Full",      re.IGNORECASE))
+}
+
+
+@functools.total_ordering
+class FontTag(Flag):
+    MONO        = auto()
+    UI          = auto() # UI font
+    DISPLAY     = auto()
+    SLIM        = auto() # Noto slim-build variable font
+
+    def __lt__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.value < other.value

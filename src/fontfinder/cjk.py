@@ -2,7 +2,7 @@ import copy
 
 from fontfinder.fontinfo import FontInfo, FontForm, FontWidth, FontWeight, FontStyle, FontFormat, FontBuild 
 
-cjk_base_url = "https://github.com/notofonts/noto-cjk/blob/main/"
+cjk_base_url = "https://github.com/notofonts/noto-cjk/raw/main/"
 
 cjk_weights =   [
     ("Black",       FontWeight.BLACK),

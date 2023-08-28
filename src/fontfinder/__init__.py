@@ -93,7 +93,7 @@ class FontFinder:
                                 _known_fonts.append(font_info)
         
         _known_fonts.extend(get_noto_cjk_fonts())
-        # _known_fonts.sort()      
+        _known_fonts.sort()      
 
     def _load_small_unihan_data(self):
         global _small_unihan_data
