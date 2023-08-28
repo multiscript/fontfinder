@@ -20,6 +20,9 @@ from fontfinder.cjk import get_noto_cjk_fonts
 MAX_CHARS_TO_ANALYSE: int = 2048
 '''Maximum number of characters of a string to analyse for script information.'''
 
+ZH_HANT_USE_HK = False
+
+
 _DATA_DIR_PATH = Path(__file__, "../data").resolve()
 _DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
@@ -89,7 +92,8 @@ class FontFinder:
                                 font_info.build = build
                                 _known_fonts.append(font_info)
         
-        _known_fonts.extend(get_noto_cjk_fonts())      
+        _known_fonts.extend(get_noto_cjk_fonts())
+        # _known_fonts.sort()      
 
     def _load_small_unihan_data(self):
         global _small_unihan_data
@@ -101,9 +105,17 @@ class FontFinder:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
         object with the analysis results.
 
-        Only the first `MAX_CHARS_TO_ANALYSE` characters are analysed.
+        The number of characters analysed is set by the module attribute `MAX_CHARS_TO_ANALYSE`.
 
+        In setting the `TextInfo.main_script` result, the Unicode script property values `Common`, `Inherited`, and
+        `Unknown` are ignored.
 
+        If the resulting `TextInfo.main_script` is `Han`, some basic language detection is performed, and the
+        `TextInfo.script_variant` field is set to one of the following language tags:
+            For Simplified Chinese:  `zh-Hans`                   
+            For Traditional Chinese: `zh-Hant` (or `zh-Hant-HK` if the module attribute `ZH_HANT_USE_HK` is True)
+            For Japanese:            `ja`
+            For Korean:              `ko`
         '''
         self._load_small_unihan_data()
         script_counter = Counter()
@@ -121,28 +133,26 @@ class FontFinder:
             del script_counter[ignore_script]
 
         main_script = script_counter.most_common(1)[0][0]
+        script_variant = ""
 
         if main_script == 'Han':
             # Han script can be used by Chinese, Japanese and Korean texts
             if 'Hangul' in script_counter:
                 # If Hangul characters are present, assume it's Korean
-                main_script = 'Korean'
+                script_variant = 'ko'
             elif 'Hiragana' in script_counter or 'Katakana' in script_counter:
                 # If Hirogana or Katakana characters are present, assume it's Japanese
-                main_script = 'Japanese'
+                script_variant = 'ja'
             elif unihan_counter['kSimplifiedVariant'] > unihan_counter['kTraditionalVariant']:
                 # Traditional Chinese characters have simplified variants, and vice versa.
                 # So if there are more simplified variants than traditional, we likely have traditional text,
                 # and vice-versa.
-                main_script = 'Chinese (Traditional)'
+                script_variant = 'zh-Hant-HK' if ZH_HANT_USE_HK else 'zh-Hant'
             else:
-                main_script = 'Chinese (Simplified)'
-        elif main_script == 'Hangul':
-            main_script = 'Korean'
-        elif main_script in ['Hiragana', 'Katakana']:
-            main_script = 'Japanese'
+                script_variant = 'zh-Hans'
 
         text_info.main_script=main_script
+        text_info.script_variant=script_variant
         return text_info
 
     def get_installed_families(self):
@@ -176,16 +186,11 @@ class FontFinder:
 @dataclass
 class TextInfo:
     main_script: str = ""
-    '''Name of the most frequent Unicode script used in a piece of text.'''
+    '''Name of the most frequently used Unicode script in a piece of text.'''
 
     script_variant: str = ""
-    '''A secondary string to provide extra information when main_script name is insufficient for choosing a font.
-    
-    The Unicode script property values `Common`, `Inherited`, and `Unknown` are ignored. If the most frequently used
-    script is one of `Han`, `Hangul`, `Hiragana` or `Katakana`, this field is set to one of the following strings
-    instead, representing an estimate of the language used in the text:
-        `Chinese (Traditional)`, `Chinese (Simplified)`, `Japanese`, `Korean`
-    '''
+    '''A secondary string to provide extra information when main_script name is insufficient for choosing a font.'''
+
     script_count: list[tuple[str, int]] = field(default_factory=list)
     '''The raw character counts of each Unicode script value analysed for the text, as a list of tuples.
     Each tuple is of the form `('script', count)`, listed from most-to-least frequent.'''
