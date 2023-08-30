@@ -3,18 +3,15 @@ Analyses the majority Unicode script used in a text string, and locates fonts th
 For now, only locates fonts in the Google Noto font collection.
 '''
 from collections import Counter
-import copy
 from dataclasses import dataclass, field
-from enum import Enum, auto
 import json
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import platform
 
-import requests
 import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
-from fontfinder.cjk import get_noto_cjk_fonts
+from fontfinder.noto import get_noto_fonts
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -22,18 +19,17 @@ MAX_CHARS_TO_ANALYSE: int = 2048
 
 ZH_HANT_USE_HK = False
 
-
 _DATA_DIR_PATH = Path(__file__, "../data").resolve()
 _DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 
-_known_fonts = None
 _small_unihan_data = None
 
 
 class FontFinder:
     def __init__(self):
-        pass
+        self._known_fonts = None
+        self._small_unihan_data_private = None
 
     @property
     def all_unicode_scripts(self):
@@ -50,56 +46,16 @@ class FontFinder:
 
     @property
     def known_fonts(self):
-        if _known_fonts is None:
-            self._load_known_fonts()
-        return _known_fonts
+        if self._known_fonts is None:
+            self._known_fonts = get_noto_fonts()
+        return self._known_fonts
 
-    def _load_known_fonts(self):
-        self._load_noto_fonts()
-
-    def _load_noto_fonts(self):
-        global _known_fonts
-        if _known_fonts is None:
-            noto_data = requests.get("https://notofonts.github.io/noto.json").json()
-            noto_font_base_url = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/"
-
-            # Convert the Noto json data into a flat list of FontFileInfo records, to allow for easier
-            # filtering of list.
-            _known_fonts = []
-            for script_tag, script_data in noto_data.items():
-                if script_tag == "latin-greek-cyrillic":
-                    script_set = ['latin', 'greek', 'cyrillic']
-                    # The Noto data treats these 3 scripts as one, but we duplicate the font info for all 3.
-                else:
-                    script_set = [script_tag]
-
-                for main_script in script_set:
-                    # Make the Noto script formatting match the Unicode script formatting.
-                    main_script = main_script.replace('-', '_').title()
-                    if main_script == 'Sign_Writing':
-                        main_script = 'SignWriting' # Mismatch in Noto / Unicode script name
-                    for family_name, family_data in script_data['families'].items():
-                        form = FontForm.from_str(family_name)
-                        for build, relative_url_list in family_data['files'].items():
-                            build = FontBuild.from_str(build)
-                            for relative_url in relative_url_list:
-                                url = noto_font_base_url + relative_url
-                                font_info = FontInfo(main_script=main_script, family_name=family_name, url=url)
-                                font_info.set_from_noto_url(url)
-                                # Form and build have already been set from the URL, but we can ensure the values are
-                                # correct from the other JSON data.
-                                font_info.form = form
-                                font_info.build = build
-                                _known_fonts.append(font_info)
-        
-        _known_fonts.extend(get_noto_cjk_fonts())
-        _known_fonts.sort()      
-
-    def _load_small_unihan_data(self):
-        global _small_unihan_data
-        if _small_unihan_data is None:
+    @property
+    def _small_unihan_data(self):
+        if self._small_unihan_data_private is None:
             with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
-                _small_unihan_data = json.load(small_unihan_file)
+                self._small_unihan_data_private = json.load(small_unihan_file)
+        return self._small_unihan_data_private
     
     def get_text_info(self, text: str):
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
@@ -117,14 +73,13 @@ class FontFinder:
             For Japanese:            `ja`
             For Korean:              `ko`
         '''
-        self._load_small_unihan_data()
         script_counter = Counter()
         unihan_counter = Counter()
         for char in text[0:min(len(text), MAX_CHARS_TO_ANALYSE)]:
             script = udp.script(char)
             script_counter[script] += 1
-            if char in _small_unihan_data:
-                for key in _small_unihan_data[char].keys():
+            if char in self._small_unihan_data:
+                for key in self._small_unihan_data[char].keys():
                     unihan_counter[key] += 1
         text_info = TextInfo(script_count=script_counter.most_common())
 
@@ -155,7 +110,7 @@ class FontFinder:
         text_info.script_variant=script_variant
         return text_info
 
-    def get_installed_families(self):
+    def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":
             import Cocoa
             font_manager = Cocoa.NSFontManager.sharedFontManager()
@@ -178,7 +133,7 @@ class FontFinder:
         
         return sorted(installed_families)
 
-    def get_installed_filenames(self):
+    def _OLD_get_installed_filenames(self):
         import find_system_fonts_filename
         return find_system_fonts_filename.get_system_fonts_filename()
 

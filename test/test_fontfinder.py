@@ -47,12 +47,12 @@ class TestFontFinder:
 
     def test_get_installed_families(self):
         ff = FontFinder()
-        installed_families = ff.get_installed_families()
+        installed_families = ff._OLD_get_installed_families()
         pprint(installed_families)
 
     def test_get_installed_filenames(self):
         ff = FontFinder()
-        pprint(ff.get_installed_filenames())
+        pprint(ff._OLD_get_installed_filenames())
 
     def test_get_mac_system_fonts(self):
         fontfinder.mac.get_mac_system_fonts()
