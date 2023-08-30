@@ -1,13 +1,18 @@
 import copy
-
+import datetime
+from pathlib import Path
 import requests
+import shutil
 
+import fontfinder
 from fontfinder.fontinfo import FontInfo, FontForm, FontWidth, FontWeight, FontStyle, FontFormat, FontBuild 
 
 NOTO_MAIN_JSON_URL = "https://notofonts.github.io/noto.json"
 NOTO_MAIN_BASE_URL = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/"
 NOTO_CJK_BASE_URL = "https://github.com/notofonts/noto-cjk/raw/main/"
 
+_NOTO_MAIN_JSON_PATH = Path(fontfinder._DATA_DIR_PATH, "noto_main.json").resolve()
+_NOTO_MAIN_JSON_UPDATE_DELTA = datetime.timedelta(days=1)
 
 def get_noto_fonts():
     '''Return a list of FontInfo records for the Google Noto fonts.'''
@@ -16,6 +21,21 @@ def get_noto_fonts():
     font_infos.sort()
     return font_infos
 
+def _get_noto_main_json_data():
+    update_local_copy = False
+    if _NOTO_MAIN_JSON_PATH.exists():
+        last_mod_time = datetime.fromtimestampe(_NOTO_MAIN_JSON_PATH.stat().st_mtime)
+        if (datetime.datetime.now() - last_mod_time) >= _NOTO_MAIN_JSON_UPDATE_DELTA:
+            update_local_copy = True
+    else:
+        update_local_copy = True
+    
+    if update_local_copy:
+        pass
+    else:
+        pass
+        # Read local copy
+            
 def _get_noto_main_fonts():
     '''Return a list of FontInfo records for the main (non-CJK) Google Noto fonts.'''
     font_infos = []

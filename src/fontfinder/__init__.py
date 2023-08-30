@@ -11,7 +11,6 @@ import platform
 import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
-from fontfinder.noto import get_noto_fonts
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -23,7 +22,7 @@ _DATA_DIR_PATH = Path(__file__, "../data").resolve()
 _DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 
-_small_unihan_data = None
+from fontfinder import noto
 
 
 class FontFinder:
@@ -47,7 +46,7 @@ class FontFinder:
     @property
     def known_fonts(self):
         if self._known_fonts is None:
-            self._known_fonts = get_noto_fonts()
+            self._known_fonts = noto.get_noto_fonts()
         return self._known_fonts
 
     @property
