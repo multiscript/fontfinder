@@ -17,15 +17,22 @@ MAX_CHARS_TO_ANALYSE: int = 2048
 '''Maximum number of characters of a string to analyse for script information.'''
 
 ZH_HANT_USE_HK = False
+'''If True, `FontFinder.get_text_info()` selects Hong Kong rather than Taiwanese fonts for Traditional Chinese
+Script.'''
 
 _DATA_DIR_PATH = Path(__file__, "../data").resolve()
+'''Path to font data'''
 _DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
-_SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 
-from fontfinder import noto
+_SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
+'''Path to subset of Unihan data.'''
+
+# We wait until now to import Noto data so that data path constants above are set.
+from fontfinder import noto 
 
 
 class FontFinder:
+    '''FontFinder object exposes this package's functionality.'''
     def __init__(self):
         self._known_fonts = None
         self._small_unihan_data_private = None
