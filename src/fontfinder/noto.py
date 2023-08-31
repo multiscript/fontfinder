@@ -1,5 +1,6 @@
 import copy
 import datetime
+import json
 from pathlib import Path
 import requests
 import shutil
@@ -7,12 +8,26 @@ import shutil
 import fontfinder
 from fontfinder.fontinfo import FontInfo, FontForm, FontWidth, FontWeight, FontStyle, FontFormat, FontBuild 
 
-NOTO_MAIN_JSON_URL = "https://notofonts.github.io/noto.json"
-NOTO_MAIN_BASE_URL = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/"
-NOTO_CJK_BASE_URL = "https://github.com/notofonts/noto-cjk/raw/main/"
 
-_NOTO_MAIN_JSON_PATH = Path(fontfinder._DATA_DIR_PATH, "noto_main.json").resolve()
-_NOTO_MAIN_JSON_UPDATE_DELTA = datetime.timedelta(days=1)
+NOTO_MAIN_JSON_URL = "https://notofonts.github.io/noto.json"
+'''URL of main Noto JSON font data.'''
+
+NOTO_MAIN_BASE_URL = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/"
+'''Base URL of main Noto font download location.'''
+
+NOTO_CJK_BASE_URL = "https://github.com/notofonts/noto-cjk/raw/main/"
+'''Base URL of CJK Noto font download location.'''
+
+
+_NOTO_MAIN_JSON_REF_PATH = Path(fontfinder._DATA_DIR_PATH, "noto.json").resolve()
+'''Path of reference copy of noto.json distributed with this package.'''
+
+_NOTO_MAIN_JSON_PATH = Path(fontfinder._DATA_DIR_PATH, "latest", "noto.json").resolve()
+'''Path of updated, cached copy of noto.json.'''
+
+_NOTO_MAIN_JSON_MAX_AGE = datetime.timedelta(days=1)
+'''Max age of cached copy of noto.json, after which an updated copy will be downloaded.'''
+
 
 def get_noto_fonts():
     '''Return a list of FontInfo records for the Google Noto fonts.'''
@@ -21,25 +36,29 @@ def get_noto_fonts():
     font_infos.sort()
     return font_infos
 
-def _get_noto_main_json_data():
-    update_local_copy = False
-    if _NOTO_MAIN_JSON_PATH.exists():
-        last_mod_time = datetime.fromtimestampe(_NOTO_MAIN_JSON_PATH.stat().st_mtime)
-        if (datetime.datetime.now() - last_mod_time) >= _NOTO_MAIN_JSON_UPDATE_DELTA:
-            update_local_copy = True
-    else:
-        update_local_copy = True
+def _get_noto_main_data():
+    '''Return main Noto JSON data as a Python object, handling cache as necessary.'''
+    if not _NOTO_MAIN_JSON_PATH.exists():
+        # Copy noto.json distributed with this package
+        _NOTO_MAIN_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(_NOTO_MAIN_JSON_REF_PATH, _NOTO_MAIN_JSON_PATH)
+
+    last_mod_time = datetime.datetime.fromtimestamp(_NOTO_MAIN_JSON_PATH.stat().st_mtime)
+    if (datetime.datetime.now() - last_mod_time) >= _NOTO_MAIN_JSON_MAX_AGE:
+        # Update cached noto.json
+        noto_json_text = requests.get(NOTO_MAIN_JSON_URL)
+        with open(_NOTO_MAIN_JSON_PATH, "w") as file:
+            file.write(noto_json_text.text)
     
-    if update_local_copy:
-        pass
-    else:
-        pass
-        # Read local copy
+    # Read cached noto.json
+    with open(_NOTO_MAIN_JSON_PATH, "r") as file:
+        noto_data = json.load(file)
+    return noto_data
             
 def _get_noto_main_fonts():
     '''Return a list of FontInfo records for the main (non-CJK) Google Noto fonts.'''
     font_infos = []
-    noto_data = requests.get(NOTO_MAIN_JSON_URL).json()
+    noto_data = _get_noto_main_data()
     for script_tag, script_data in noto_data.items():
         if script_tag == "latin-greek-cyrillic":
             script_set = ['latin', 'greek', 'cyrillic']
@@ -77,7 +96,9 @@ _CJK_WEIGHTS =   [
     ("Regular",     FontWeight.REGULAR),
     ("Thin",        FontWeight.THIN),                
 ]
+'''Available weights of Noto CJK fonts.'''
 
+# Keys for _CJK_DATA
 _CJK_SCRIPT_INFO_KEY = "script_info"
 _CJK_URL_COMPONENT_KEY = "url_component"
 _CJK_CODE_KEY = "cjk_code"
@@ -109,6 +130,7 @@ _CJK_DATA = {
             _CJK_CODE_KEY:          "KR",
         },
 }
+'''Data needed to create FontInfo records for Noto CJK fonts.'''
 
 
 def _get_noto_cjk_fonts():

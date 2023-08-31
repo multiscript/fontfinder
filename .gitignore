@@ -1,3 +1,6 @@
+# Cached font data
+src/fontfinder/data/latest/*
+
 # Mac
 .DS_Store
 
