@@ -48,7 +48,7 @@ class FontFinder:
     @property
     def scripts_not_covered(self):
         return sorted(set(self.all_unicode_scripts) - set(self.all_known_font_scripts) -
-                      set(["Commoon", "Inherited", "Unknown"]))
+                      set(["Common", "Inherited", "Unknown"]))
 
     @property
     def known_fonts(self):

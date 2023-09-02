@@ -61,8 +61,11 @@ def _get_noto_main_fonts():
     noto_data = _get_noto_main_data()
     for script_tag, script_data in noto_data.items():
         if script_tag == "latin-greek-cyrillic":
-            script_set = ['latin', 'greek', 'cyrillic']
             # The Noto data treats these 3 scripts as one, but we duplicate the font info for all 3.
+            script_set = ['latin', 'greek', 'cyrillic']
+        elif script_tag == "meroitic":
+            # The Noto data treats Meroitic as a single script, but in the unicode data it's two separate scripts:
+            script_set = ['meroitic-cursive', 'meroitic-hieroglyphs']
         else:
             script_set = [script_tag]
 
@@ -72,18 +75,27 @@ def _get_noto_main_fonts():
             if main_script == 'Sign_Writing':
                 main_script = 'SignWriting' # Mismatch in Noto / Unicode script name
             for family_name, family_data in script_data['families'].items():
+                if family_name == "Noto Sans Symbols2":
+                    family_name = "Noto Sans Symbols 2" # Fix spacing in Noto data
+                
                 form = FontForm.from_str(family_name)
-                for build, relative_url_list in family_data['files'].items():
-                    build = FontBuild.from_str(build)
-                    for relative_url in relative_url_list:
-                        url = NOTO_MAIN_BASE_URL + relative_url
-                        font_info = FontInfo(main_script=main_script, family_name=family_name, url=url)
-                        font_info.set_from_noto_url(url)
-                        # Form and build have already been set from the URL, but we can ensure the values are
-                        # correct from the other JSON data.
-                        font_info.form = form
-                        font_info.build = build
-                        font_infos.append(font_info)
+
+                # Some font families should be added under other scripts as well
+                extra_scripts = [main_script]
+                if family_name == "Noto Sans Symbols 2":
+                    extra_scripts.append("Braille")
+                for main_script in extra_scripts:
+                    for build, relative_url_list in family_data['files'].items():
+                        build = FontBuild.from_str(build)
+                        for relative_url in relative_url_list:
+                            url = NOTO_MAIN_BASE_URL + relative_url
+                            font_info = FontInfo(main_script=main_script, family_name=family_name, url=url)
+                            font_info.set_from_noto_url(url)
+                            # Form and build have already been set from the URL, but we can ensure the values are
+                            # correct from the other JSON data.
+                            font_info.form = form
+                            font_info.build = build
+                            font_infos.append(font_info)
     return font_infos
 
 
@@ -120,7 +132,7 @@ _CJK_DATA = {
             _CJK_CODE_KEY:          "HK",
         },
     "japanese": {
-            _CJK_SCRIPT_INFO_KEY:   [("Hiragana", ""), ("Katakana", ""), ("Han", "ja")],
+            _CJK_SCRIPT_INFO_KEY:   [("Katakana", ""), ("Hiragana", ""), ("Katakana_Or_Hiragana", ""), ("Han", "ja")],
             _CJK_URL_COMPONENT_KEY: "Japanese/",
             _CJK_CODE_KEY:          "JP",
         },
