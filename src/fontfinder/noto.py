@@ -59,37 +59,64 @@ def _get_noto_main_fonts():
     '''Return a list of FontInfo records for the main (non-CJK) Google Noto fonts.'''
     font_infos = []
     noto_data = _get_noto_main_data()
-    for script_tag, script_data in noto_data.items():
-        if script_tag == "latin-greek-cyrillic":
-            # The Noto data treats these 3 scripts as one, but we duplicate the font info for all 3.
-            script_set = ['latin', 'greek', 'cyrillic']
-        elif script_tag == "meroitic":
-            # The Noto data treats Meroitic as a single script, but in the unicode data it's two separate scripts:
-            script_set = ['meroitic-cursive', 'meroitic-hieroglyphs']
-        else:
-            script_set = [script_tag]
 
-        for main_script in script_set:
-            # Make the Noto script formatting match the Unicode script formatting.
-            main_script = main_script.replace('-', '_').title()
-            if main_script == 'Sign_Writing':
-                main_script = 'SignWriting' # Mismatch in Noto / Unicode script name
+    # Note that the script keys in the Noto JSON data are *mostly* Unicode script names (once they are
+    # changed to titlecase and have hyphens replaced with underscores). But some of them are "pseudo-script-names"
+    # for characters that formally belong under other Unicode script names. We adjust for all this below.
+    for raw_script_key, script_data in noto_data.items():
+        if raw_script_key == "latin-greek-cyrillic":
+            # The Noto data treats these 3 scripts as one, but we duplicate the font info for all 3 indiv scripts.
+            script_key_set = ['Latin', 'Greek', 'Cyrillic']
+        elif raw_script_key == "meroitic":
+            # The Noto data treats Meroitic as a single script, but in the Unicode data it's two separate scripts.
+            script_key_set = ['Meroitic_Cursive', 'Meroitic_Hieroglyphs']
+        else:
+            script_key_set = [raw_script_key]
+
+        for script_key in script_key_set:
+            script_variant = ""
+            if script_key == "sign-writing":
+                main_script = "SignWriting" # No hyphen or underscore in the Unicode script name
+            elif script_key == "nastaliq":
+                # This is a Noto "pseudo-script-name" that actually is a Nastaliq Urdu variant of Arabic script.
+                main_script = "Arabic"
+                script_variant = "Urdu"
+            elif script_key == "math" or script_key == "music" or script_key == "symbols" or \
+                 script_key == "mayan-numerals" or script_key == "indic-siyaq-numbers" or \
+                 script_key == "ottoman-siyaq-numbers":
+                # These are all "pseudo-script-names" for characters who actual script is mostly "Common".
+                main_script = "Common"
+                script_variant = script_key.replace('-', '_').title()
+            elif script_key == "test":
+                # For completeness, we include the Noto Sans Test and Noto Serif Test fonts, but without including
+                # a Unicode script.
+                main_script = ""
+                script_variant = "Test"
+            else:
+                # Make the Noto script key formatting match the Unicode script name formatting.
+                main_script = script_key.replace('-', '_').title()
+
             for family_name, family_data in script_data['families'].items():
                 if family_name == "Noto Sans Symbols2":
-                    family_name = "Noto Sans Symbols 2" # Fix spacing in Noto data
+                    family_name = "Noto Sans Symbols 2" # Fix spacing in Noto family name
                 
                 form = FontForm.from_str(family_name)
 
-                # Some font families should be added under other scripts as well
-                extra_scripts = [main_script]
+                # Some font families should be added under other scripts as well. We add them here,
+                # then re-iterate over the expand script and variant names. (Most of the time this is a single
+                # iteration that changes nothing.)
+                expanded_scripts = [(main_script, script_variant)]
                 if family_name == "Noto Sans Symbols 2":
-                    extra_scripts.append("Braille")
-                for main_script in extra_scripts:
+                    # Only the Noto Sans Symbols 2 family handles the Unicode Braille script.
+                    expanded_scripts.append(("Braille", ""))
+
+                for main_script, script_variant in expanded_scripts:
                     for build, relative_url_list in family_data['files'].items():
                         build = FontBuild.from_str(build)
                         for relative_url in relative_url_list:
                             url = NOTO_MAIN_BASE_URL + relative_url
-                            font_info = FontInfo(main_script=main_script, family_name=family_name, url=url)
+                            font_info = FontInfo(main_script=main_script, script_variant=script_variant,
+                                                 family_name=family_name, url=url)
                             font_info.set_from_noto_url(url)
                             # Form and build have already been set from the URL, but we can ensure the values are
                             # correct from the other JSON data.

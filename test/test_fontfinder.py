@@ -28,7 +28,9 @@ class TestFontFinder:
 
     def test_scripts_not_covered(self):
         ff = FontFinder()
+        print("Unicode Scripts Not Covered:")
         pprint(ff.scripts_not_covered)
+        print("Noto Pseudo-Scripts Not in Unicode:")
         pprint(list(set(ff.all_known_font_scripts) - set(ff.all_unicode_scripts)))
 
     def test_get_text_info(self):
