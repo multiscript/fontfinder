@@ -33,6 +33,7 @@ def get_noto_fonts():
     '''Return a list of FontInfo records for the Google Noto fonts.'''
     font_infos = _get_noto_main_fonts()
     font_infos.extend(_get_noto_cjk_fonts())
+    font_infos.extend(_get_noto_emoji_fonts())
     font_infos.sort()
     return font_infos
 
@@ -202,3 +203,10 @@ def _get_noto_cjk_fonts():
                     font_info.script_variant = script_variant
                     font_infos.append(font_info)
     return font_infos
+
+def _get_noto_emoji_fonts():
+    return [FontInfo(main_script="Common", script_variant="Emoji", family_name="Noto Color Emoji",
+                     subfamily_name="Regular", postscript_name="NotoColorEmoji-Regular",
+                     form=FontForm.UNSET, width=FontWidth.NORMAL, weight=FontWeight.REGULAR,
+                     style=FontStyle.UPRIGHT, format=FontFormat.TTF, build=FontBuild.UNSET,
+                     url="https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf")]

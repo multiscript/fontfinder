@@ -65,43 +65,72 @@ class FontFinder:
     
     def get_text_info(self, text: str):
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
-        object with the analysis results.
+        object with the results.
 
         The number of characters analysed is set by the module attribute `MAX_CHARS_TO_ANALYSE`.
 
-        In setting the `TextInfo.main_script` result, the Unicode script property values `Common`, `Inherited`, and
-        `Unknown` are ignored.
+        The attributes of the `TextInfo` result object are set as follows:
 
-        If the resulting `TextInfo.main_script` is `Han`, some basic language detection is performed, and the
-        `TextInfo.script_variant` field is set to one of the following language tags:
+            `main_script`: name of the most-frequently-used Unicode script in `text`.
+
+            `script_variant`: a secondary string used when the value of `main_script` is insufficient for choosing
+                              an appropriate font.
+
+            `emoji_count`: count of characters who have either the Emoji Presentation property or the
+                           Extended_Pictographic property set (independant of script).
+
+            `script_count`: a collections.Counter of the count of each Unicode script in the text. The keys are the
+                            string names of each script that appears in the text (including `Common`, `Inherited`
+                            and `Unknown`).
+
+        In calculating `main_script`, the script values `Common`, `Inherited`, and `Unknown` are
+        ignored. However if `emoji_count` is larger then the rest of the script counts, then `main_script' is set to
+        `Common` and `script_variant` is set to `Emoji`. (Most emoji characters have a script value of `Common`.)
+        
+        If `main_script` is `Han`, some basic language detection is performed, and the `script_variant` is set to
+        one of the following language tags:
             For Simplified Chinese:  `zh-Hans`                   
             For Traditional Chinese: `zh-Hant` (or `zh-Hant-HK` if the module attribute `ZH_HANT_USE_HK` is True)
             For Japanese:            `ja`
             For Korean:              `ko`
         '''
-        script_counter = Counter()
+        # Do the counting
+        script_count = Counter()
         unihan_counter = Counter()
+        emoji_count = 0
         for char in text[0:min(len(text), MAX_CHARS_TO_ANALYSE)]:
-            script = udp.script(char)
-            script_counter[script] += 1
+            script_count[udp.script(char)] += 1
+            if udp.is_emoji_presentation(char) or udp.is_extended_pictographic(char):
+                emoji_count += 1
             if char in self._small_unihan_data:
                 for key in self._small_unihan_data[char].keys():
                     unihan_counter[key] += 1
-        text_info = TextInfo(script_count=script_counter.most_common())
+        
+        # Determine main_script and script_variant
+        non_generic_count = script_count.copy()
+        generic_scripts = ['Common', 'Inherited', 'Unknown']
+        for generic_script in generic_scripts:
+            del non_generic_count[generic_script]
 
-        ignore_scripts = set(['Common', 'Inherited', 'Unknown'])
-        for ignore_script in ignore_scripts:
-            del script_counter[ignore_script]
+        if len(non_generic_count) > 0:
+            main_script = non_generic_count.most_common(1)[0][0]
+            script_variant = ""
+        else:
+            main_script = ""
+            script_variant = ""
 
-        main_script = script_counter.most_common(1)[0][0]
-        script_variant = ""
+        # Handle emoji
+        if (len(non_generic_count) == 0 and emoji_count > 0) or emoji_count > non_generic_count.most_common(1)[0][1]:
+            main_script = "Common"
+            script_variant = "Emoji"
 
+        # Handle Han script
         if main_script == 'Han':
             # Han script can be used by Chinese, Japanese and Korean texts
-            if 'Hangul' in script_counter:
+            if 'Hangul' in script_count:
                 # If Hangul characters are present, assume it's Korean
                 script_variant = 'ko'
-            elif 'Hiragana' in script_counter or 'Katakana' in script_counter:
+            elif 'Hiragana' in script_count or 'Katakana' in script_count:
                 # If Hirogana or Katakana characters are present, assume it's Japanese
                 script_variant = 'ja'
             elif unihan_counter['kSimplifiedVariant'] > unihan_counter['kTraditionalVariant']:
@@ -112,9 +141,8 @@ class FontFinder:
             else:
                 script_variant = 'zh-Hans'
 
-        text_info.main_script=main_script
-        text_info.script_variant=script_variant
-        return text_info
+        return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
+                        script_count=script_count)
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":
@@ -150,10 +178,15 @@ class TextInfo:
     '''Name of the most frequently used Unicode script in a piece of text.'''
 
     script_variant: str = ""
-    '''A secondary string to provide extra information when main_script name is insufficient for choosing a font.'''
+    '''a secondary string used when the value of `main_script` is insufficient for choosing an appropriate font.'''
 
-    script_count: list[tuple[str, int]] = field(default_factory=list)
-    '''The raw character counts of each Unicode script value analysed for the text, as a list of tuples.
-    Each tuple is of the form `('script', count)`, listed from most-to-least frequent.'''
+    emoji_count: int = 0
+    '''Count of characters who have either the Emoji Presentation property or the Extended_Pictographic property set
+    (independant of script).'''
+
+    script_count: Counter = field(default_factory=Counter)
+    '''A collections.Counter of the count of each Unicode script in the text. The keys are the string names of
+    each script that appears in the text.'''
+    
 
 

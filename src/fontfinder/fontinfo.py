@@ -86,6 +86,8 @@ class FontInfo:
             self.tags |= FontTag.UI
         if "Display".casefold() in self.postscript_name.casefold():
             self.tags |= FontTag.DISPLAY
+        if "Looped".casefold() in self.family_name.casefold():
+            self.tags |= FontTag.LOOPED
         if self.postscript_name.startswith("NotoSansNotoSansTifinagh"):
             pass
         match = re.match(r"NotoSansTifinagh(?P<variant>.*?)-", self.postscript_name)
@@ -151,6 +153,12 @@ class FontForm(Enum):
     UNSET       = auto()
     SERIF       = auto()
     SANS_SERIF  = auto()
+    # Arabic forms
+    NASKH       = auto()
+    # Perso-Arabic forms
+    NASTALIQ    = auto()
+    # Hebrew forms
+    RASHI       = auto()
 
     @property
     def text(self):
@@ -171,8 +179,11 @@ class FontForm(Enum):
 
 
 font_form_str_data = {
-    FontForm.SERIF:         ("Serif", re.compile(r"Serif",    re.IGNORECASE)),
-    FontForm.SANS_SERIF:    ("Sans",  re.compile(r"Sans",     re.IGNORECASE))
+    FontForm.SERIF:         ("Serif",       re.compile(r"Serif",    re.IGNORECASE)),
+    FontForm.SANS_SERIF:    ("Sans",        re.compile(r"Sans",     re.IGNORECASE)),
+    FontForm.NASKH:         ("Naskh",       re.compile(r"Naskh",    re.IGNORECASE)),
+    FontForm.NASTALIQ:      ("Nastaliq",    re.compile(r"Nastaliq", re.IGNORECASE)),
+    FontForm.RASHI:         ("Rashi",       re.compile(r"Rashi",    re.IGNORECASE)),
 }
 
 
@@ -355,6 +366,7 @@ class FontTag(Flag):
     UI          = auto() # UI font
     DISPLAY     = auto()
     SLIM        = auto() # Noto slim-build variable font
+    LOOPED      = auto() # Thai looped-variants
 
     def __lt__(self, other):
         if not isinstance(other, type(self)):

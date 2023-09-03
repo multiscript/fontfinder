@@ -340,4 +340,11 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 '''},
 
 
+{'language': 'Emoji',
+ 'main_script': 'Common',
+ 'script_variant': 'Emoji',
+ 'text': # Text below is just some sample emoji
+'''
+😀😃😄😁🐶🐱🐭🐹🍏🍎🍐🍊⚽️🏀🏈⚾️🚗🚕🚙🚌⌚️📱📲💻🩷❤️🧡💛🏳️🏴🏴‍☠️🏁
+'''},
 ]
