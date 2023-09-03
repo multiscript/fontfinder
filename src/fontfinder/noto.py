@@ -206,7 +206,8 @@ def _get_noto_cjk_fonts():
 
 def _get_noto_emoji_fonts():
     return [FontInfo(main_script="Common", script_variant="Emoji", family_name="Noto Color Emoji",
-                     subfamily_name="Regular", postscript_name="NotoColorEmoji-Regular",
+                     subfamily_name="Regular", postscript_name="NotoColorEmoji",
                      form=FontForm.UNSET, width=FontWidth.NORMAL, weight=FontWeight.REGULAR,
                      style=FontStyle.UPRIGHT, format=FontFormat.TTF, build=FontBuild.UNSET,
+                     # Note: This url may not be the fully-built version of the font:
                      url="https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf")]
