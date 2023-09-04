@@ -61,7 +61,7 @@ class FontInfo:
         self.tags = FontTag(0) if tags is None else tags
         self.url = "" if url is None else url
 
-    def set_from_noto_url(self, url):
+    def init_from_noto_url(self, url):
         url_path = urlparse(url).path
         self.form = FontForm.from_str(url_path)
         self.width = FontWidth.from_str(url_path)

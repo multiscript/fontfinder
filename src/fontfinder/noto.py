@@ -118,7 +118,7 @@ def _get_noto_main_fonts(filter_func = None):
                             url = NOTO_MAIN_BASE_URL + relative_url
                             font_info = FontInfo(main_script=main_script, script_variant=script_variant,
                                                  family_name=family_name, url=url)
-                            font_info.set_from_noto_url(url)
+                            font_info.init_from_noto_url(url)
                             # Form and build have already been set from the URL, but we can ensure the values are
                             # correct from the other JSON data.
                             font_info.form = form
