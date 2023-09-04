@@ -29,11 +29,11 @@ _NOTO_MAIN_JSON_MAX_AGE = datetime.timedelta(days=1)
 '''Max age of cached copy of noto.json, after which an updated copy will be downloaded.'''
 
 
-def get_noto_fonts():
+def get_noto_fonts(filter_func = None):
     '''Return a list of FontInfo records for the Google Noto fonts.'''
-    font_infos = _get_noto_main_fonts()
-    font_infos.extend(_get_noto_cjk_fonts())
-    font_infos.extend(_get_noto_emoji_fonts())
+    font_infos = _get_noto_main_fonts(filter_func)
+    font_infos.extend(_get_noto_cjk_fonts(filter_func))
+    font_infos.extend(_get_noto_emoji_fonts(filter_func))
     font_infos.sort()
     return font_infos
 
@@ -56,7 +56,7 @@ def _get_noto_main_data():
         noto_data = json.load(file)
     return noto_data
             
-def _get_noto_main_fonts():
+def _get_noto_main_fonts(filter_func = None):
     '''Return a list of FontInfo records for the main (non-CJK) Google Noto fonts.'''
     font_infos = []
     noto_data = _get_noto_main_data()
@@ -123,7 +123,8 @@ def _get_noto_main_fonts():
                             # correct from the other JSON data.
                             font_info.form = form
                             font_info.build = build
-                            font_infos.append(font_info)
+                            if filter_func is None or filter_func(font_info):
+                                font_infos.append(font_info)
     return font_infos
 
 
@@ -173,7 +174,7 @@ _CJK_DATA = {
 '''Data needed to create FontInfo records for Noto CJK fonts.'''
 
 
-def _get_noto_cjk_fonts():
+def _get_noto_cjk_fonts(filter_func = None):
     '''Return a list of FontInfo records for the CJK Google Noto fonts.'''
     font_infos = []
     for lang, lang_data in _CJK_DATA.items():
@@ -201,13 +202,19 @@ def _get_noto_cjk_fonts():
                     font_info = copy.copy(font_info)
                     font_info.main_script = main_script
                     font_info.script_variant = script_variant
-                    font_infos.append(font_info)
+                    if filter_func is None or filter_func(font_info):
+                        font_infos.append(font_info)
     return font_infos
 
-def _get_noto_emoji_fonts():
-    return [FontInfo(main_script="Common", script_variant="Emoji", family_name="Noto Color Emoji",
-                     subfamily_name="Regular", postscript_name="NotoColorEmoji",
-                     form=FontForm.UNSET, width=FontWidth.NORMAL, weight=FontWeight.REGULAR,
-                     style=FontStyle.UPRIGHT, format=FontFormat.TTF, build=FontBuild.UNSET,
-                     # Note: This url may not be the fully-built version of the font:
-                     url="https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf")]
+def _get_noto_emoji_fonts(filter_func = None):
+    font_infos = []
+    font_info = FontInfo(main_script="Common", script_variant="Emoji", family_name="Noto Color Emoji",
+                        subfamily_name="Regular", postscript_name="NotoColorEmoji",
+                        form=FontForm.UNSET, width=FontWidth.NORMAL, weight=FontWeight.REGULAR,
+                        style=FontStyle.UPRIGHT, format=FontFormat.TTF, build=FontBuild.UNSET,
+                        # Note: This url may not be the fully-built version of the font:
+                        url="https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf")
+    if filter_func is None or filter_func(font_info):
+        font_infos.append(font_info)
+    return font_infos
+    

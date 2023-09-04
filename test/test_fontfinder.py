@@ -42,10 +42,23 @@ class TestFontFinder:
 
     def test_known_fonts(self):
         ff = FontFinder()
-        fonts = ff.known_fonts # Ensure no errors in creating list
+        fonts = ff.known_fonts() # Ensure no errors in creating list
         fonts = [font for font in fonts if font.family_name == "Noto Sans"]
         # print(len(fonts))
         # pprint(fonts[-10:])
+
+    def test_find_font_families(self):
+        ff = FontFinder()
+        for sample_text in sample_texts:
+            family_names = ff.find_font_families(sample_text['text'])
+            assert sample_text['expected_family_names'] == family_names
+
+    def test_find_font_family(self):
+        ff = FontFinder()
+        for sample_text in sample_texts:
+            family_name = ff.find_font_family(sample_text['text'])
+            print(family_name)
+            assert sample_text['expected_family_name'] == family_name
 
     def test_get_installed_families(self):
         ff = FontFinder()
@@ -70,7 +83,7 @@ class TestFontFinder:
             assert False
 
         ff = FontFinder()
-        write_fonts = ff.known_fonts
+        write_fonts = ff.known_fonts()
 
         with context_manager as output_dir:
             csv_path = Path(output_dir, "font_info.csv")
@@ -100,6 +113,8 @@ sample_texts = [
 {'language': 'English',
  'main_script': 'Latin',
  'script_variant': '',
+ 'expected_family_names': ['Noto Sans', 'Noto Sans Mono', 'Noto Serif', 'Noto Serif Display'],
+ 'expected_family_name': 'Noto Sans',
  'text':
 '''
 Earth is the third planet from the Sun and the only place known in the universe where life has originated and found
@@ -144,7 +159,9 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Chinese (Simplified)',
  'main_script': 'Han',
  'script_variant': 'zh-Hans',
-'text':
+ 'expected_family_names': ['Noto Sans CJK SC', 'Noto Serif CJK SC'],
+ 'expected_family_name': 'Noto Sans CJK SC',
+ 'text':
 '''
 地球是太阳系中由內及外的第三顆行星，距离太阳149 597 870.7公里/1天文單位，是宇宙中人類已知唯一存在生命的天体[3]，也
 是人類居住的星球，共有80億人口[22]。其質量约为5.97×1024公斤，半径约6,371公里，平均密度5.5 g/cm3，是太阳系行星中最高
@@ -168,6 +185,8 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'Language': 'Cantonese',
  'main_script': 'Han',
  'script_variant': 'zh-Hant',
+ 'expected_family_names': ['Noto Sans CJK TC', 'Noto Serif CJK TC'],
+ 'expected_family_name': 'Noto Sans CJK TC',
  'text':
 '''
 佢距離太陽 1.5 億公里（1個天文單位）遠，係太陽系嘅行星入面第三近太陽嘅－排正喺水星同金星之後。佢嘅質量係 5.97 ×
@@ -194,6 +213,8 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Arabic',
  'main_script': 'Arabic',
  'script_variant': '',
+ 'expected_family_names': ['Noto Naskh Arabic', 'Noto Naskh Arabic UI', 'Noto Sans Arabic'],
+ 'expected_family_name': 'Noto Naskh Arabic',
  'text':
 '''
 الأَرْض (رمزها: 🜨) هي ثالث كواكب المجموعة الشمسية بعدًا عن الشمس بعد عطارد والزهرة، وتُعتبر من أكبر الكواكب
@@ -227,6 +248,8 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Japanese',
  'main_script': 'Han',
  'script_variant': 'ja',
+ 'expected_family_names': ['Noto Sans CJK JP', 'Noto Serif CJK JP'],
+ 'expected_family_name': 'Noto Sans CJK JP',
  'text':
 '''
 地球とは人類が住んでいる天体、つまり人類の足元にある天体のことである。「地」という字・概念と「球」という字・概念で
@@ -272,6 +295,8 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Korean',
  'main_script': 'Hangul',
  'script_variant': '',
+ 'expected_family_names': ['Noto Sans CJK KR', 'Noto Serif CJK KR'],
+ 'expected_family_name': 'Noto Sans CJK KR',
  'text':
 '''
 지구(地球, 영어: Earth)는 태양으로부터 세 번째 행성이며, 조금 두꺼운 대기층으로 둘러싸여 있고, 지금까지 발견된
@@ -307,6 +332,8 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Hindi',
  'main_script': 'Devanagari',
  'script_variant': '',
+ 'expected_family_names': ['Noto Sans Devanagari', 'Noto Serif Devanagari'],
+ 'expected_family_name': 'Noto Sans Devanagari',
  'text':
 '''
 पृथ्वी (प्रतीक: 🜨) सौर मण्डल में सूर्य से तीसरा ग्रह है और एकमात्र खगोलीय वस्तु है जो जीवन को आश्रय देने के लिए
@@ -343,6 +370,8 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Emoji',
  'main_script': 'Common',
  'script_variant': 'Emoji',
+ 'expected_family_names': ['Noto Color Emoji'],
+ 'expected_family_name': 'Noto Color Emoji',
  'text': # Text below is just some sample emoji
 '''
 😀😃😄😁🐶🐱🐭🐹🍏🍎🍐🍊⚽️🏀🏈⚾️🚗🚕🚙🚌⌚️📱📲💻🩷❤️🧡💛🏳️🏴🏴‍☠️🏁

@@ -34,8 +34,10 @@ from fontfinder import noto
 class FontFinder:
     '''FontFinder object exposes this package's functionality.'''
     def __init__(self):
-        self._known_fonts = None
+        self._all_known_fonts = None
         self._small_unihan_data_private = None
+        self.font_family_prefs = {}
+        self.set_default_prefs()
 
     @property
     def all_unicode_scripts(self):
@@ -43,18 +45,22 @@ class FontFinder:
 
     @property
     def all_known_font_scripts(self):
-        return sorted(set([info.main_script for info in self.known_fonts]))
+        return sorted(set([info.main_script for info in self.known_fonts()]))
 
     @property
     def scripts_not_covered(self):
         return sorted(set(self.all_unicode_scripts) - set(self.all_known_font_scripts) -
                       set(["Common", "Inherited", "Unknown"]))
 
-    @property
-    def known_fonts(self):
-        if self._known_fonts is None:
-            self._known_fonts = noto.get_noto_fonts()
-        return self._known_fonts
+    def set_default_prefs(self):
+        self.font_family_prefs[("Arabic", "")] = "Noto Naskh Arabic"
+
+    def known_fonts(self, filter_func = None):
+        # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
+        # than memory, by caching the full list of font_infos in memory.
+        if self._all_known_fonts is None:
+            self._all_known_fonts = noto.get_noto_fonts()
+        return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
 
     @property
     def _small_unihan_data(self):
@@ -143,6 +149,33 @@ class FontFinder:
 
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
+
+    def find_font_family(self, text_or_info):
+        if isinstance(text_or_info, str):
+            text_info = self.get_text_info(text_or_info)
+        else:
+            text_info = text_or_info
+
+        font_family_pref_key = (text_info.main_script, text_info.script_variant)
+        if font_family_pref_key in self.font_family_prefs:
+            family_name = self.font_family_prefs[font_family_pref_key]
+        else:
+            family_name = self.find_font_families(text_info)[0]
+        return family_name
+
+    def find_font_families(self, text_or_info):
+        if isinstance(text_or_info, str):
+            text_info = self.get_text_info(text_or_info)
+        else:
+            text_info = text_or_info
+        
+        font_infos = self.known_fonts(lambda font_info: font_info.main_script == text_info.main_script and \
+                                                        font_info.script_variant == text_info.script_variant)
+        # We use a dictionary as a set that preserves insertion order
+        family_names = {font_info.family_name: 1 for font_info in font_infos}
+        return list(family_names.keys())
+
+
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":
