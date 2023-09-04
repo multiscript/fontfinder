@@ -52,9 +52,6 @@ class FontFinder:
         return sorted(set(self.all_unicode_scripts) - set(self.all_known_font_scripts) -
                       set(["Common", "Inherited", "Unknown"]))
 
-    def set_default_prefs(self):
-        self.font_family_prefs[("Arabic", "")] = "Noto Naskh Arabic"
-
     def known_fonts(self, filter_func = None):
         # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
         # than memory, by caching the full list of font_infos in memory.
@@ -150,6 +147,37 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
+    def set_default_prefs(self):
+        self.font_info_pref_order = list(dataclasses.asdict(FontInfo()).keys())
+        self.font_info_prefs = dataclasses.asdict(FontInfo())
+        self.font_family_prefs[("Arabic", "")] = "Noto Naskh Arabic"
+
+    def apply_prefs(self, font_info_iterable):
+        old_list = font_info_iterable
+        # Font preferences are lists of preferred values for each attribute of FontInfo.
+        # We filter the list of FontInfos one attribute at a time, so to start with we
+        # loop over each attribute of FontInfo, in the preferred order.
+        for font_info_attr_name in self.font_info_pref_order:
+            # Aggregate each possible value for the attribute in the list of FontInfos
+            aggregate = FontInfo.aggregate(old_list)
+            # Begin our new filtered list
+            new_list = []
+            # We only filter on the attribute if there is more than one value for the attribute in the list
+            if len(aggregate[font_info_attr_name]) > 1:
+                # Loop over each FontInfo in the old list
+                for font_info in old_list:
+                    # Loop over each preferred value for the attribute
+                    for pref_value in self.font_family_prefs[font_info_attr_name]:
+                        # If this font_info has the preferred value, it's included in the new list
+                        if getattr(font_info, font_info_attr_name) == pref_value:                
+                            new_list.append(font_info)
+                            break
+            else:
+                # There was only one value for this attribute for the FontInfos in the list, so we skip filtering.
+                pass
+            old_list = new_list
+        return new_list
+
     def find_font_family(self, text_or_info):
         if isinstance(text_or_info, str):
             text_info = self.get_text_info(text_or_info)
@@ -175,7 +203,10 @@ class FontFinder:
         family_names = {font_info.family_name: 1 for font_info in font_infos}
         return list(family_names.keys())
 
-
+    def find_font_info(self, family_name_or_iterable):
+        if isinstance(family_name_or_iterable, str):
+            family_name_or_iterable = [family_name_or_iterable]
+        family_names = family_name_or_iterable
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":

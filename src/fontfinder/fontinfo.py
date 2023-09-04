@@ -130,6 +130,18 @@ class FontInfo:
                 str_dict[field_name] = (str_dict[field_name].upper() == "TRUE")
         return cls(**str_dict)
 
+    @classmethod
+    def aggregate(cls, font_info_iterable):
+        '''Returns a dictionary whose keys are the names of the FontInfo class attributes, and whose values
+        are the set of all values for that attribute across `font_info_iterable`.'''
+        result_dict = dataclasses.asdict(cls())
+        for key in result_dict.keys():
+            result_dict[key] = set()
+        for font_info in font_info_iterable:
+            font_info_dict = dataclasses.asdict(font_info)
+            for key, value in font_info_dict.items():
+                result_dict[key].add(value)
+        return result_dict
 
 def write_font_infos_to_csv(font_infos, csv_path):
     with open(csv_path, "w") as file:

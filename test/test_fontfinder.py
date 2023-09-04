@@ -42,8 +42,10 @@ class TestFontFinder:
 
     def test_known_fonts(self):
         ff = FontFinder()
-        fonts = ff.known_fonts() # Ensure no errors in creating list
-        fonts = [font for font in fonts if font.family_name == "Noto Sans"]
+        font_infos = ff.known_fonts() # Ensure no errors in creating list
+        # font_infos = [font for font in font_infos if font.family_name == "Noto Sans"]
+        aggregate = FontInfo.aggregate(font_infos)
+        print(aggregate["tags"])
         # print(len(fonts))
         # pprint(fonts[-10:])
 
