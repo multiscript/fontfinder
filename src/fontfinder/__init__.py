@@ -28,6 +28,7 @@ _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 '''Path to subset of Unihan data.'''
 
 ANY_SCRIPT = object() # Sentinel for preference matching on any script
+NON_VARIABLE = object() # Sentinel for preference matching on non-variable fonts
 
 # We wait until now to import Noto data so that data path constants above are set.
 from fontfinder import noto 
@@ -171,11 +172,25 @@ class FontFinder:
                                                         font_info.script_variant == text_info.script_variant)
         return font_infos
 
+    def find_font_info(self, family_name_or_iterable):
+        if isinstance(family_name_or_iterable, str):
+            family_name_or_iterable = [family_name_or_iterable]
+        family_names = family_name_or_iterable
+        result_font_infos = []
+        for family_name in family_names:
+            font_infos = self.known_fonts(lambda font_info: font_info.family_name == family_name)
+            # TODO: Do filterning here.
+            result_font_infos.extend(font_infos)
+        return result_font_infos
+
     def set_default_prefs(self):
-        self.font_info_pref_order = list(dataclasses.asdict(FontInfo()).keys())
-        self.font_info_prefs = dataclasses.asdict(FontInfo())
+        # self.font_info_pref_order = list(dataclasses.asdict(FontInfo()).keys())
+        # self.font_info_prefs = dataclasses.asdict(FontInfo())
         self.font_family_prefs[ANY_SCRIPT] = {"form": (FontForm.SANS_SERIF,)}
         self.font_family_prefs[("Arabic", "")] = {"family_name": ("Noto Naskh Arabic",)}
+        self.font_info_prefs[ANY_SCRIPT] = {"width": (NON_VARIABLE,)}
+        self.font_info_prefs[ANY_SCRIPT] = {"weight": (NON_VARIABLE,)}
+        self.font_info_prefs[ANY_SCRIPT] = {"build": (FontBuild.FULL,)}
 
     def apply_family_prefs(self, font_info_iterable):
         font_infos = list(font_info_iterable)
@@ -214,11 +229,6 @@ class FontFinder:
                 # Keep filtering
                 old_list = new_list
         return new_list
-
-    def find_font_info(self, family_name_or_iterable):
-        if isinstance(family_name_or_iterable, str):
-            family_name_or_iterable = [family_name_or_iterable]
-        family_names = family_name_or_iterable
 
     def OLD_apply_prefs(self, font_info_iterable):
         # TODO: Replace this parameterised approach, with a hard-coded method than can be overrided by subclasses.
