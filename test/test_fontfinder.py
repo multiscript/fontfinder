@@ -59,7 +59,6 @@ class TestFontFinder:
         ff = FontFinder()
         for sample_text in sample_texts:
             family_name = ff.find_font_family(sample_text['text'])
-            print(family_name)
             assert sample_text['expected_family_name'] == family_name
 
     def test_get_installed_families(self):

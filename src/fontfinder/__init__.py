@@ -149,24 +149,47 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
+    def find_font_family(self, text_or_info):
+        font_infos = self._find_font_families_info(text_or_info)
+        font_infos = self.apply_family_prefs(font_infos)
+        family_name = font_infos[0].family_name
+        return family_name
+
+    def find_font_families(self, text_or_info):
+        font_infos = self._find_font_families_info(text_or_info)
+        # We use a dictionary as a set that preserves insertion order
+        family_names = {font_info.family_name: 1 for font_info in font_infos}
+        return list(family_names.keys())
+
+    def _find_font_families_info(self, text_or_info):
+        if isinstance(text_or_info, str):
+            text_info = self.get_text_info(text_or_info)
+        else:
+            text_info = text_or_info
+        
+        font_infos = self.known_fonts(lambda font_info: font_info.main_script == text_info.main_script and \
+                                                        font_info.script_variant == text_info.script_variant)
+        return font_infos
+
     def set_default_prefs(self):
         self.font_info_pref_order = list(dataclasses.asdict(FontInfo()).keys())
         self.font_info_prefs = dataclasses.asdict(FontInfo())
         self.font_family_prefs[ANY_SCRIPT] = {"form": (FontForm.SANS_SERIF,)}
-        self.font_family_prefs[("Arabic", "")] = "Noto Naskh Arabic"
+        self.font_family_prefs[("Arabic", "")] = {"family_name": ("Noto Naskh Arabic",)}
 
     def apply_family_prefs(self, font_info_iterable):
-        font_list = list(font_info_iterable)
+        font_infos = list(font_info_iterable)
         # Font preferences are lists of preferred values for attributes of FontInfo.
-        main_script = font_list[0].main_script
-        script_variant = font_list[0].script_variant
+        main_script = font_infos[0].main_script
+        script_variant = font_infos[0].script_variant
         if (main_script, script_variant) in self.font_family_prefs:
-            font_list = self.filter_family_prefs(self.font_family_prefs[(main_script, script_variant)])
+            font_infos = self._filter_by_family_prefs(self.font_family_prefs[(main_script, script_variant)],
+                                                      font_infos)
         if ANY_SCRIPT in self.font_family_prefs:
-            font_list = self.filter_family_prefs(self.font_family_prefs[ANY_SCRIPT])
-        # TODO: If there's still too many, just choose the first
+            font_infos = self._filter_by_family_prefs(self.font_family_prefs[ANY_SCRIPT], font_infos)
+        return font_infos
 
-    def filter_family_prefs(self, pref_dict, font_info_list):
+    def _filter_by_family_prefs(self, pref_dict, font_info_list):
         old_list = font_info_list
         aggregate = FontInfo.aggregate(old_list)
         family_name_count = len(aggregate["family_name"])
@@ -192,7 +215,12 @@ class FontFinder:
                 old_list = new_list
         return new_list
 
-    def apply_prefs(self, font_info_iterable):
+    def find_font_info(self, family_name_or_iterable):
+        if isinstance(family_name_or_iterable, str):
+            family_name_or_iterable = [family_name_or_iterable]
+        family_names = family_name_or_iterable
+
+    def OLD_apply_prefs(self, font_info_iterable):
         # TODO: Replace this parameterised approach, with a hard-coded method than can be overrided by subclasses.
         #
         old_list = font_info_iterable
@@ -219,36 +247,6 @@ class FontFinder:
                 pass
             old_list = new_list
         return new_list
-
-    def find_font_family(self, text_or_info):
-        if isinstance(text_or_info, str):
-            text_info = self.get_text_info(text_or_info)
-        else:
-            text_info = text_or_info
-
-        font_family_pref_key = (text_info.main_script, text_info.script_variant)
-        if font_family_pref_key in self.font_family_prefs:
-            family_name = self.font_family_prefs[font_family_pref_key]
-        else:
-            family_name = self.find_font_families(text_info)[0]
-        return family_name
-
-    def find_font_families(self, text_or_info):
-        if isinstance(text_or_info, str):
-            text_info = self.get_text_info(text_or_info)
-        else:
-            text_info = text_or_info
-        
-        font_infos = self.known_fonts(lambda font_info: font_info.main_script == text_info.main_script and \
-                                                        font_info.script_variant == text_info.script_variant)
-        # We use a dictionary as a set that preserves insertion order
-        family_names = {font_info.family_name: 1 for font_info in font_infos}
-        return list(family_names.keys())
-
-    def find_font_info(self, family_name_or_iterable):
-        if isinstance(family_name_or_iterable, str):
-            family_name_or_iterable = [family_name_or_iterable]
-        family_names = family_name_or_iterable
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":
