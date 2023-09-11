@@ -40,6 +40,7 @@ class FontFinder:
         self._all_known_fonts = None
         self._small_unihan_data_private = None
         self.font_family_prefs = {}
+        self.font_info_prefs = {}
         self.set_default_prefs()
 
     @property
