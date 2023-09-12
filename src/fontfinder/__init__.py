@@ -153,7 +153,7 @@ class FontFinder:
 
     def find_font_family(self, text_or_info):
         font_infos = self._find_font_families_info(text_or_info)
-        font_infos = self.apply_family_prefs(font_infos)
+        font_infos = self._apply_family_prefs(font_infos)
         family_name = font_infos[0].family_name
         return family_name
 
@@ -193,7 +193,7 @@ class FontFinder:
         self.font_info_prefs[ANY_SCRIPT] = {"weight": (NON_VARIABLE,)}
         self.font_info_prefs[ANY_SCRIPT] = {"build": (FontBuild.FULL,)}
 
-    def apply_family_prefs(self, font_info_iterable):
+    def _apply_family_prefs(self, font_info_iterable):
         font_infos = list(font_info_iterable)
         # Font preferences are lists of preferred values for attributes of FontInfo.
         main_script = font_infos[0].main_script
@@ -203,6 +203,18 @@ class FontFinder:
                                                       font_infos)
         if ANY_SCRIPT in self.font_family_prefs:
             font_infos = self._filter_by_family_prefs(self.font_family_prefs[ANY_SCRIPT], font_infos)
+        return font_infos
+
+    def _apply_font_info_prefs(self, font_info_iterable):
+        font_infos = list(font_info_iterable)
+        # Font preferences are lists of preferred values for attributes of FontInfo.
+        main_script = font_infos[0].main_script
+        script_variant = font_infos[0].script_variant
+        if (main_script, script_variant) in self.font_info_prefs:
+            font_infos = self._filter_by_font_info_prefs(self.font_info_prefs[(main_script, script_variant)],
+                                                      font_infos)
+        if ANY_SCRIPT in self.font_info_prefs:
+            font_infos = self._filter_by_font_info_prefs(self.font_info_prefs[ANY_SCRIPT], font_infos)
         return font_infos
 
     def _filter_by_family_prefs(self, pref_dict, font_info_list):
@@ -224,6 +236,30 @@ class FontFinder:
                 # This preference was too restrictive, so ignore it by not updating old_list
                 pass
             elif family_name_count == 1:
+                # Perfect! Stop filtering
+                break
+            else:
+                # Keep filtering
+                old_list = new_list
+        return new_list
+
+    def _filter_by_font_info_prefs(self, pref_dict, font_info_list):
+        old_list = font_info_list
+        font_info_count = len(old_list)
+        if font_info_count < 2:
+            # We actually don't need to filter.
+            return old_list
+
+        for attr_name, values in pref_dict.items():
+            new_list = []
+            for font_info in old_list:
+                if getattr(font_info, attr_name) in values:                
+                    new_list.append(font_info)
+            font_info_count = len(new_list)
+            if font_info_count == 0:
+                # This preference was too restrictive, so ignore it by not updating old_list
+                pass
+            elif font_info_count == 1:
                 # Perfect! Stop filtering
                 break
             else:
