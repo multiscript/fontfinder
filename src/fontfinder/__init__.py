@@ -12,6 +12,9 @@ import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
 
+# TODO: Test finding font family members.
+# TODO: Ensure we return at least one font family name for every script.
+# TODO: Ensure we return font_infos for every script.
 
 MAX_CHARS_TO_ANALYSE: int = 2048
 '''Maximum number of characters of a string to analyse for script information.'''
@@ -28,11 +31,26 @@ _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 '''Path to subset of Unihan data.'''
 
 ANY_SCRIPT = object() # Sentinel for preference matching on any script
-NON_VARIABLE = object() # Sentinel for preference matching on non-variable fonts
 
 # We wait until now to import Noto data so that data path constants above are set.
 from fontfinder import noto 
 
+
+def any_of(attr_name, collection):
+    '''A filter generator. Returns a filter function that takes a single argument `obj` and returns True
+    if `obj.attr_name` is in `collection`, else False.
+    '''
+    def filter(obj):
+        return getattr(obj, attr_name) in collection
+    return filter
+
+def none_of(attr_name, collection):
+    '''A filter generator. Returns a filter function that takes a single argument `obj` and returns True
+    if `obj.attr_name` is not in `collection`, else False.
+    '''
+    def filter(obj):
+        return getattr(obj, attr_name) not in collection
+    
 
 class FontFinder:
     '''FontFinder object exposes this package's functionality.'''
@@ -40,8 +58,19 @@ class FontFinder:
         self._all_known_fonts = None
         self._small_unihan_data_private = None
         self.font_family_prefs = {}
-        self.font_info_prefs = {}
+        self.family_member_prefs = {}
         self.set_default_prefs()
+
+    def set_default_prefs(self):
+        # Font preferences are dictionaries of lists of filter functions. The keys are either ANY_SCRIPT or tuples of
+        # (main_script, script_variant). The values are lists of filter functions. The filters are usually created
+        # using the filter generators any_of() or none_of(), but can be any custom filter function that takes a
+        # font_info object and returns True if the object should be included in the filtered list.
+        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+        self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF])]
+        self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE])]
+        self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE])]
+        self.family_member_prefs[ANY_SCRIPT] = [any_of("build", [FontBuild.FULL])]
 
     @property
     def all_unicode_scripts(self):
@@ -151,148 +180,68 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
-    def find_font_family(self, text_or_info):
-        font_infos = self._find_font_families_info(text_or_info)
-        font_infos = self._apply_family_prefs(font_infos)
-        family_name = font_infos[0].family_name
-        return family_name
-
-    def find_font_families(self, text_or_info):
-        font_infos = self._find_font_families_info(text_or_info)
-        # We use a dictionary as a set that preserves insertion order
+    def find_font_families(self, str_or_text_info):
+        font_infos = self._text_info_to_font_infos(str_or_text_info)
+        # We use a dictionary as a set that preserves insertion order, to return families in their original order.
         family_names = {font_info.family_name: 1 for font_info in font_infos}
         return list(family_names.keys())
 
-    def _find_font_families_info(self, text_or_info):
-        if isinstance(text_or_info, str):
-            text_info = self.get_text_info(text_or_info)
+    def find_font_family(self, str_or_text_info):
+        font_infos = self._text_info_to_font_infos(str_or_text_info)
+        if len(font_infos) == 0:
+            return None
+        count_func = lambda font_infos: len({font_info.family_name for font_info in font_infos})
+        font_infos = self._apply_pref_dict(font_infos[0].main_script, font_infos[0].script_variant,
+                                           self.font_family_prefs, count_func, font_infos)
+        family_name = font_infos[0].family_name
+        return family_name
+
+    def find_family_members(self, family_name_or_names):
+        family_names = family_name_or_names
+        if isinstance(family_names, str):
+            family_names = [family_names]
+        font_infos = self.known_fonts(lambda font_info: font_info.family_name in family_names)
+        count_func = len
+        font_infos = self._apply_pref_dict(font_infos[0].main_script, font_infos[0].script_variant,
+                                           self.family_member_prefs, count_func, font_infos)
+        return font_infos
+
+    def _text_info_to_font_infos(self, str_or_text_info):
+        if isinstance(str_or_text_info, str):
+            text_info = self.get_text_info(str_or_text_info)
         else:
-            text_info = text_or_info
-        
+            text_info = str_or_text_info
         font_infos = self.known_fonts(lambda font_info: font_info.main_script == text_info.main_script and \
                                                         font_info.script_variant == text_info.script_variant)
         return font_infos
 
-    def find_font_info(self, family_name_or_iterable):
-        if isinstance(family_name_or_iterable, str):
-            family_name_or_iterable = [family_name_or_iterable]
-        family_names = family_name_or_iterable
-        result_font_infos = []
-        for family_name in family_names:
-            font_infos = self.known_fonts(lambda font_info: font_info.family_name == family_name)
-            # TODO: Do filterning here.
-            result_font_infos.extend(font_infos)
-        return result_font_infos
-
-    def set_default_prefs(self):
-        # self.font_info_pref_order = list(dataclasses.asdict(FontInfo()).keys())
-        # self.font_info_prefs = dataclasses.asdict(FontInfo())
-        self.font_family_prefs[ANY_SCRIPT] = {"form": (FontForm.SANS_SERIF,)}
-        self.font_family_prefs[("Arabic", "")] = {"family_name": ("Noto Naskh Arabic",)}
-        self.font_info_prefs[ANY_SCRIPT] = {"width": (NON_VARIABLE,)}
-        self.font_info_prefs[ANY_SCRIPT] = {"weight": (NON_VARIABLE,)}
-        self.font_info_prefs[ANY_SCRIPT] = {"build": (FontBuild.FULL,)}
-
-    def _apply_family_prefs(self, font_info_iterable):
-        font_infos = list(font_info_iterable)
-        # Font preferences are lists of preferred values for attributes of FontInfo.
-        main_script = font_infos[0].main_script
-        script_variant = font_infos[0].script_variant
-        if (main_script, script_variant) in self.font_family_prefs:
-            font_infos = self._filter_by_family_prefs(self.font_family_prefs[(main_script, script_variant)],
-                                                      font_infos)
-        if ANY_SCRIPT in self.font_family_prefs:
-            font_infos = self._filter_by_family_prefs(self.font_family_prefs[ANY_SCRIPT], font_infos)
+    def _apply_pref_dict(self, main_script, script_variant, pref_dict, count_func, font_infos):
+        # Preferences for particular scripts are applied before preferences for any script
+        pref_keys = [(main_script, script_variant), ANY_SCRIPT]
+        for pref_key in pref_keys:
+            if pref_key in pref_dict:
+                font_infos = self._apply_prefs(pref_dict[pref_key], count_func, font_infos)
         return font_infos
 
-    def _apply_font_info_prefs(self, font_info_iterable):
-        font_infos = list(font_info_iterable)
-        # Font preferences are lists of preferred values for attributes of FontInfo.
-        main_script = font_infos[0].main_script
-        script_variant = font_infos[0].script_variant
-        if (main_script, script_variant) in self.font_info_prefs:
-            font_infos = self._filter_by_font_info_prefs(self.font_info_prefs[(main_script, script_variant)],
-                                                      font_infos)
-        if ANY_SCRIPT in self.font_info_prefs:
-            font_infos = self._filter_by_font_info_prefs(self.font_info_prefs[ANY_SCRIPT], font_infos)
-        return font_infos
-
-    def _filter_by_family_prefs(self, pref_dict, font_info_list):
-        old_list = font_info_list
-        aggregate = FontInfo.aggregate(old_list)
-        family_name_count = len(aggregate["family_name"])
-        if family_name_count < 2:
+    def _apply_prefs(self, filter_funcs, count_func, font_infos):
+        old_list = font_infos
+        count = count_func(old_list)
+        if count < 2:
             # We actually don't need to filter.
             return old_list
 
-        for attr_name, values in pref_dict.items():
-            new_list = []
-            for font_info in old_list:
-                if getattr(font_info, attr_name) in values:                
-                    new_list.append(font_info)
-            aggregate = FontInfo.aggregate(new_list)
-            family_name_count = len(aggregate["family_name"])
-            if family_name_count == 0:
-                # This preference was too restrictive, so ignore it by not updating old_list
+        for filter_func in filter_funcs:
+            new_list = [font_info for font_info in old_list if filter_func(font_info)]
+            count = count_func(new_list)
+            if count == 0:
+                # This preference was too restrictive, so we ignore it by not updating old_list
                 pass
-            elif family_name_count == 1:
+            elif count == 1:
                 # Perfect! Stop filtering
                 break
             else:
                 # Keep filtering
                 old_list = new_list
-        return new_list
-
-    def _filter_by_font_info_prefs(self, pref_dict, font_info_list):
-        old_list = font_info_list
-        font_info_count = len(old_list)
-        if font_info_count < 2:
-            # We actually don't need to filter.
-            return old_list
-
-        for attr_name, values in pref_dict.items():
-            new_list = []
-            for font_info in old_list:
-                if getattr(font_info, attr_name) in values:                
-                    new_list.append(font_info)
-            font_info_count = len(new_list)
-            if font_info_count == 0:
-                # This preference was too restrictive, so ignore it by not updating old_list
-                pass
-            elif font_info_count == 1:
-                # Perfect! Stop filtering
-                break
-            else:
-                # Keep filtering
-                old_list = new_list
-        return new_list
-
-    def OLD_apply_prefs(self, font_info_iterable):
-        # TODO: Replace this parameterised approach, with a hard-coded method than can be overrided by subclasses.
-        #
-        old_list = font_info_iterable
-        # Font preferences are lists of preferred values for each attribute of FontInfo.
-        # We filter the list of FontInfos one attribute at a time, so to start with we
-        # loop over each attribute of FontInfo, in the preferred order.
-        for font_info_attr_name in self.font_info_pref_order:
-            # Aggregate each possible value for the attribute in the list of FontInfos
-            aggregate = FontInfo.aggregate(old_list)
-            # Begin our new filtered list
-            new_list = []
-            # We only filter on the attribute if there is more than one value for the attribute in the list
-            if len(aggregate[font_info_attr_name]) > 1:
-                # Loop over each FontInfo in the old list
-                for font_info in old_list:
-                    # Loop over each preferred value for the attribute
-                    for pref_value in self.font_family_prefs[font_info_attr_name]:
-                        # If this font_info has the preferred value, it's included in the new list
-                        if getattr(font_info, font_info_attr_name) == pref_value:                
-                            new_list.append(font_info)
-                            break
-            else:
-                # There was only one value for this attribute for the FontInfos in the list, so we skip filtering.
-                pass
-            old_list = new_list
         return new_list
 
     def _OLD_get_installed_families(self):
