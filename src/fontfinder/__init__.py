@@ -220,10 +220,10 @@ class FontFinder:
         pref_keys = [(main_script, script_variant), ANY_SCRIPT]
         for pref_key in pref_keys:
             if pref_key in pref_dict:
-                font_infos = self._apply_prefs(pref_dict[pref_key], count_func, font_infos)
+                font_infos = self._apply_pref_filters(pref_dict[pref_key], count_func, font_infos)
         return font_infos
 
-    def _apply_prefs(self, filter_funcs, count_func, font_infos):
+    def _apply_pref_filters(self, filter_funcs, count_func, font_infos):
         old_list = font_infos
         count = count_func(old_list)
         if count < 2:
