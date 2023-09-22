@@ -71,6 +71,9 @@ class FontFinder:
         self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE])]
         self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE])]
         self.family_member_prefs[ANY_SCRIPT] = [any_of("build", [FontBuild.FULL])]
+        self.family_member_prefs[ANY_SCRIPT] = [any_of("format", [FontFormat.OTF])]
+        self.family_member_prefs[ANY_SCRIPT] = [any_of("format", [FontFormat.TTF])]
+        self.family_member_prefs[ANY_SCRIPT] = [any_of("format", [FontFormat.OTC])]
 
     @property
     def all_unicode_scripts(self):
