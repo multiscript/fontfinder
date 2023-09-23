@@ -22,16 +22,16 @@ class TestFontFinder:
         ff = FontFinder()
         pprint(ff.all_unicode_scripts)
 
-    def test_all_known_font_scripts(self):
+    def test_known_font_scripts(self):
         ff = FontFinder()
-        pprint(ff.all_known_font_scripts)
+        pprint(ff.known_font_scripts)
 
     def test_scripts_not_covered(self):
         ff = FontFinder()
         print("Unicode Scripts Not Covered:")
         pprint(ff.scripts_not_covered)
         print("Noto Pseudo-Scripts Not in Unicode:")
-        pprint(list(set(ff.all_known_font_scripts) - set(ff.all_unicode_scripts)))
+        pprint(list(set(ff.known_font_scripts) - set(ff.all_unicode_scripts)))
 
     def test_get_text_info(self):
         ff = FontFinder()
@@ -44,8 +44,6 @@ class TestFontFinder:
         ff = FontFinder()
         font_infos = ff.known_fonts() # Ensure no errors in creating list
         # font_infos = [font for font in font_infos if font.family_name == "Noto Sans"]
-        aggregate = FontInfo.aggregate(font_infos)
-        print(aggregate["tags"])
         # print(len(fonts))
         # pprint(fonts[-10:])
 
@@ -73,7 +71,34 @@ class TestFontFinder:
     def test_get_mac_system_fonts(self):
         fontfinder.mac.get_mac_system_fonts()
 
-    def test_font_list_to_csv(self, test_mode = TestMode.OBSERVE):
+    def test_known_fonts_to_csv(self, test_mode = TestMode.OBSERVE):
+        ff = FontFinder()
+        font_infos = ff.known_fonts()
+        filename = "known_fonts.csv"
+        self._font_infos_test_to_csv(font_infos, filename, test_mode)
+
+    def test_known_script_variants(self):
+        ff = FontFinder()
+        script_variants = ff.known_font_script_variants()
+        index = 3
+        print(script_variants[index])
+        print("Finding family")
+        family_name = ff.find_font_family(TextInfo(script_variants[index][0], script_variants[index][1]))
+        print("Finding family members")
+        ff.find_family_members(family_name)
+
+    def test_script_variants_to_csv(self, test_mode = TestMode.OBSERVE):
+        ff = FontFinder()
+        font_infos = []
+        for (main_script, script_variant) in ff.known_font_script_variants():
+            print(f"{main_script}, {script_variant}")
+            font_families = [ff.find_font_family(TextInfo(main_script, script_variant))]
+            print(font_families)
+            font_infos.extend(ff.find_family_members(font_families))
+        filename = "known_script_variants.csv"
+        self._font_infos_test_to_csv(font_infos, filename, test_mode)
+
+    def _font_infos_test_to_csv(self, font_infos, filename, test_mode):
         if test_mode is TestMode.TEST:
             context_manager = tempfile.TemporaryDirectory()
         elif test_mode is TestMode.OBSERVE:
@@ -83,11 +108,10 @@ class TestFontFinder:
         else:
             assert False
 
-        ff = FontFinder()
-        write_fonts = ff.known_fonts()
+        write_fonts = font_infos
 
         with context_manager as output_dir:
-            csv_path = Path(output_dir, "font_info.csv")
+            csv_path = Path(output_dir, filename)
             write_font_infos_to_csv(write_fonts, csv_path)
             read_fonts = read_font_infos_from_csv(csv_path)
         

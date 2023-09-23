@@ -50,6 +50,7 @@ def none_of(attr_name, collection):
     '''
     def filter(obj):
         return getattr(obj, attr_name) not in collection
+    return filter
     
 
 class FontFinder:
@@ -61,31 +62,17 @@ class FontFinder:
         self.family_member_prefs = {}
         self.set_default_prefs()
 
-    def set_default_prefs(self):
-        # Font preferences are dictionaries of lists of filter functions. The keys are either ANY_SCRIPT or tuples of
-        # (main_script, script_variant). The values are lists of filter functions. The filters are usually created
-        # using the filter generators any_of() or none_of(), but can be any custom filter function that takes a
-        # font_info object and returns True if the object should be included in the filtered list.
-        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
-        self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF])]
-        self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE])]
-        self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE])]
-        self.family_member_prefs[ANY_SCRIPT] = [any_of("build", [FontBuild.FULL])]
-        self.family_member_prefs[ANY_SCRIPT] = [any_of("format", [FontFormat.OTF])]
-        self.family_member_prefs[ANY_SCRIPT] = [any_of("format", [FontFormat.TTF])]
-        self.family_member_prefs[ANY_SCRIPT] = [any_of("format", [FontFormat.OTC])]
-
     @property
     def all_unicode_scripts(self):
         return list(udp.property_value_aliases['script'].keys())
 
     @property
-    def all_known_font_scripts(self):
+    def known_font_scripts(self):
         return sorted(set([info.main_script for info in self.known_fonts()]))
 
     @property
     def scripts_not_covered(self):
-        return sorted(set(self.all_unicode_scripts) - set(self.all_known_font_scripts) -
+        return sorted(set(self.all_unicode_scripts) - set(self.known_font_scripts) -
                       set(["Common", "Inherited", "Unknown"]))
 
     def known_fonts(self, filter_func = None):
@@ -94,6 +81,10 @@ class FontFinder:
         if self._all_known_fonts is None:
             self._all_known_fonts = noto.get_noto_fonts()
         return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
+
+    def known_font_script_variants(self):
+        # Use a dictionary as an ordered set
+        return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts()}.keys())
 
     @property
     def _small_unihan_data(self):
@@ -183,6 +174,23 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
+    def set_default_prefs(self):
+        # Font preferences are dictionaries of lists of filter functions. The keys are either ANY_SCRIPT or tuples of
+        # (main_script, script_variant). The values are lists of filter functions. The filters are usually created
+        # using the filter generators any_of() or none_of(), but can be any custom filter function that takes a
+        # font_info object and returns True if the object should be included in the filtered list.
+        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"]),
+                                                 ]
+        self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF]),
+                                             ]
+        self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE]),
+                                                none_of("weight", [FontWidth.VARIABLE]),
+                                                any_of("build", [FontBuild.FULL]),
+                                                any_of("format", [FontFormat.OTF]),
+                                                any_of("format", [FontFormat.TTF]),
+                                                any_of("format", [FontFormat.OTC]),
+                                               ]
+
     def find_font_families(self, str_or_text_info):
         font_infos = self._text_info_to_font_infos(str_or_text_info)
         # We use a dictionary as a set that preserves insertion order, to return families in their original order.
@@ -227,25 +235,32 @@ class FontFinder:
         return font_infos
 
     def _apply_pref_filters(self, filter_funcs, count_func, font_infos):
-        old_list = font_infos
-        count = count_func(old_list)
-        if count < 2:
+        print("Initial")
+        print([info.url for info in font_infos])
+        print()
+        cur_list = font_infos
+        count = count_func(cur_list)
+        if count < 2 or len(filter_funcs) == 0:
             # We actually don't need to filter.
-            return old_list
+            return cur_list
 
+        print("After each filter func")
         for filter_func in filter_funcs:
-            new_list = [font_info for font_info in old_list if filter_func(font_info)]
+            new_list = [font_info for font_info in cur_list if filter_func(font_info)]
+            print([info.url for info in new_list])
+            print()
             count = count_func(new_list)
             if count == 0:
-                # This preference was too restrictive, so we ignore it by not updating old_list
+                # This preference was too restrictive, so we ignore it by not updating cur_list
                 pass
             elif count == 1:
                 # Perfect! Stop filtering
+                cur_list = new_list
                 break
             else:
                 # Keep filtering
-                old_list = new_list
-        return new_list
+                cur_list = new_list
+        return cur_list
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":
