@@ -208,10 +208,26 @@ class FontFinder:
         '''
         # For Adlam, prefer joined to unjoined.
         self.font_family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
-        # For Arabic, prefer Naskh form
+        # For Arabic, prefer more traditional Naskh form
         self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+        # For Hebrew, prefer the more traditional Serif form
+        self.font_family_prefs[("Hebrew", "")] = [any_of("family_name", ["Noto Serif Hebrew"])]
+        # For Khitan Small Script, prefer Noto Serif Khitan Small Script, as the purpose of the other fonts isn't clear
+        self.font_family_prefs[("Khitan_Small_Script", "")] = [any_of("family_name",
+                                                                     ["Noto Serif Khitan Small Script"])]
+        # For Lao, prefer more traidtional looped fonts
+        self.font_family_prefs[("Lao", "")] = [any_of_str_in("family_name", ["Looped"])]
+        # For Nko, prefer Noto Sans NKo to unjoined
+        self.font_family_prefs[("Nko", "")] = [any_of("family_name", ["Noto Sans NKo"])]
+        # For Nushu, prefer Noto Sans Nushu as it is better for smaller font sizes
+        self.font_family_prefs[("Nushu", "")] = [any_of("family_name", ["Noto Sans Nushu"])]
+        # For Tamil, don't use the Supplement font
+        self.font_family_prefs[("Tamil", "")] = [none_of_str_in("family_name", ["Supplement"])]
+        # For Thai, prefer more traidtional looped fonts, and Noto Sans Thai Looped in particular
+        self.font_family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
+
         self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF]),
-                                            ]
+                                              none_of_str_in("family_name", ["Mono", "Display", "UI"])]
         self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE]),
                                                 none_of("weight", [FontWidth.VARIABLE]),
                                                 any_of("build", [FontBuild.FULL]),

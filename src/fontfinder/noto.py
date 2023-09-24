@@ -101,6 +101,10 @@ def _get_noto_main_fonts(filter_func = None):
             for family_name, family_data in script_data['families'].items():
                 if family_name == "Noto Sans Symbols2":
                     family_name = "Noto Sans Symbols 2" # Fix spacing in Noto family name
+                if "Syriac Western" in family_name:
+                    script_variant = "Western"
+                elif "Syriac Eastern" in family_name:
+                    script_variant = "Eastern"
                 
                 form = FontForm.from_str(family_name)
 
