@@ -229,6 +229,17 @@ class FontFinder:
         family_name = font_infos[0].family_name
         return family_name
 
+    def find_family_members_to_install(self, family_name_or_names):
+        '''Returns a list of FontInfo objects for any of the font families in `family_name_or_names` that are not
+        currently installed. The list is filtered according to the filter functions in the preference attribute
+        `family_member_prefs`.
+
+        `family_name_or_names` can be the string of a single font family names, or a list of strings of font family
+        names.
+        '''
+        family_names = self.not_installed_families(family_name_or_names)
+        return self.find_family_members(family_names)
+
     def find_family_members(self, family_name_or_names):
         '''Returns a list of FontInfo objects for the font family name or names in `family_name_or_names`.
         The list is filtered according to the filter functions in the preference attribute `family_member_prefs`.
@@ -299,7 +310,21 @@ class FontFinder:
         else:
             raise Exception("Unsupported platform for get_installed_families()")
         
-        return sorted(all_installed_families)
+        return all_installed_families
+
+    def installed_families(self, family_name_or_names):
+        family_names = family_name_or_names
+        if isinstance(family_names, str):
+            family_names = [family_names]
+        all_installed_families = set(self.all_installed_families())
+        return [family_name for family_name in family_names if family_name in all_installed_families]
+
+    def not_installed_families(self, family_name_or_names):
+        family_names = family_name_or_names
+        if isinstance(family_names, str):
+            family_names = [family_names]
+        all_installed_families = set(self.all_installed_families())
+        return [family_name for family_name in family_names if family_name not in all_installed_families]
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":
