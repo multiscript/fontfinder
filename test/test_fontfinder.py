@@ -17,6 +17,18 @@ class TestMode(Enum):
 
 class TestFontFinder:
 
+    def test_str_in_any_of(self):
+        filter = str_in_any_of("family_name", ["mono", "display"])
+        assert filter(FontInfo(family_name="Some Font Mono"))
+        assert filter(FontInfo(family_name="Some Display Font"))
+        assert not filter(FontInfo(family_name="Some Font UI"))
+
+    def test_str_in_none_of(self):
+        filter = str_in_none_of("family_name", ["mono", "display"])
+        assert not filter(FontInfo(family_name="Some Font Mono"))
+        assert not filter(FontInfo(family_name="Some Display Font"))
+        assert filter(FontInfo(family_name="Some Font UI"))
+
     def test_known_fonts(self):
         ff = FontFinder()
         font_infos = ff.known_fonts() # Ensure no errors in creating list
@@ -39,9 +51,13 @@ class TestFontFinder:
     def test_scripts_not_known(self):
         ff = FontFinder()
         print("Unicode Scripts Not Covered:")
-        pprint(ff.scripts_not_known())
+        scripts_not_known = ff.scripts_not_known()
+        pprint(scripts_not_known)
+        assert len(scripts_not_known) == 0
         print("Noto Pseudo-Scripts Not in Unicode:")
-        pprint(list(set(ff.known_scripts()) - set(ff.all_unicode_scripts())))
+        not_in_unicode = set(ff.known_scripts()) - set(ff.all_unicode_scripts()) - {''}
+        print(not_in_unicode)
+        assert len(not_in_unicode) == 0
 
     def test_analyse(self):
         ff = FontFinder()
@@ -62,12 +78,6 @@ class TestFontFinder:
             family_name = ff.find_font_family(sample_text['text'])
             assert sample_text['expected_family_name'] == family_name
 
-    def test_known_fonts_to_csv(self, test_mode = TestMode.OBSERVE):
-        ff = FontFinder()
-        font_infos = ff.known_fonts()
-        filename = "known_fonts.csv"
-        self._font_infos_test_to_csv(font_infos, filename, test_mode)
-
     def test_find_family_members(self):
         ff = FontFinder()
         main_script = "Latin"
@@ -77,14 +87,25 @@ class TestFontFinder:
         print("Finding family members")
         ff.find_family_members(family_name)
 
+    def test_all_installed_families(self):
+        ff = FontFinder()
+        all_installed_families = ff.all_installed_families()
+        pprint(all_installed_families)
+
+    def test_known_fonts_to_csv(self, test_mode = TestMode.OBSERVE):
+        ff = FontFinder()
+        font_infos = ff.known_fonts()
+        filename = "known_fonts.csv"
+        self._font_infos_test_to_csv(font_infos, filename, test_mode)
+
     def test_script_variants_to_csv(self, test_mode = TestMode.OBSERVE):
         ff = FontFinder()
         font_infos = []
         for (main_script, script_variant) in ff.known_script_variants():
             print(f"{main_script}, {script_variant}")
-            font_families = [ff.find_font_family(TextInfo(main_script, script_variant))]
-            print(font_families)
-            font_infos.extend(ff.find_family_members(font_families))
+            font_family = ff.find_font_family(TextInfo(main_script, script_variant))
+            print(font_family)
+            font_infos.extend(ff.find_family_members(font_family))
         filename = "known_script_variants.csv"
         self._font_infos_test_to_csv(font_infos, filename, test_mode)
 
@@ -112,14 +133,15 @@ class TestFontFinder:
         #         assert False
         assert write_fonts == read_fonts
 
-    def test_all_installed_families(self):
+    # @pytest.mark.skip("Investigation test to examine variants with multiple families")
+    def test_multi_family_script_variants(self):
         ff = FontFinder()
-        all_installed_families = ff.all_installed_families()
-        pprint(all_installed_families)
-
-    def test_OLD_get_installed_filenames(self):
-        ff = FontFinder()
-        pprint(ff._OLD_get_installed_filenames())
+        for (main_script, script_variant) in ff.known_script_variants():
+            font_families = ff.find_font_families(TextInfo(main_script, script_variant))
+            if len(font_families) > 1:
+                print(f"{main_script}, {script_variant}:")
+                print(font_families)
+                print
 
     @pytest.mark.skip("Investigation test to examine script of emoji codepoints")
     def test_script_of_emoji(self):

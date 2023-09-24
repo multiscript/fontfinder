@@ -53,7 +53,25 @@ def none_of(attr_name, collection):
     def filter(obj):
         return getattr(obj, attr_name) not in collection
     return filter
-    
+
+def str_in_any_of(attr_name, str_collection):
+    '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
+    if any of the strings in `str_collection` are in the string conversion of `obj.attr_name`, when all strings are
+    casefolded. Otherwise returns False.
+    '''
+    def filter(obj):
+        return any(map(lambda s: s.casefold() in str(getattr(obj, attr_name)).casefold(), str_collection))
+    return filter
+
+def str_in_none_of(attr_name, str_collection):
+    '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
+    if none of the strings in `str_collection` are in the string conversion of `obj.attr_name`, when all strings are
+    casefolded. Otherwise returns False.
+    '''
+    def filter(obj):
+        return not any(map(lambda s: s.casefold() in str(getattr(obj, attr_name).casefold()), str_collection))
+    return filter
+
 
 class FontFinder:
     '''FontFinder object exposes this package's functionality.'''
@@ -188,8 +206,10 @@ class FontFinder:
         using the filter factories `any_of()` or `none_of()`, but can be any custom filter function that takes a
         `FontInfo` object and returns True if the object should be included in the filtered list.
         '''
-        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"]),
-                                                 ]
+        # For Adlam, prefer joined to unjoined.
+        self.font_family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
+        # For Arabic, prefer Naskh form
+        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
         self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF]),
                                              ]
         self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE]),
@@ -283,7 +303,7 @@ class FontFinder:
             # We actually don't need to filter.
             return cur_list
 
-        print("After each filter func")
+        # print("After each filter func")
         for filter_func in filter_funcs:
             new_list = [font_info for font_info in cur_list if filter_func(font_info)]
             count = count_func(new_list)
@@ -348,10 +368,6 @@ class FontFinder:
             raise Exception("Unsupported platform for get_installed_families()")
         
         return sorted(installed_families)
-
-    def _OLD_get_installed_filenames(self):
-        import find_system_fonts_filename
-        return find_system_fonts_filename.get_system_fonts_filename()
 
 
 @dataclass
