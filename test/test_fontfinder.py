@@ -20,18 +20,18 @@ class TestFontFinder:
 
     def test_all_unicode_scripts(self):
         ff = FontFinder()
-        pprint(ff.all_unicode_scripts)
+        pprint(ff.all_unicode_scripts())
 
     def test_known_font_scripts(self):
         ff = FontFinder()
-        pprint(ff.known_font_scripts)
+        pprint(ff.known_scripts())
 
-    def test_scripts_not_covered(self):
+    def test_scripts_not_known(self):
         ff = FontFinder()
         print("Unicode Scripts Not Covered:")
-        pprint(ff.scripts_not_covered)
+        pprint(ff.scripts_not_known())
         print("Noto Pseudo-Scripts Not in Unicode:")
-        pprint(list(set(ff.known_font_scripts) - set(ff.all_unicode_scripts)))
+        pprint(list(set(ff.known_scripts()) - set(ff.all_unicode_scripts())))
 
     def test_get_text_info(self):
         ff = FontFinder()
@@ -79,7 +79,7 @@ class TestFontFinder:
 
     def test_known_script_variants(self):
         ff = FontFinder()
-        script_variants = ff.known_font_script_variants()
+        script_variants = ff.known_script_variants()
         index = 3
         print(script_variants[index])
         print("Finding family")
@@ -90,7 +90,7 @@ class TestFontFinder:
     def test_script_variants_to_csv(self, test_mode = TestMode.OBSERVE):
         ff = FontFinder()
         font_infos = []
-        for (main_script, script_variant) in ff.known_font_script_variants():
+        for (main_script, script_variant) in ff.known_script_variants():
             print(f"{main_script}, {script_variant}")
             font_families = [ff.find_font_family(TextInfo(main_script, script_variant))]
             print(font_families)
