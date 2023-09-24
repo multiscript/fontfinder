@@ -17,14 +17,14 @@ class TestMode(Enum):
 
 class TestFontFinder:
 
-    def test_str_in_any_of(self):
-        filter = str_in_any_of("family_name", ["mono", "display"])
+    def test_any_of_str_in(self):
+        filter = any_of_str_in("family_name", ["mono", "display"])
         assert filter(FontInfo(family_name="Some Font Mono"))
         assert filter(FontInfo(family_name="Some Display Font"))
         assert not filter(FontInfo(family_name="Some Font UI"))
 
-    def test_str_in_none_of(self):
-        filter = str_in_none_of("family_name", ["mono", "display"])
+    def test_none_of_str_in(self):
+        filter = none_of_str_in("family_name", ["mono", "display"])
         assert not filter(FontInfo(family_name="Some Font Mono"))
         assert not filter(FontInfo(family_name="Some Display Font"))
         assert filter(FontInfo(family_name="Some Font UI"))

@@ -54,7 +54,7 @@ def none_of(attr_name, collection):
         return getattr(obj, attr_name) not in collection
     return filter
 
-def str_in_any_of(attr_name, str_collection):
+def any_of_str_in(attr_name, str_collection):
     '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
     if any of the strings in `str_collection` are in the string conversion of `obj.attr_name`, when all strings are
     casefolded. Otherwise returns False.
@@ -63,7 +63,7 @@ def str_in_any_of(attr_name, str_collection):
         return any(map(lambda s: s.casefold() in str(getattr(obj, attr_name)).casefold(), str_collection))
     return filter
 
-def str_in_none_of(attr_name, str_collection):
+def none_of_str_in(attr_name, str_collection):
     '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
     if none of the strings in `str_collection` are in the string conversion of `obj.attr_name`, when all strings are
     casefolded. Otherwise returns False.
@@ -211,7 +211,7 @@ class FontFinder:
         # For Arabic, prefer Naskh form
         self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
         self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF]),
-                                             ]
+                                            ]
         self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE]),
                                                 none_of("weight", [FontWidth.VARIABLE]),
                                                 any_of("build", [FontBuild.FULL]),
