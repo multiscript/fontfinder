@@ -37,7 +37,7 @@ from fontfinder import noto
 
 
 def any_of(attr_name, collection):
-    '''A filter generator. Returns a filter function that takes a single argument `obj` and returns True
+    '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
     if `obj.attr_name` is in `collection`, else False.
     '''
     def filter(obj):
@@ -45,7 +45,7 @@ def any_of(attr_name, collection):
     return filter
 
 def none_of(attr_name, collection):
-    '''A filter generator. Returns a filter function that takes a single argument `obj` and returns True
+    '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
     if `obj.attr_name` is not in `collection`, else False.
     '''
     def filter(obj):
@@ -95,7 +95,7 @@ class FontFinder:
                 self._small_unihan_data_private = json.load(small_unihan_file)
         return self._small_unihan_data_private
     
-    def get_text_info(self, text: str):
+    def analyse(self, text: str):
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
         object with the results.
 
@@ -108,16 +108,17 @@ class FontFinder:
             `script_variant`: a secondary string used when the value of `main_script` is insufficient for choosing
                               an appropriate font.
 
-            `emoji_count`: count of characters who have either the Emoji Presentation property or the
-                           Extended_Pictographic property set (independant of script).
+            `emoji_count`:    count of characters who have either the Emoji Presentation property or the
+                              Extended_Pictographic property set (independant of script).
 
-            `script_count`: a collections.Counter of the count of each Unicode script in the text. The keys are the
-                            string names of each script that appears in the text (including `Common`, `Inherited`
-                            and `Unknown`).
+            `script_count`:   a collections.Counter of the count of each Unicode script in the text. The keys are
+                              the string names of each script that appears in the text (including `Common`,
+                              `Inherited` and `Unknown`).
 
         In calculating `main_script`, the script values `Common`, `Inherited`, and `Unknown` are
-        ignored. However if `emoji_count` is larger then the rest of the script counts, then `main_script' is set to
-        `Common` and `script_variant` is set to `Emoji`. (Most emoji characters have a script value of `Common`.)
+        ignored. However if `emoji_count` is larger than the rest of the script counts, then `main_script' is set to
+        `Common` and `script_variant` is set to `Emoji`. (Most emoji characters have a Unicode script value of
+        `Common`.)
         
         If `main_script` is `Han`, some basic language detection is performed, and the `script_variant` is set to
         one of the following language tags:
@@ -177,10 +178,14 @@ class FontFinder:
                         script_count=script_count)
 
     def set_default_prefs(self):
-        # Font preferences are dictionaries of lists of filter functions. The keys are either ANY_SCRIPT or tuples of
-        # (main_script, script_variant). The values are lists of filter functions. The filters are usually created
-        # using the filter generators any_of() or none_of(), but can be any custom filter function that takes a
-        # font_info object and returns True if the object should be included in the filtered list.
+        '''Sets the default font preferences. These can be modified either by overriding this method, or by
+        editing the `font_family_prefs` and `family_member_prefs` attributes.
+        
+        Font preferences are dictionaries of lists of filter functions. The keys are either `ANY_SCRIPT` or tuples of
+        (main_script, script_variant). The values are lists of filter functions. The filters are usually created
+        using the filter factories `any_of()` or `none_of()`, but can be any custom filter function that takes a
+        `FontInfo` object and returns True if the object should be included in the filtered list.
+        '''
         self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"]),
                                                  ]
         self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF]),
@@ -194,12 +199,25 @@ class FontFinder:
                                                ]
 
     def find_font_families(self, str_or_text_info):
+        '''Returns a list of the family names (strings) of all fonts (known to the library) that are suitable for
+        displaying some text.
+        
+        `str_or_text_info` should either be the string of text itself, or a TextInfo object returned by
+        `analyse()`.
+        '''
         font_infos = self._text_info_to_font_infos(str_or_text_info)
         # We use a dictionary as a set that preserves insertion order, to return families in their original order.
         family_names = {font_info.family_name: 1 for font_info in font_infos}
         return list(family_names.keys())
 
     def find_font_family(self, str_or_text_info):
+        '''Returns the family name (a string) for the font family considered most-suitable for displaying some text.
+        "Most-suitable" is determined by the filter functions in the preference attribute `font_family_prefs`.
+        If, after applying these filters, more than one family remains, the first family is selected.
+        
+        `str_or_text_info` should either be the string of text itself, or a TextInfo object returned by
+        `analyse()`.
+        '''
         font_infos = self._text_info_to_font_infos(str_or_text_info)
         if len(font_infos) == 0:
             return None
@@ -210,6 +228,12 @@ class FontFinder:
         return family_name
 
     def find_family_members(self, family_name_or_names):
+        '''Returns a list of FontInfo objects for the font family name or names in `family_name_or_names`.
+        The list is filtered according to the filter functions in the preference attribute `family_member_prefs`.
+         
+        `family_name_or_names` can be the string of a single font family names, or a list of strings of font family
+        names.
+        '''
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
@@ -221,7 +245,7 @@ class FontFinder:
 
     def _text_info_to_font_infos(self, str_or_text_info):
         if isinstance(str_or_text_info, str):
-            text_info = self.get_text_info(str_or_text_info)
+            text_info = self.analyse(str_or_text_info)
         else:
             text_info = str_or_text_info
         font_infos = self.known_fonts(lambda font_info: font_info.main_script == text_info.main_script and \
@@ -237,11 +261,11 @@ class FontFinder:
         return font_infos
 
     def _apply_pref_filters(self, filter_funcs, count_func, font_infos):
-        print("Initial")
-        print([info.url for info in font_infos])
-        print()
         cur_list = font_infos
         count = count_func(cur_list)
+        # print(f"Initial ({count})")
+        # print([info.url for info in font_infos])
+        # print()
         if count < 2 or len(filter_funcs) == 0:
             # We actually don't need to filter.
             return cur_list
@@ -249,9 +273,10 @@ class FontFinder:
         print("After each filter func")
         for filter_func in filter_funcs:
             new_list = [font_info for font_info in cur_list if filter_func(font_info)]
-            print([info.url for info in new_list])
-            print()
             count = count_func(new_list)
+            # print(count)
+            # print([info.url for info in new_list])
+            # print()
             if count == 0:
                 # This preference was too restrictive, so we ignore it by not updating cur_list
                 pass

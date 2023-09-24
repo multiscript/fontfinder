@@ -18,13 +18,24 @@ class TestMode(Enum):
 
 class TestFontFinder:
 
+    def test_known_fonts(self):
+        ff = FontFinder()
+        font_infos = ff.known_fonts() # Ensure no errors in creating list
+        # font_infos = [font for font in font_infos if font.family_name == "Noto Sans"]
+        # print(len(fonts))
+        # pprint(fonts[-10:])
+
+    def test_known_scripts(self):
+        ff = FontFinder()
+        pprint(ff.known_scripts())
+
+    def test_known_script_variants(self):
+        ff = FontFinder()
+        script_variants = ff.known_script_variants() # Ensure no errors
+    
     def test_all_unicode_scripts(self):
         ff = FontFinder()
         pprint(ff.all_unicode_scripts())
-
-    def test_known_font_scripts(self):
-        ff = FontFinder()
-        pprint(ff.known_scripts())
 
     def test_scripts_not_known(self):
         ff = FontFinder()
@@ -33,19 +44,12 @@ class TestFontFinder:
         print("Noto Pseudo-Scripts Not in Unicode:")
         pprint(list(set(ff.known_scripts()) - set(ff.all_unicode_scripts())))
 
-    def test_get_text_info(self):
+    def test_analyse(self):
         ff = FontFinder()
         for sample_text in sample_texts:
-            text_info = ff.get_text_info(sample_text['text'])
+            text_info = ff.analyse(sample_text['text'])
             assert sample_text['main_script'] == text_info.main_script
             assert sample_text['script_variant'] == text_info.script_variant
-
-    def test_known_fonts(self):
-        ff = FontFinder()
-        font_infos = ff.known_fonts() # Ensure no errors in creating list
-        # font_infos = [font for font in font_infos if font.family_name == "Noto Sans"]
-        # print(len(fonts))
-        # pprint(fonts[-10:])
 
     def test_find_font_families(self):
         ff = FontFinder()
@@ -59,31 +63,18 @@ class TestFontFinder:
             family_name = ff.find_font_family(sample_text['text'])
             assert sample_text['expected_family_name'] == family_name
 
-    def test_get_installed_families(self):
-        ff = FontFinder()
-        installed_families = ff._OLD_get_installed_families()
-        pprint(installed_families)
-
-    def test_get_installed_filenames(self):
-        ff = FontFinder()
-        pprint(ff._OLD_get_installed_filenames())
-
-    def test_get_mac_system_fonts(self):
-        fontfinder.mac.get_mac_system_fonts()
-
     def test_known_fonts_to_csv(self, test_mode = TestMode.OBSERVE):
         ff = FontFinder()
         font_infos = ff.known_fonts()
         filename = "known_fonts.csv"
         self._font_infos_test_to_csv(font_infos, filename, test_mode)
 
-    def test_known_script_variants(self):
+    def test_find_family_members(self):
         ff = FontFinder()
-        script_variants = ff.known_script_variants()
-        index = 3
-        print(script_variants[index])
+        main_script = "Latin"
+        script_variant = ""
         print("Finding family")
-        family_name = ff.find_font_family(TextInfo(script_variants[index][0], script_variants[index][1]))
+        family_name = ff.find_font_family(TextInfo(main_script, script_variant))
         print("Finding family members")
         ff.find_family_members(family_name)
 
@@ -121,6 +112,18 @@ class TestFontFinder:
         #         print(item[1])
         #         assert False
         assert write_fonts == read_fonts
+
+    def test_OLD_get_installed_families(self):
+        ff = FontFinder()
+        installed_families = ff._OLD_get_installed_families()
+        pprint(installed_families)
+
+    def test_OLD_get_installed_filenames(self):
+        ff = FontFinder()
+        pprint(ff._OLD_get_installed_filenames())
+
+    def test_get_mac_system_fonts(self):
+        fontfinder.mac.get_mac_system_fonts()
 
     @pytest.mark.skip("Investigation test to examine script of emoji codepoints")
     def test_script_of_emoji(self):

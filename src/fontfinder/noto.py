@@ -31,7 +31,8 @@ _NOTO_MAIN_JSON_MAX_AGE = datetime.timedelta(days=1)
 
 def get_noto_fonts(filter_func = None):
     '''Return a list of FontInfo records for the Google Noto fonts.'''
-    font_infos = _get_noto_main_fonts(filter_func)
+    font_infos = []
+    font_infos.extend(_get_noto_main_fonts(filter_func))
     font_infos.extend(_get_noto_cjk_fonts(filter_func))
     font_infos.extend(_get_noto_emoji_fonts(filter_func))
     font_infos.sort()
@@ -62,7 +63,7 @@ def _get_noto_main_fonts(filter_func = None):
     noto_data = _get_noto_main_data()
 
     # Note that the script keys in the Noto JSON data are *mostly* Unicode script names (once they are
-    # changed to titlecase and have hyphens replaced with underscores). But some of them are "pseudo-script-names"
+    # changed to Titlecase and have hyphens replaced with underscores). But some of them are "pseudo-script-names"
     # for characters that formally belong under other Unicode script names. We adjust for all this below.
     for raw_script_key, script_data in noto_data.items():
         if raw_script_key == "latin-greek-cyrillic":
@@ -104,7 +105,7 @@ def _get_noto_main_fonts(filter_func = None):
                 form = FontForm.from_str(family_name)
 
                 # Some font families should be added under other scripts as well. We add them here,
-                # then re-iterate over the expand script and variant names. (Most of the time this is a single
+                # then re-iterate over the expanded script and variant names. (Most of the time this is a single
                 # iteration that changes nothing.)
                 expanded_scripts = [(main_script, script_variant)]
                 if family_name == "Noto Sans Symbols 2":
@@ -207,6 +208,7 @@ def _get_noto_cjk_fonts(filter_func = None):
     return font_infos
 
 def _get_noto_emoji_fonts(filter_func = None):
+    '''Return a list of FontInfo records for Google Noto emoji fonts. Currently just Noto Color Emoji.'''
     font_infos = []
     font_info = FontInfo(main_script="Common", script_variant="Emoji", family_name="Noto Color Emoji",
                         subfamily_name="Regular", postscript_name="NotoColorEmoji",
