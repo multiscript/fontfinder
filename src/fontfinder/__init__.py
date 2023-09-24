@@ -277,6 +277,9 @@ class FontFinder:
         return self.find_family_members(family_names)
 
     def find_family_members(self, family_name_or_names):
+        # TODO: Handle the fact that some family names are listed multiple times under different scripts.
+        # Do we need to supply the main_script and script_variant too?
+        # We probably need to be able to test if two font_infos are the same apart from the script data.
         '''Returns a list of FontInfo objects for the font family name or names in `family_name_or_names`.
         The list is filtered according to the filter functions in the preference attribute `family_member_prefs`.
          
