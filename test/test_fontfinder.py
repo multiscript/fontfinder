@@ -7,7 +7,6 @@ import unicodedataplus as udp
 import pytest
 
 from fontfinder import *
-import fontfinder.mac
 
 
 class TestMode(Enum):
@@ -113,17 +112,14 @@ class TestFontFinder:
         #         assert False
         assert write_fonts == read_fonts
 
-    def test_OLD_get_installed_families(self):
+    def test_all_installed_families(self):
         ff = FontFinder()
-        installed_families = ff._OLD_get_installed_families()
-        pprint(installed_families)
+        all_installed_families = ff.all_installed_families()
+        pprint(all_installed_families)
 
     def test_OLD_get_installed_filenames(self):
         ff = FontFinder()
         pprint(ff._OLD_get_installed_filenames())
-
-    def test_get_mac_system_fonts(self):
-        fontfinder.mac.get_mac_system_fonts()
 
     @pytest.mark.skip("Investigation test to examine script of emoji codepoints")
     def test_script_of_emoji(self):

@@ -11,6 +11,8 @@ import platform
 import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
+import fontfinder.mac
+
 
 # TODO: Test finding font family members.
 # TODO: Ensure we return at least one font family name for every script.
@@ -288,6 +290,16 @@ class FontFinder:
                 # Keep filtering
                 cur_list = new_list
         return cur_list
+
+    def all_installed_families(self):
+        '''Returns a list of strings of the family names of all fonts installed on the system.
+        '''
+        if platform.system() == "Darwin":
+            all_installed_families = fontfinder.mac.all_installed_families()
+        else:
+            raise Exception("Unsupported platform for get_installed_families()")
+        
+        return sorted(all_installed_families)
 
     def _OLD_get_installed_families(self):
         if platform.system() == "Darwin":

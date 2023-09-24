@@ -6,12 +6,12 @@ from pprint import pprint
 import semver
 
 
-def get_mac_system_fonts():
+def all_installed_families():
     if platform.system() != "Darwin":
-        raise Exception("get_mac_system_fonts() should only be called under macOS")
+        raise Exception("fontfinder.mac.all_installed_families() should only be called under macOS")
     
     if semver.Version.parse(platform.mac_ver()[0]) < semver.Version(10.6):
-        raise Exception("get_mac_system_fonts() only supported by macOS 10.6 or later")
+        raise Exception("fontfinder.mac.all_installed_families() only supported by macOS 10.6 or later")
     
     cf = CoreFoundationLibrary()
     ct = CoreTextLibrary()
@@ -19,7 +19,8 @@ def get_mac_system_fonts():
     font_collection = ct.CTFontCollectionCreateFromAvailableFonts(None)
     font_array = ct.CTFontCollectionCreateMatchingFontDescriptors(font_collection)
     font_array_len = cf.CFArrayGetCount(font_array)
-    font_dict = {}
+    # Use a dict as an ordered set
+    family_names = {}
     for i in range(font_array_len):
         font_descriptor = cf.CFArrayGetValueAtIndex(font_array, i)
 
@@ -27,27 +28,23 @@ def get_mac_system_fonts():
         family_name = cf.cf_string_ref_to_python_str(family_cfstr)
         cf.CFRelease(family_cfstr)
 
-        style_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontStyleNameAttribute)
-        style_name = cf.cf_string_ref_to_python_str(style_cfstr)
-        cf.CFRelease(style_cfstr)
+        # style_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontStyleNameAttribute)
+        # style_name = cf.cf_string_ref_to_python_str(style_cfstr)
+        # cf.CFRelease(style_cfstr)
 
-        display_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontDisplayNameAttribute)
-        display_name = cf.cf_string_ref_to_python_str(display_cfstr)
-        cf.CFRelease(display_cfstr)
+        # display_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontDisplayNameAttribute)
+        # display_name = cf.cf_string_ref_to_python_str(display_cfstr)
+        # cf.CFRelease(display_cfstr)
 
-        postscript_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontNameAttribute)
-        postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
-        cf.CFRelease(postscript_cfstr)
+        # postscript_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontNameAttribute)
+        # postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
+        # cf.CFRelease(postscript_cfstr)
 
-        if family_name not in font_dict:
-            font_dict[family_name] = {}
-        
-        font_dict[family_name][style_name] = postscript_name
+        family_names[family_name] = 1
 
     cf.CFRelease(font_array)
     cf.CFRelease(font_collection)
-
-    pprint(font_dict)
+    return list(family_names.keys())
 
 
 class CTypesLibrary:
