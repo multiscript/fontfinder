@@ -12,6 +12,7 @@ import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
 import fontfinder.mac
+import fontfinder.windows
 
 
 # TODO: Test finding font family members.
@@ -355,6 +356,8 @@ class FontFinder:
         '''
         if platform.system() == "Darwin":
             all_installed_families = fontfinder.mac.all_installed_families()
+        elif platform.system() == "Windows":
+            all_installed_families = fontfinder.windows.all_installed_families()
         else:
             raise Exception("Unsupported platform for get_installed_families()")
         

@@ -5,6 +5,8 @@ from pprint import pprint
 
 import semver
 
+from fontfinder.all_platforms import CTypesLibrary
+
 
 def all_installed_families():
     if platform.system() != "Darwin":
@@ -47,60 +49,29 @@ def all_installed_families():
     return list(family_names.keys())
 
 
-class CTypesLibrary:
-    IN:  int    = 1
-    OUT: int    = 2
-    IN0: int    = 4
-
-    def __init__(self, library_name: str, alt_pathname: str = None):
-        '''`alt_pathname` is an alternative pathname to try if a library named `library_name` cannot be found.
-        '''
-        lib_pathname = ctypes.util.find_library("library_name")
-        if lib_pathname is None:
-            lib_pathname = alt_pathname
-        self.lib = ctypes.cdll.LoadLibrary(lib_pathname)
-
-    # Inspired by https://www.cs.unc.edu/~gb/blog/2007/02/11/ctypes-tricks/
-    def prototype(self, result_type, func_name, *arg_items):
-        '''
-        Each arg_item should be
-        (in_or_out_const, arg_type[, param_name_str[, default_value]])
-        '''
-        arg_types = []
-        param_flags = []
-        for arg_item in arg_items:
-            arg_types.append(arg_item[1])
-            param_flag = [arg_item[0]]
-            if len(arg_item) > 2:
-                param_flag.append(arg_item[2])
-            if len(arg_item) > 3:
-                param_flag.append(arg_item[3])
-            param_flags.append(tuple(param_flag))
-        return CFUNCTYPE(result_type, *arg_types)((func_name, self.lib), tuple(param_flags))
-
-
 class CoreFoundationLibrary(CTypesLibrary):
     def __init__(self):
-        super().__init__("CoreFoundation", "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation")
+        super().__init__(ctypes.cdll, "CoreFoundation", True,
+                         "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation")
         # Note hack for compatibility with macOS 11.0 and later
         # From: https://github.com/pyglet/pyglet/blob/a44e83a265e7df8ece793de865bcf3690f66adbd/pyglet/libs/darwin/cocoapy/cocoalibs.py#L10-L14
 
-        self.CFRelease = self.prototype(
+        self.CFRelease = self.c_prototype(
             None, "CFRelease", (self.IN, c_void_p, "cf_object"))
 
-        self.CFArrayGetCount = self.prototype(
+        self.CFArrayGetCount = self.c_prototype(
             c_long, "CFArrayGetCount", (self.IN, c_void_p, "cf_array"))
 
-        self.CFArrayGetValueAtIndex = self.prototype(
+        self.CFArrayGetValueAtIndex = self.c_prototype(
             c_void_p, "CFArrayGetValueAtIndex", (self.IN, c_void_p, "cf_array"), (self.IN, c_long, "index"))
 
-        self.CFStringGetMaximumSizeForEncoding = self.prototype(
+        self.CFStringGetMaximumSizeForEncoding = self.c_prototype(
             c_long, "CFStringGetMaximumSizeForEncoding", (self.IN, c_long, "length"), (self.IN, c_uint32, "encoding"))
 
-        self.CFStringGetLength = self.prototype(
+        self.CFStringGetLength = self.c_prototype(
             c_long, "CFStringGetLength", (self.IN, c_void_p, "the_string"))
 
-        self.CFStringGetCString = self.prototype(
+        self.CFStringGetCString = self.c_prototype(
             c_bool, "CFStringGetCString", (self.IN, c_void_p, "the_string"),
                                           (self.IN, c_char_p, "buffer"),
                                           (self.IN, c_long,   "buffer_size"),
@@ -122,17 +93,18 @@ class CoreFoundationLibrary(CTypesLibrary):
 
 class CoreTextLibrary(CTypesLibrary):
     def __init__(self):
-        super().__init__("CoreText", "/System/Library/Frameworks/CoreText.framework/CoreText")
+        super().__init__(ctypes.cdll, "CoreText", True,
+                         "/System/Library/Frameworks/CoreText.framework/CoreText")
         # Note hack for compatibility with macOS greater or equals to 11.0.
         # From: https://github.com/pyglet/pyglet/blob/a44e83a265e7df8ece793de865bcf3690f66adbd/pyglet/libs/darwin/cocoapy/cocoalibs.py#L520-L524
 
-        self.CTFontCollectionCreateFromAvailableFonts = self.prototype(
+        self.CTFontCollectionCreateFromAvailableFonts = self.c_prototype(
             c_void_p, "CTFontCollectionCreateFromAvailableFonts", (self.IN, c_void_p, "options"))
 
-        self.CTFontCollectionCreateMatchingFontDescriptors = self.prototype(
+        self.CTFontCollectionCreateMatchingFontDescriptors = self.c_prototype(
             c_void_p, "CTFontCollectionCreateMatchingFontDescriptors", (self.IN, c_void_p, "font_collection"))
         
-        self.CTFontDescriptorCopyAttribute = self.prototype(
+        self.CTFontDescriptorCopyAttribute = self.c_prototype(
             c_void_p, "CTFontDescriptorCopyAttribute", (self.IN, c_void_p, "font_descriptor"),
                                                        (self.IN, c_void_p, "attribute_name")
         )
