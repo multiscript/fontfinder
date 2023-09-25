@@ -1,6 +1,8 @@
-from ctypes import CFUNCTYPE, WINFUNCTYPE
+from ctypes import CFUNCTYPE
 import ctypes.util
-
+import platform
+if platform.system() == "Windows":
+    from ctypes import WINFUNCTYPE
 
 class CTypesLibrary:
     IN:  int    = 1
