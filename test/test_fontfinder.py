@@ -105,7 +105,7 @@ class TestFontFinder:
             print(f"{main_script}, {script_variant}")
             font_family = ff.find_font_family(TextInfo(main_script, script_variant))
             print(font_family)
-            font_infos.extend(ff.find_family_members(font_family))
+            font_infos.extend(ff.find_family_members(font_family, main_script, script_variant))
         filename = "known_script_variants.csv"
         self._font_infos_test_to_csv(font_infos, filename, test_mode)
 

@@ -276,23 +276,32 @@ class FontFinder:
         family_names = self.not_installed_families(family_name_or_names)
         return self.find_family_members(family_names)
 
-    def find_family_members(self, family_name_or_names):
-        # TODO: Handle the fact that some family names are listed multiple times under different scripts.
-        # Do we need to supply the main_script and script_variant too?
-        # We probably need to be able to test if two font_infos are the same apart from the script data.
+    def find_family_members(self, family_name_or_names, main_script=None, script_variant=None):
         '''Returns a list of FontInfo objects for the font family name or names in `family_name_or_names`.
         The list is filtered according to the filter functions in the preference attribute `family_member_prefs`.
          
         `family_name_or_names` can be the string of a single font family names, or a list of strings of font family
-        names.
+        names. `main_script` and `script_variant` can optionally be specified, to ensure these fields have
+        the correct value in the returned list. Otherwise, the first `main_script` and `script_variant` values
+        found (for the given family) are used.
         '''
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
         font_infos = self.known_fonts(lambda font_info: font_info.family_name in family_names)
+        if len(font_infos) == 0:
+            return font_infos
+        # font_infos can be duplicated under multiple script variants. If no script and variant is specified, we
+        # just pick the first.
+        if main_script is None:
+            main_script = font_infos[0].main_script
+        if script_variant is None:
+            script_variant = font_infos[0].script_variant
+        font_infos = [font_info for font_info in font_infos if font_info.main_script == main_script and \
+                                                               font_info.script_variant == script_variant]
         count_func = len
-        font_infos = self._apply_pref_dict(font_infos[0].main_script, font_infos[0].script_variant,
-                                           self.family_member_prefs, count_func, font_infos)
+        font_infos = self._apply_pref_dict(main_script, script_variant, self.family_member_prefs, count_func,
+                                           font_infos)
         return font_infos
 
     def _text_info_to_font_infos(self, str_or_text_info):
