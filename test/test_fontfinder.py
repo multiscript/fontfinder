@@ -2,11 +2,18 @@ from collections import Counter
 import contextlib
 from pprint import pprint
 import tempfile
+import time
 
 import unicodedataplus as udp
 import pytest
 
 from fontfinder import *
+import fontfinder.mac
+
+
+TEST_FONT_PATH = Path(__file__, "../data/Fontfinder-Regular.otf").resolve()
+TEST_FONT_FAMILY = "Fontfinder"
+INSTALL_FONT_SLEEP = 5
 
 
 class TestMode(Enum):
@@ -132,6 +139,32 @@ class TestFontFinder:
         #         print(item[1])
         #         assert False
         assert write_fonts == read_fonts
+
+    def test_mac_install_fonts(self):
+        ff = FontFinder()
+        print("Uninstalling font")
+        try:
+            fontfinder.mac.uninstall_fonts([TEST_FONT_PATH.name])
+        except FileNotFoundError:
+            pass
+        time.sleep(INSTALL_FONT_SLEEP)
+        font_families = ff.all_installed_families()
+        assert TEST_FONT_FAMILY not in font_families
+
+        print("Installing font")
+        fontfinder.mac.install_fonts([TEST_FONT_PATH])
+        time.sleep(INSTALL_FONT_SLEEP)
+        font_families = ff.all_installed_families()
+        assert TEST_FONT_FAMILY in font_families
+
+        print("Uninstalling font")
+        try:
+            fontfinder.mac.uninstall_fonts([TEST_FONT_PATH.name])
+        except FileNotFoundError:
+            pass
+        time.sleep(INSTALL_FONT_SLEEP)
+        font_families = ff.all_installed_families()
+        assert TEST_FONT_FAMILY not in font_families
 
     # @pytest.mark.skip("Investigation test to examine variants with multiple families")
     def test_multi_family_script_variants(self):

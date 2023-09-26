@@ -1,11 +1,16 @@
-from ctypes import c_bool, c_char_p, c_long, c_uint32, c_void_p, CFUNCTYPE, create_string_buffer
+from ctypes import c_bool, c_char_p, c_long, c_uint32, c_void_p, create_string_buffer
 import ctypes.util
+from pathlib import Path
+import os
 import platform
-from pprint import pprint
+import shutil
 
 import semver
 
 from fontfinder.all_platforms import CTypesLibrary
+
+
+USER_FONT_DIR = Path("~/Library/Fonts").expanduser()
 
 
 def all_installed_families():
@@ -21,8 +26,7 @@ def all_installed_families():
     font_collection = ct.CTFontCollectionCreateFromAvailableFonts(None)
     font_array = ct.CTFontCollectionCreateMatchingFontDescriptors(font_collection)
     font_array_len = cf.CFArrayGetCount(font_array)
-    # Use a dict as an ordered set
-    family_names = {}
+    family_names = set()
     for i in range(font_array_len):
         font_descriptor = cf.CFArrayGetValueAtIndex(font_array, i)
 
@@ -42,11 +46,19 @@ def all_installed_families():
         # postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
         # cf.CFRelease(postscript_cfstr)
 
-        family_names[family_name] = 1
+        family_names.add(family_name)
 
     cf.CFRelease(font_array)
     cf.CFRelease(font_collection)
-    return list(family_names.keys())
+    return sorted(list(family_names))
+
+def install_fonts(paths):
+    for path in paths:
+        shutil.copy2(path, USER_FONT_DIR)
+
+def uninstall_fonts(base_filenames):
+    for filename in base_filenames:
+        os.remove(USER_FONT_DIR / filename)
 
 
 class CoreFoundationLibrary(CTypesLibrary):
