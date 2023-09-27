@@ -2,7 +2,7 @@ import csv
 import dataclasses
 import functools
 from enum import Enum, Flag, auto
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 import re
 from urllib.parse import urlparse
 
@@ -41,10 +41,14 @@ class FontInfo:
     url: str = ""
     '''URL download source for the font.'''
 
+    path: Path = Path()
+    '''Path to the font on the local filesystem for installation.'''
+
     def __init__(self, main_script: str = None, script_variant: str = None, family_name: str = None,
                  subfamily_name: str = None, postscript_name: str = None, form: 'FontForm' = None,
                  width: 'FontWidth' = None, weight: 'FontWeight' = None, style: 'FontStyle' = None,
-                 format: 'FontFormat' = None, build: 'FontBuild' = None, tags: 'FontTag' = None, url: str  = None, 
+                 format: 'FontFormat' = None, build: 'FontBuild' = None, tags: 'FontTag' = None, url: str  = None,
+                 path: Path = None 
                 ):
 
         self.main_script = "" if main_script is None else main_script
@@ -60,6 +64,7 @@ class FontInfo:
         self.build = FontBuild.UNSET if build is None else build
         self.tags = FontTag(0) if tags is None else tags
         self.url = "" if url is None else url
+        self.path = Path() if path is None else path
 
     def init_from_noto_url(self, url):
         url_path = urlparse(url).path
@@ -72,7 +77,8 @@ class FontInfo:
         
         stem = PurePosixPath(url_path).stem
         self.postscript_name = re.sub(r"\[.*\]", "", stem)
-        self.subfamily_name = self.postscript_name.split('-')[-1]
+        # Previously: self.subfamily_name = self.postscript_name.split('-')[-1]
+        self.subfamily_name = " ".join([self.width.text, self.weight.text, self.style.text]).strip()
 
         if self.width is FontWidth.VARIABLE or self.weight is FontWeight.VARIABLE:
             self.subfamily_name = FontWeight.REGULAR.text
@@ -107,6 +113,11 @@ class FontInfo:
                 str_dict[field_name] = "|".join(name_list)
             elif isinstance(field_value, Enum):
                 str_dict[field_name] = str(field_value.name)
+            elif isinstance(field_value, Path):
+                if field_value == Path():
+                    str_dict[field_name] = ""
+                else:
+                    str_dict[field_name] = str(field_value)
         return str_dict
     
     @classmethod
@@ -128,6 +139,12 @@ class FontInfo:
                 str_dict[field_name] = type(field_value)[str_dict[field_name]]
             elif isinstance(field_value, bool):
                 str_dict[field_name] = (str_dict[field_name].upper() == "TRUE")
+            elif isinstance(field_value, Path):
+                print(str_dict[field_name])
+                if str_dict[field_name] == "":
+                    str_dict[field_name] = Path()
+                else:
+                    str_dict[field_name] = Path(str_dict[field_name])
         return cls(**str_dict)
 
     @classmethod
@@ -209,7 +226,11 @@ class FontWidth(Enum):
 
     @property
     def text(self):
-        return font_width_str_data[self][0]
+        if self is FontWidth.NORMAL:
+            result = ""
+        else:
+            result = font_width_str_data[self][0]
+        return result
 
     @classmethod
     def from_str(cls, string: str):
@@ -287,7 +308,11 @@ class FontStyle(Enum):
  
     @property
     def text(self):
-        return font_style_str_data[self][0]
+        if self is FontStyle.UPRIGHT:
+            result = ""
+        else:
+            result = font_style_str_data[self][0]
+        return result
 
     @classmethod
     def from_str(cls, string: str):

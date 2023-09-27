@@ -13,12 +13,6 @@ import unicodedataplus as udp
 from fontfinder.fontinfo import *
 
 
-# TODO: Ensure we return at least one font family name for every script.
-# TODO: Ensure we return font_infos for every script.
-# TODO: Fix the way UI scripts are getting mixed in without differentiation.
-# TODO: Try to get spaces into the subfamily name.
-
-
 MAX_CHARS_TO_ANALYSE: int = 2048
 '''Maximum number of characters of a string to analyse for script information.'''
 
@@ -53,6 +47,22 @@ def none_of(attr_name, collection):
     '''
     def filter(obj):
         return getattr(obj, attr_name) not in collection
+    return filter
+
+def any_of_in(attr_name, collection):
+    '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
+    if any of the items in `collection` are in `obj.attr_name`. Otherwise returns False.
+    '''
+    def filter(obj):
+        return any(map(lambda item: item in getattr(obj, attr_name), collection))
+    return filter
+
+def none_of_in(attr_name, collection):
+    '''A filter factory. Returns a filter function that takes a single argument `obj` and returns True
+    if none of the items in `collection` are in `obj.attr_name`. Otherwise returns False.
+    '''
+    def filter(obj):
+        return not any(map(lambda item: item in getattr(obj, attr_name), collection))
     return filter
 
 def any_of_str_in(attr_name, str_collection):
@@ -227,14 +237,16 @@ class FontFinder:
         # For Thai, prefer more traidtional looped fonts, and Noto Sans Thai Looped in particular
         self.font_family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
 
-        self.font_family_prefs[ANY_SCRIPT] = [any_of("form", [FontForm.SANS_SERIF]),
-                                              none_of_str_in("family_name", ["Mono", "Display", "UI"])]
-        self.family_member_prefs[ANY_SCRIPT] = [none_of("width", [FontWidth.VARIABLE]),
-                                                none_of("weight", [FontWidth.VARIABLE]),
-                                                any_of("build", [FontBuild.FULL]),
-                                                any_of("format", [FontFormat.OTF]),
-                                                any_of("format", [FontFormat.TTF]),
-                                                any_of("format", [FontFormat.OTC]),
+        self.font_family_prefs[ANY_SCRIPT] = [any_of("form",        [FontForm.SANS_SERIF]),
+                                              none_of_in("tags",    [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
+        self.family_member_prefs[ANY_SCRIPT] = [none_of("width",    [FontWidth.VARIABLE]),
+                                                none_of("weight",   [FontWidth.VARIABLE]),
+                                                none_of_in("tags",  [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
+                                                any_of("build",     [FontBuild.FULL]),
+                                                any_of("build",     [FontBuild.HINTED]),
+                                                any_of("format",    [FontFormat.OTF]),
+                                                any_of("format",    [FontFormat.TTF]),
+                                                any_of("format",    [FontFormat.OTC]),
                                                ]
 
     def find_font_families(self, str_or_text_info):
