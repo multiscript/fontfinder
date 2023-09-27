@@ -13,9 +13,11 @@ import unicodedataplus as udp
 from fontfinder.fontinfo import *
 
 
-# TODO: Test finding font family members.
 # TODO: Ensure we return at least one font family name for every script.
 # TODO: Ensure we return font_infos for every script.
+# TODO: Fix the way UI scripts are getting mixed in without differentiation.
+# TODO: Try to get spaces into the subfamily name.
+
 
 MAX_CHARS_TO_ANALYSE: int = 2048
 '''Maximum number of characters of a string to analyse for script information.'''
