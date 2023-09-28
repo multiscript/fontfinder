@@ -11,8 +11,6 @@ from fontfinder import *
 import fontfinder.mac
 
 
-TEST_FONT_PATH = Path(__file__, "../data/Fontfinder-Regular.otf").resolve()
-TEST_FONT_FAMILY = "Fontfinder"
 INSTALL_FONT_SLEEP = 5
 
 
@@ -23,6 +21,16 @@ class TestMode(Enum):
 
 
 class TestFontFinder:
+
+    def get_test_font_info(self):
+        font_info = FontInfo(main_script="Latin", family_name="Fontfinder", subfamily_name="Regular",
+                             postscript_name="Fontfinder-Regular", form=FontForm.SANS_SERIF,
+                             width=FontWidth.NORMAL, weight=FontWeight.REGULAR, style=FontStyle.UPRIGHT,
+                             format=FontFormat.OTF,
+                             url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Regular.otf",
+                             path=Path(__file__, "../data/Fontfinder-Regular.otf").resolve()
+                             )
+        return font_info
 
     def test_any_of_str_in(self):
         filter = any_of_str_in("family_name", ["mono", "display"])
@@ -142,29 +150,30 @@ class TestFontFinder:
 
     def test_mac_install_fonts(self):
         ff = FontFinder()
+        test_font_info = self.get_test_font_info()
         print("Uninstalling font")
         try:
-            fontfinder.mac.uninstall_fonts([TEST_FONT_PATH.name])
+            fontfinder.mac.uninstall_fonts([test_font_info])
         except FileNotFoundError:
             pass
         time.sleep(INSTALL_FONT_SLEEP)
         font_families = ff.all_installed_families()
-        assert TEST_FONT_FAMILY not in font_families
+        assert test_font_info.family_name not in font_families
 
         print("Installing font")
-        fontfinder.mac.install_fonts([TEST_FONT_PATH])
+        fontfinder.mac.install_fonts([test_font_info])
         time.sleep(INSTALL_FONT_SLEEP)
         font_families = ff.all_installed_families()
-        assert TEST_FONT_FAMILY in font_families
+        assert test_font_info.family_name in font_families
 
         print("Uninstalling font")
         try:
-            fontfinder.mac.uninstall_fonts([TEST_FONT_PATH.name])
+            fontfinder.mac.uninstall_fonts([test_font_info])
         except FileNotFoundError:
             pass
         time.sleep(INSTALL_FONT_SLEEP)
         font_families = ff.all_installed_families()
-        assert TEST_FONT_FAMILY not in font_families
+        assert test_font_info.family_name not in font_families
 
     # @pytest.mark.skip("Investigation test to examine variants with multiple families")
     def test_multi_family_script_variants(self):

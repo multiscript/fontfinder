@@ -52,13 +52,19 @@ def all_installed_families():
     cf.CFRelease(font_collection)
     return sorted(list(family_names))
 
-def install_fonts(paths):
-    for path in paths:
-        shutil.copy2(path, USER_FONT_DIR)
+def install_fonts(font_infos):
+    for font_info in font_infos:
+        if font_info.path is not None and font_info.path != Path():
+            shutil.copy2(font_info.path, USER_FONT_DIR)
+        else:
+            raise Exception()
 
-def uninstall_fonts(base_filenames):
-    for filename in base_filenames:
-        os.remove(USER_FONT_DIR / filename)
+def uninstall_fonts(font_infos):
+    for font_info in font_infos:
+        if font_info.filename is not None:
+            os.remove(USER_FONT_DIR / font_info.filename)
+        else:
+            raise Exception()
 
 
 class CoreFoundationLibrary(CTypesLibrary):
