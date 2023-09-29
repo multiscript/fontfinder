@@ -391,29 +391,6 @@ class FontFinder:
         all_installed_families = set(self.all_installed_families())
         return [family_name for family_name in family_names if family_name not in all_installed_families]
 
-    def _OLD_get_installed_families(self):
-        if platform.system() == "Darwin":
-            import Cocoa
-            font_manager = Cocoa.NSFontManager.sharedFontManager()
-            installed_families = list(font_manager.availableFonts())
-        
-        elif platform.system() == "Windows":
-            import win32gui
-
-            def enum_font_fam_proc(log_font, text_metric, font_type, installed_families):
-                '''Callback for win32gui.EnumFontFamilies()'''
-                installed_families.append(log_font.lfFaceName)
-                return 1 # A postive return value is needed to continue enumeration
-            
-            installed_families = []
-            hDC = win32gui.GetDC(None) # None for the window handle is acceptable (returns DC for entire screen)
-            win32gui.EnumFontFamilies(hDC, None, enum_font_fam_proc, installed_families)
-            win32gui.ReleaseDC(None, hDC)
-        else:
-            raise Exception("Unsupported platform for get_installed_families()")
-        
-        return sorted(installed_families)
-
 
 @dataclass
 class TextInfo:
