@@ -5,11 +5,19 @@
 from comtypes import COMError, GUID, HRESULT, IUnknown, STDMETHOD, WINFUNCTYPE
 import ctypes
 from ctypes import byref, POINTER, wintypes
-from enum import IntEnum
+import os
+from pathlib import Path
 import platform
+import shutil
 from sys import getwindowsversion
+import winreg
 
 from fontfinder.all_platforms import CTypesLibrary
+
+
+USER_FONT_DIR = Path("~\\AppData\\Local\\Microsoft\\Windows\\Fonts").expanduser()
+USER_FONT_REG_PATH = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
+
 
 def all_installed_families():
     if platform.system() != "Windows":
@@ -38,8 +46,30 @@ def all_installed_families():
         name_buffer = ctypes.create_unicode_buffer(name_len.value+1)
         family_name_strings.GetString(name_index, name_buffer, name_len.value+1)
         family_names[name_buffer.value] = 1
-
     return list(family_names.keys())
+
+def install_fonts(font_infos):
+    reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
+    for font_info in font_infos:
+        dest_path = USER_FONT_DIR / font_info.filename
+        font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
+        if font_info.path is not None and font_info.path != Path():
+            shutil.copy2(font_info.path, USER_FONT_DIR)
+        else:
+            raise Exception()
+        winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
+    reg_font_key.Close()
+
+def uninstall_fonts(font_infos):
+    reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
+    for font_info in font_infos:
+        font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
+        winreg.DeleteValue(reg_font_key, font_family_subfamily)
+        if font_info.filename is not None:
+            os.remove(USER_FONT_DIR / font_info.filename)
+        else:
+            raise Exception()
+    reg_font_key.Close()
 
 
 class IDWriteLocalizedStrings(IUnknown):
