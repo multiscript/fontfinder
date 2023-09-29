@@ -148,12 +148,12 @@ class TestFontFinder:
         #         assert False
         assert write_fonts == read_fonts
 
-    def test_mac_install_fonts(self):
+    def test_install_fonts(self):
         ff = FontFinder()
         test_font_info = self.get_test_font_info()
         print("Uninstalling font")
         try:
-            fontfinder.mac.uninstall_fonts([test_font_info])
+            ff.uninstall_fonts([test_font_info])
         except FileNotFoundError:
             pass
         time.sleep(INSTALL_FONT_SLEEP)
@@ -161,14 +161,14 @@ class TestFontFinder:
         assert test_font_info.family_name not in font_families
 
         print("Installing font")
-        fontfinder.mac.install_fonts([test_font_info])
+        ff.install_fonts([test_font_info])
         time.sleep(INSTALL_FONT_SLEEP)
         font_families = ff.all_installed_families()
         assert test_font_info.family_name in font_families
 
         print("Uninstalling font")
         try:
-            fontfinder.mac.uninstall_fonts([test_font_info])
+            ff.uninstall_fonts([test_font_info])
         except FileNotFoundError:
             pass
         time.sleep(INSTALL_FONT_SLEEP)

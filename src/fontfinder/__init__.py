@@ -11,6 +11,10 @@ import platform
 import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
+if platform.system() == "Darwin":
+    from fontfinder import mac
+elif platform.system() == "Windows":
+    from fontfinder import windows
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -367,13 +371,11 @@ class FontFinder:
         '''Returns a list of strings of the family names of all fonts installed on the system.
         '''
         if platform.system() == "Darwin":
-            import fontfinder.mac
-            all_installed_families = fontfinder.mac.all_installed_families()
+            all_installed_families = mac.all_installed_families()
         elif platform.system() == "Windows":
-            import fontfinder.windows
-            all_installed_families = fontfinder.windows.all_installed_families()
+            all_installed_families = windows.all_installed_families()
         else:
-            raise Exception("Unsupported platform for get_installed_families()")
+            raise Exception("Unsupported platform for FontFinder.get_installed_families()")
         
         return all_installed_families
 
@@ -390,6 +392,22 @@ class FontFinder:
             family_names = [family_names]
         all_installed_families = set(self.all_installed_families())
         return [family_name for family_name in family_names if family_name not in all_installed_families]
+
+    def install_fonts(self, font_infos):
+        if platform.system() == "Darwin":
+            mac.install_fonts(font_infos)
+        elif platform.system() == "Windows":
+            windows.install_fonts(font_infos)
+        else:
+            raise Exception("Unsupported platform for FontFinder.install_fonts()")
+     
+    def uninstall_fonts(self, font_infos):
+        if platform.system() == "Darwin":
+            mac.uninstall_fonts(font_infos)
+        elif platform.system() == "Windows":
+            windows.uninstall_fonts(font_infos)
+        else:
+            raise Exception("Unsupported platform for FontFinder.uninstall_fonts()")
 
 
 @dataclass

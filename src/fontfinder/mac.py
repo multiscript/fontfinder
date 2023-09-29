@@ -47,7 +47,6 @@ def all_installed_families():
         # cf.CFRelease(postscript_cfstr)
 
         family_names.add(family_name)
-
     cf.CFRelease(font_array)
     cf.CFRelease(font_collection)
     return sorted(list(family_names))
