@@ -2,6 +2,7 @@
 # under the MIT Licence:
 # https://github.com/moi15moi/FindSystemFontsFilename/
 
+import comtypes
 from comtypes import COMError, GUID, HRESULT, IUnknown, STDMETHOD, WINFUNCTYPE
 import ctypes
 from ctypes import byref, POINTER, wintypes
@@ -20,9 +21,6 @@ USER_FONT_REG_PATH = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
 
 
 def all_installed_families():
-    if platform.system() != "Windows":
-        raise Exception("fontfinder.windows.all_installed_families() should only be called under Windows")
-    
     dw = DirectWriteLibrary()
     dw_factory = POINTER(IDWriteFactory)()
     dw.DWriteCreateFactory(dw.DWRITE_FACTORY_TYPE_ISOLATED, IDWriteFactory._iid_, byref(dw_factory))
@@ -49,6 +47,7 @@ def all_installed_families():
     return list(family_names.keys())
 
 def install_fonts(font_infos):
+    user32 = User32Library()
     reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
     for font_info in font_infos:
         dest_path = USER_FONT_DIR / font_info.filename
@@ -153,3 +152,18 @@ class DirectWriteLibrary(CTypesLibrary):
 
         self.DWRITE_FACTORY_TYPE_SHARED = 0
         self.DWRITE_FACTORY_TYPE_ISOLATED = 1
+
+
+class User32Library(CTypesLibrary):
+    def __init__(self):
+        super().__init__(ctypes.windll, "User32")
+
+        self.SendMessageW = self.w_prototype(
+            wintypes.LONG, "SendMessageW", (self.IN, wintypes.HWND, "hWnd"),
+                                           (self.IN, wintypes.UINT, "Msg"),
+                                           (self.IN, wintypes.WPARAM, "wParam"),
+                                           (self.IN, wintypes.LPARAM, "lParam")
+        )
+
+        self.HWND_BROADCAST = wintypes.HWND(0xffff)
+        self.WM_FONTCHANGE = wintypes.UINT(0x001D)
