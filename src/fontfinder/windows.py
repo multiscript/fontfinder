@@ -58,8 +58,10 @@ def install_fonts(font_infos):
             raise Exception()
         winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
     reg_font_key.Close()
+    user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
 def uninstall_fonts(font_infos):
+    user32 = User32Library()
     reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
     for font_info in font_infos:
         font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
@@ -69,6 +71,8 @@ def uninstall_fonts(font_infos):
         else:
             raise Exception()
     reg_font_key.Close()
+    user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+    
 
 
 class IDWriteLocalizedStrings(IUnknown):
