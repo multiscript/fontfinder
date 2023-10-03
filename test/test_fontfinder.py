@@ -11,13 +11,53 @@ from fontfinder import *
 import fontfinder.mac
 
 
-INSTALL_FONT_SLEEP = 5
+FONT_INSTALL_SLEEP_STEP = 1
+MAX_FONT_INSTALL_RETRIES = 20
 
 
 class TestMode(Enum):
     TEST    = auto()    # Run the test as normal
     CREATE  = auto()    # Create the expected output, rather than testing for it
     OBSERVE = auto()    # Observe output: Use known instead of temp directories, don't unzip word docs, don't test
+
+
+class FontFinderTest(FontFinder):
+    def get_test_font_infos(self):
+        font_infos = []
+        font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
+                          subfamily_name="Regular", postscript_name="Fontfinder-Regular", form=FontForm.SANS_SERIF,
+                          width=FontWidth.NORMAL, weight=FontWeight.REGULAR, style=FontStyle.UPRIGHT,
+                          format=FontFormat.OTF,
+                          url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Regular.otf",
+                          path=Path(__file__, "../data/Fontfinder-Regular.otf").resolve())
+                         )
+        font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
+                          subfamily_name="Bold", postscript_name="Fontfinder-Bold", form=FontForm.SANS_SERIF,
+                          width=FontWidth.NORMAL, weight=FontWeight.BOLD, style=FontStyle.UPRIGHT,
+                          format=FontFormat.OTF,
+                          url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Bold.otf",
+                          path=Path(__file__, "../data/Fontfinder-Bold.otf").resolve())
+                         )
+        font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
+                          subfamily_name="Italic", postscript_name="Fontfinder-Italic", form=FontForm.SANS_SERIF,
+                          width=FontWidth.NORMAL, weight=FontWeight.REGULAR, style=FontStyle.ITALIC,
+                          format=FontFormat.OTF,
+                          url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Italic.otf",
+                          path=Path(__file__, "../data/Fontfinder-Italic.otf").resolve())
+                         )
+        font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
+                          subfamily_name="Bold Italic", postscript_name="Fontfinder-BoldItalic",
+                          form=FontForm.SANS_SERIF, width=FontWidth.NORMAL, weight=FontWeight.BOLD,
+                          style=FontStyle.ITALIC, format=FontFormat.OTF,
+                          url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-BoldItalic.otf",
+                          path=Path(__file__, "../data/Fontfinder-BoldItalic.otf").resolve())
+                         )
+        return font_infos
+    
+    def known_fonts(self, filter_func = None):
+        known_fonts = super().known_fonts(filter_func)
+        known_fonts.extend(self.get_test_font_infos())
+        return known_fonts
 
 
 class TestFontFinder:
@@ -149,31 +189,41 @@ class TestFontFinder:
         assert write_fonts == read_fonts
 
     def test_install_fonts(self):
-        ff = FontFinder()
-        test_font_info = self.get_test_font_info()
+        ff = FontFinderTest()
+        font_families = []
+        test_font_infos = ff.get_test_font_infos()
         print("Uninstalling font")
         try:
-            ff.uninstall_fonts([test_font_info])
+            ff.uninstall_fonts(test_font_infos)
         except FileNotFoundError:
             pass
-        time.sleep(INSTALL_FONT_SLEEP)
-        font_families = ff.all_installed_families()
-        assert test_font_info.family_name not in font_families
+        for i in range(MAX_FONT_INSTALL_RETRIES):
+            time.sleep(FONT_INSTALL_SLEEP_STEP)
+            font_families = ff.all_installed_families()
+            if test_font_infos[0].family_name not in font_families:
+                break
+        assert test_font_infos[0].family_name not in font_families
 
         print("Installing font")
-        ff.install_fonts([test_font_info])
-        time.sleep(INSTALL_FONT_SLEEP)
-        font_families = ff.all_installed_families()
-        assert test_font_info.family_name in font_families
+        ff.install_fonts(test_font_infos)
+        for i in range(MAX_FONT_INSTALL_RETRIES):
+            time.sleep(FONT_INSTALL_SLEEP_STEP)
+            font_families = ff.all_installed_families()
+            if test_font_infos[0].family_name in font_families:
+                break
+        assert test_font_infos[0].family_name in font_families
 
         print("Uninstalling font")
         try:
-            ff.uninstall_fonts([test_font_info])
+            ff.uninstall_fonts(test_font_infos)
         except FileNotFoundError:
             pass
-        time.sleep(INSTALL_FONT_SLEEP)
-        font_families = ff.all_installed_families()
-        assert test_font_info.family_name not in font_families
+        for i in range(MAX_FONT_INSTALL_RETRIES):
+            time.sleep(FONT_INSTALL_SLEEP_STEP)
+            font_families = ff.all_installed_families()
+            if test_font_infos[0].family_name not in font_families:
+                break
+        assert test_font_infos[0].family_name not in font_families
 
     # @pytest.mark.skip("Investigation test to examine variants with multiple families")
     def test_multi_family_script_variants(self):
