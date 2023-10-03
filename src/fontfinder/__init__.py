@@ -7,7 +7,9 @@ from dataclasses import dataclass, field
 import json
 from pathlib import Path
 import platform
+import tempfile
 
+import requests
 import unicodedataplus as udp
 
 from fontfinder.fontinfo import *
@@ -392,6 +394,26 @@ class FontFinder:
             family_names = [family_names]
         all_installed_families = set(self.all_installed_families())
         return [family_name for family_name in family_names if family_name not in all_installed_families]
+
+    def download_fonts(self, font_infos, download_dir = None):
+        temp_dir = None
+        if download_dir is None:
+            temp_dir = tempfile.TemporaryDirectory()
+            download_dir = Path(temp_dir.name)
+        else:
+            download_dir = Path(download_dir)
+        print("Download dir:", download_dir)
+        font_infos = [font_info.copy() for font_info in font_infos]
+        for font_info in font_infos:
+            if font_info.url is None or font_info.url == "":
+                continue
+            print(font_info.url)
+            response = requests.get(font_info.url, stream=True)
+            font_info.path = download_dir / font_info.filename
+            with open(font_info.path, 'wb') as file:
+                for chunk in response.iter_content(chunk_size=128):
+                    file.write(chunk)
+        return temp_dir
 
     def install_fonts(self, font_infos):
         if platform.system() == "Darwin":

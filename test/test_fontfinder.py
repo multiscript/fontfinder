@@ -1,5 +1,6 @@
 from collections import Counter
 import contextlib
+import filecmp
 from pprint import pprint
 import tempfile
 import time
@@ -8,7 +9,6 @@ import unicodedataplus as udp
 import pytest
 
 from fontfinder import *
-import fontfinder.mac
 
 
 FONT_INSTALL_SLEEP_STEP = 1
@@ -187,6 +187,22 @@ class TestFontFinder:
         #         print(item[1])
         #         assert False
         assert write_fonts == read_fonts
+
+    def test_download_fonts(self):
+        ff = FontFinderTest()
+        test_font_infos = ff.get_test_font_infos()
+        download_dir = None #Path("~/Desktop/TestFontFinder/Download").expanduser()
+        # download_dir.mkdir(parents=True, exist_ok=True)
+        temp_download_dir = ff.download_fonts(test_font_infos, download_dir)
+        if temp_download_dir is not None:
+            download_dir = temp_download_dir.name
+        filenames = [font_info.filename for font_info in test_font_infos]
+        cmp_result = filecmp.cmpfiles(download_dir, Path(__file__, "../data").resolve(), filenames,
+                                      shallow=False)
+        if temp_download_dir is not None:
+            temp_download_dir.cleanup()
+        assert cmp_result[1] == []
+        assert cmp_result[2] == []
 
     def test_install_fonts(self):
         ff = FontFinderTest()

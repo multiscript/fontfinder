@@ -111,6 +111,9 @@ class FontInfo:
             filename = None
         return filename 
 
+    def copy(self):
+        return FontInfo(**dataclasses.asdict(self))
+
     def str_dict(self):
         str_dict = dataclasses.asdict(self)
         # Convert Enum-type fields to their string names without the Enum type-name
