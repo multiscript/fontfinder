@@ -402,12 +402,10 @@ class FontFinder:
             download_dir = Path(temp_dir.name)
         else:
             download_dir = Path(download_dir)
-        print("Download dir:", download_dir)
         font_infos = [font_info.copy() for font_info in font_infos]
         for font_info in font_infos:
             if font_info.url is None or font_info.url == "":
                 continue
-            print(font_info.url)
             response = requests.get(font_info.url, stream=True)
             font_info.path = download_dir / font_info.filename
             with open(font_info.path, 'wb') as file:
