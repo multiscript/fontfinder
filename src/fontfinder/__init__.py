@@ -23,21 +23,12 @@ from fontfinder.fontinfo import *
 from fontfinder import _platforms
 
 
-MAX_CHARS_TO_ANALYSE: int = 2048
-'''Maximum number of characters of a string to analyse for script information.'''
-
-ZH_HANT_USE_HK = False
-'''If True, `FontFinder.get_text_info()` selects Hong Kong rather than Taiwanese fonts for Traditional Chinese
-Script.'''
-
 _DATA_DIR_PATH = Path(__file__, "../data").resolve()
 '''Path to font data'''
 _DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
 _SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
 '''Path to subset of Unihan data neede for CJK font selection.'''
-
-ANY_SCRIPT = object() # Sentinel for preference matching on any script
 
 # We wait until now to import Noto data so that data path constants above are set.
 from fontfinder import noto 
@@ -48,6 +39,14 @@ class FontFinder:
     def __init__(self):
         self._all_known_fonts = None
         self._small_unihan_data_private = None
+        
+        self.max_analysis_chars: int = 2048
+        '''Maximum number of characters of a string to analyse for script information.'''
+        
+        self.zh_hant_use_hk = False
+        '''If True, `FontFinder.analyse()` selects Hong Kong rather than Taiwanese fonts for Traditional
+        Chinese script.'''
+
         self.font_family_prefs = {}
         self.family_member_prefs = {}
         self.set_default_prefs()
@@ -89,7 +88,7 @@ class FontFinder:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
         object with the results.
 
-        The number of characters analysed is set by the module attribute `MAX_CHARS_TO_ANALYSE`.
+        The number of characters analysed is set by the instance attribute `max_analysis_chars`.
 
         The attributes of the `TextInfo` result object are set as follows:
 
@@ -121,7 +120,7 @@ class FontFinder:
         script_count = Counter()
         unihan_counter = Counter()
         emoji_count = 0
-        for char in text[0:min(len(text), MAX_CHARS_TO_ANALYSE)]:
+        for char in text[0:min(len(text), self.max_analysis_chars)]:
             script_count[udp.script(char)] += 1
             if udp.is_emoji_presentation(char) or udp.is_extended_pictographic(char):
                 emoji_count += 1
@@ -160,7 +159,7 @@ class FontFinder:
                 # Traditional Chinese characters have simplified variants, and vice versa.
                 # So if there are more simplified variants than traditional, we likely have traditional text,
                 # and vice-versa.
-                script_variant = 'zh-Hant-HK' if ZH_HANT_USE_HK else 'zh-Hant'
+                script_variant = 'zh-Hant-HK' if self.zh_hant_use_hk else 'zh-Hant'
             else:
                 script_variant = 'zh-Hans'
 
@@ -369,8 +368,13 @@ class FontFinder:
         font_platform.uninstall_fonts(font_infos)        
 
 
+ANY_SCRIPT = object()
+'''Sentinel for preference matching on any script.'''
+
+
 class FontFinderException(Exception):
     pass
+
 
 class UnsupportedPlatformException(FontFinderException):
     pass
