@@ -6,6 +6,10 @@ in a text string.** For now, `fontfinder` mostly locates fonts in the
 
 Most functionality is provided by instantiating the `FontFinder` class.
 
+## Examples
+
+Coming soon.
+
 ## Top-Level Objects
 '''
 from collections import Counter
@@ -48,11 +52,79 @@ class FontFinder:
         Chinese script.'''
 
         self.font_family_prefs = {}
+        '''Font preferences for selecting a single font-family for some text. This attribute is a dictionary of lists
+        of filter functions. See `set_prefs()` for more info.'''
+
         self.family_member_prefs = {}
-        self.set_default_prefs()
+        '''Font preferences for selecting the members of a given font-family. This attribute is a dictionary of lists
+        of filter functions. See `set_prefs()` for more info.'''
+
+        self.set_prefs()
+
+    def set_prefs(self):
+        '''Sets the font preferences. See the source code for this method to examine the built-in preferences
+        that `fontfinder` provides 'out-of-the-box'. These can be replaced by overriding this method, or otherwise
+        changed by modifying the `font_family_prefs` and `family_member_prefs` instance attributes.
+        
+        Font preferences are dictionaries of lists of filter functions. The dictionary keys are one of:
+        - the`fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
+        - A tuple of `(main_script, script_variant)`. Preferences under these keys will only apply to that particula
+          script and variant combination.
+        
+        The dictionary values are lists of filter functions. The filters are usually created
+        using the filter factories in the `fontfinder.filters` module. However, any custom filter function can be used
+        that takes a single `fontfinder.fontinfo.FontInfo` argument and returns True if the object should be included
+        in the filtered list.
+
+        Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
+        If applying a preference would result in all remaining fonts being excluded, the preference is ignored.
+
+        Some example preferences:
+        ```python
+        # For Arabic, prefer the more traditional Naskh form
+        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+
+        # Prefer sans-serif fonts, and exclude mono, display and UI forms where possible.
+        self.font_family_prefs[ANY_SCRIPT] = [any_of("form",     [FontForm.SANS_SERIF]),
+                                              none_of_in("tags", [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
+        ```
+        '''
+        # For Adlam, prefer joined to unjoined.
+        self.font_family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
+        # For Arabic, prefer the more traditional Naskh form
+        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+        # For Hebrew, prefer the more traditional Serif form
+        self.font_family_prefs[("Hebrew", "")] = [any_of("family_name", ["Noto Serif Hebrew"])]
+        # For Khitan Small Script, prefer Noto Serif Khitan Small Script, as the purpose of the other fonts isn't clear
+        self.font_family_prefs[("Khitan_Small_Script", "")] = [any_of("family_name",
+                                                                     ["Noto Serif Khitan Small Script"])]
+        # For Lao, prefer more traidtional looped fonts
+        self.font_family_prefs[("Lao", "")] = [any_of_str_in("family_name", ["Looped"])]
+        # For Nko, prefer Noto Sans NKo to unjoined
+        self.font_family_prefs[("Nko", "")] = [any_of("family_name", ["Noto Sans NKo"])]
+        # For Nushu, prefer Noto Sans Nushu as it is better for smaller font sizes
+        self.font_family_prefs[("Nushu", "")] = [any_of("family_name", ["Noto Sans Nushu"])]
+        # For Tamil, don't use the Supplement font
+        self.font_family_prefs[("Tamil", "")] = [none_of_str_in("family_name", ["Supplement"])]
+        # For Thai, prefer more traidtional looped fonts, and Noto Sans Thai Looped in particular
+        self.font_family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
+        # Prefer sans-serif fonts, and exclude mono, display and UI forms where possible.
+        self.font_family_prefs[ANY_SCRIPT] = [any_of("form",        [FontForm.SANS_SERIF]),
+                                              none_of_in("tags",    [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
+        self.family_member_prefs[ANY_SCRIPT] = [none_of("width",    [FontWidth.VARIABLE]),
+                                                none_of("weight",   [FontWidth.VARIABLE]),
+                                                none_of_in("tags",  [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
+                                                any_of("build",     [FontBuild.FULL]),
+                                                any_of("build",     [FontBuild.HINTED]),
+                                                any_of("format",    [FontFormat.OTF]),
+                                                any_of("format",    [FontFormat.TTF]),
+                                                any_of("format",    [FontFormat.OTC]),
+                                               ]
 
     def known_fonts(self, filter_func = None):
-        '''Returns a list of FontInfo objects for all fonts known by this library.'''
+        '''Returns a list of FontInfo objects for all fonts known to this library.
+        
+        This is a large list, which is cached in memory the first time the method is called.'''
         # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
         # than memory, by caching the full list of font_infos in memory.
         if self._all_known_fonts is None:
@@ -60,11 +132,11 @@ class FontFinder:
         return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
 
     def known_scripts(self, filter_func = None):
-        '''Returns a list of the `main_script` values for all the fonts known by this library.'''
+        '''Returns a list of the `main_script` values for all the fonts known to this library.'''
         return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
 
     def known_script_variants(self, filter_func = None):
-        '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known by this library.'''
+        '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
         # Use a dictionary as an ordered set
         return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
 
@@ -85,36 +157,35 @@ class FontFinder:
         return self._small_unihan_data_private
     
     def analyse(self, text: str):
-        '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a `TextInfo`
-        object with the results.
+        '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
+        `fontfinder.textinfo.TextInfo` object with the results.
 
         The number of characters analysed is set by the instance attribute `max_analysis_chars`.
 
         The attributes of the `TextInfo` result object are set as follows:
+        - `main_script`:    name of the most-frequently-used Unicode script in `text`.
 
-            `main_script`: name of the most-frequently-used Unicode script in `text`.
+        - `script_variant`: a secondary string used when the value of `main_script` is insufficient for choosing
+                            an appropriate font.
 
-            `script_variant`: a secondary string used when the value of `main_script` is insufficient for choosing
-                              an appropriate font.
+        - `emoji_count`:    count of characters who have either the Emoji Presentation property or the
+                            Extended_Pictographic property set (independant of script).
 
-            `emoji_count`:    count of characters who have either the Emoji Presentation property or the
-                              Extended_Pictographic property set (independant of script).
-
-            `script_count`:   a collections.Counter of the count of each Unicode script in the text. The keys are
-                              the string names of each script that appears in the text (including `Common`,
-                              `Inherited` and `Unknown`).
+        - `script_count`:   a [collections.Counter](https://docs.python.org/3/library/collections.html#collections.Counter)
+                            of the count of each Unicode script in the text. The keys are the string names of each
+                            script that appears in the text (including `Common`, `Inherited` and `Unknown`).
 
         In calculating `main_script`, the script values `Common`, `Inherited`, and `Unknown` are
-        ignored. However if `emoji_count` is larger than the rest of the script counts, then `main_script' is set to
+        ignored. However if `emoji_count` is larger than the rest of the script counts, then `main_script` is set to
         `Common` and `script_variant` is set to `Emoji`. (Most emoji characters have a Unicode script value of
         `Common`.)
         
         If `main_script` is `Han`, some basic language detection is performed, and the `script_variant` is set to
         one of the following language tags:
-            For Simplified Chinese:  `zh-Hans`                   
-            For Traditional Chinese: `zh-Hant` (or `zh-Hant-HK` if the module attribute `ZH_HANT_USE_HK` is True)
-            For Japanese:            `ja`
-            For Korean:              `ko`
+        - For Simplified Chinese:  `zh-Hans`                   
+        - For Traditional Chinese: `zh-Hant` (or `zh-Hant-HK` if the instance attribute `zh_hant_use_hk` is True)
+        - For Japanese:            `ja`
+        - For Korean:              `ko`
         '''
         # Do the counting
         script_count = Counter()
@@ -166,52 +237,11 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
-    def set_default_prefs(self):
-        '''Sets the default font preferences. These can be modified either by overriding this method, or by
-        editing the `font_family_prefs` and `family_member_prefs` attributes.
-        
-        Font preferences are dictionaries of lists of filter functions. The keys are either `ANY_SCRIPT` or tuples of
-        (main_script, script_variant). The values are lists of filter functions. The filters are usually created
-        using the filter factories `any_of()` or `none_of()`, but can be any custom filter function that takes a
-        `FontInfo` object and returns True if the object should be included in the filtered list.
-        '''
-        # For Adlam, prefer joined to unjoined.
-        self.font_family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
-        # For Arabic, prefer more traditional Naskh form
-        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
-        # For Hebrew, prefer the more traditional Serif form
-        self.font_family_prefs[("Hebrew", "")] = [any_of("family_name", ["Noto Serif Hebrew"])]
-        # For Khitan Small Script, prefer Noto Serif Khitan Small Script, as the purpose of the other fonts isn't clear
-        self.font_family_prefs[("Khitan_Small_Script", "")] = [any_of("family_name",
-                                                                     ["Noto Serif Khitan Small Script"])]
-        # For Lao, prefer more traidtional looped fonts
-        self.font_family_prefs[("Lao", "")] = [any_of_str_in("family_name", ["Looped"])]
-        # For Nko, prefer Noto Sans NKo to unjoined
-        self.font_family_prefs[("Nko", "")] = [any_of("family_name", ["Noto Sans NKo"])]
-        # For Nushu, prefer Noto Sans Nushu as it is better for smaller font sizes
-        self.font_family_prefs[("Nushu", "")] = [any_of("family_name", ["Noto Sans Nushu"])]
-        # For Tamil, don't use the Supplement font
-        self.font_family_prefs[("Tamil", "")] = [none_of_str_in("family_name", ["Supplement"])]
-        # For Thai, prefer more traidtional looped fonts, and Noto Sans Thai Looped in particular
-        self.font_family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
-
-        self.font_family_prefs[ANY_SCRIPT] = [any_of("form",        [FontForm.SANS_SERIF]),
-                                              none_of_in("tags",    [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
-        self.family_member_prefs[ANY_SCRIPT] = [none_of("width",    [FontWidth.VARIABLE]),
-                                                none_of("weight",   [FontWidth.VARIABLE]),
-                                                none_of_in("tags",  [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
-                                                any_of("build",     [FontBuild.FULL]),
-                                                any_of("build",     [FontBuild.HINTED]),
-                                                any_of("format",    [FontFormat.OTF]),
-                                                any_of("format",    [FontFormat.TTF]),
-                                                any_of("format",    [FontFormat.OTC]),
-                                               ]
-
     def find_font_families(self, str_or_text_info):
         '''Returns a list of the family names (strings) of all fonts (known to the library) that are suitable for
-        displaying some text.
+        displaying some text. No font family preferences are applied.
         
-        `str_or_text_info` should either be the string of text itself, or a TextInfo object returned by
+        `str_or_text_info` should either be the string of text itself, or a `TextInfo` object returned by
         `analyse()`.
         '''
         font_infos = self._text_info_to_font_infos(str_or_text_info)
@@ -220,11 +250,11 @@ class FontFinder:
         return list(family_names.keys())
 
     def find_font_family(self, str_or_text_info):
-        '''Returns the family name (a string) for the font family considered most-suitable for displaying some text.
-        "Most-suitable" is determined by the filter functions in the preference attribute `font_family_prefs`.
-        If, after applying these filters, more than one family remains, the first family is selected.
+        '''Returns the family name (a string) of the single font family considered most-suitable for
+        `str_or_text_info`. "Most-suitable" is determined applying the filter functions in `font_family_prefs`.
+        If, after applying these filters, more than one family remains, the first family is returned.
         
-        `str_or_text_info` should either be the string of text itself, or a TextInfo object returned by
+        `str_or_text_info` should either be the string of text itself, or a `TextInfo` object returned by
         `analyse()`.
         '''
         font_infos = self._text_info_to_font_infos(str_or_text_info)
