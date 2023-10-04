@@ -4,18 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fontfinder"
-version = "0.1.0"
+version = "0.10.0"
 
 description = "Analyses the Unicode scripts used by strings, and locates fonts that can help display those strings."
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "unicodedataplus",
     "requests",
     "semver",
-    "pyobjc-core;platform_system=='Darwin'",
-    "pyobjc-framework-Cocoa;platform_system=='Darwin'",
-    "pywin32;platform_system=='Windows'",
+    "unicodedataplus",
+    "comtypes;platform_system=='Windows'",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -29,7 +27,9 @@ classifiers = [
 test = [
   "pytest",
 ]
-
+docs = [
+  "pdoc"
+]
 unihan = [
   "unihan-etl", "typing_extensions"
 ]
