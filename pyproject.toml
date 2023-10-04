@@ -10,10 +10,10 @@ description = "Analyses the Unicode scripts used by strings, and locates fonts t
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "requests",
-    "semver",
-    "unicodedataplus",
-    "comtypes;platform_system=='Windows'",
+    "requests>=2.31",
+    "semver>=3.0.1",
+    "unicodedataplus>=15.0.0",
+    "comtypes>=1.2.0;platform_system=='Windows'",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
