@@ -34,67 +34,67 @@ import shutil
 from sys import getwindowsversion
 import winreg
 
-from fontfinder.all_platforms import CTypesLibrary
+import fontfinder._platforms
 
 
 USER_FONT_DIR = Path("~\\AppData\\Local\\Microsoft\\Windows\\Fonts").expanduser()
 USER_FONT_REG_PATH = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
 
 
-def all_installed_families():
-    dw = DirectWriteLibrary()
-    dw_factory = POINTER(IDWriteFactory)()
-    dw.DWriteCreateFactory(dw.DWRITE_FACTORY_TYPE_ISOLATED, IDWriteFactory._iid_, byref(dw_factory))
+class WindowsPlatform(fontfinder._platforms.FontPlatform):
+    def all_installed_families(self):
+        dw = DirectWriteLibrary()
+        dw_factory = POINTER(IDWriteFactory)()
+        dw.DWriteCreateFactory(dw.DWRITE_FACTORY_TYPE_ISOLATED, IDWriteFactory._iid_, byref(dw_factory))
 
-    fonts = POINTER(IDWriteFontCollection)()
-    dw_factory.GetSystemFontCollection(byref(fonts), False)
+        fonts = POINTER(IDWriteFontCollection)()
+        dw_factory.GetSystemFontCollection(byref(fonts), False)
 
-    # Use a dict as an ordered set
-    family_names = {}
-    for i in range(fonts.GetFontFamilyCount()):
-        font_family = POINTER(IDWriteFontFamily)()
-        fonts.GetFontFamily(i, byref(font_family))
+        # Use a dict as an ordered set
+        family_names = {}
+        for i in range(fonts.GetFontFamilyCount()):
+            font_family = POINTER(IDWriteFontFamily)()
+            fonts.GetFontFamily(i, byref(font_family))
 
-        family_name_strings = POINTER(IDWriteLocalizedStrings)()
-        font_family.GetFamilyNames(byref(family_name_strings))
+            family_name_strings = POINTER(IDWriteLocalizedStrings)()
+            font_family.GetFamilyNames(byref(family_name_strings))
 
-        name_index = 0
-        name_len = ctypes.c_uint32()
-        family_name_strings.GetStringLength(name_index, byref(name_len))
+            name_index = 0
+            name_len = ctypes.c_uint32()
+            family_name_strings.GetStringLength(name_index, byref(name_len))
 
-        name_buffer = ctypes.create_unicode_buffer(name_len.value+1)
-        family_name_strings.GetString(name_index, name_buffer, name_len.value+1)
-        family_names[name_buffer.value] = 1
-    return list(family_names.keys())
+            name_buffer = ctypes.create_unicode_buffer(name_len.value+1)
+            family_name_strings.GetString(name_index, name_buffer, name_len.value+1)
+            family_names[name_buffer.value] = 1
+        return list(family_names.keys())
 
-def install_fonts(font_infos):
-    user32 = User32Library()
-    reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
-    for font_info in font_infos:
-        dest_path = USER_FONT_DIR / font_info.filename
-        font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
-        if font_info.path is not None and font_info.path != Path():
-            shutil.copy2(font_info.path, USER_FONT_DIR)
-        else:
-            raise Exception()
-        winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
-    reg_font_key.Close()
-    user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+    def install_fonts(self, font_infos):
+        user32 = User32Library()
+        reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
+        for font_info in font_infos:
+            dest_path = USER_FONT_DIR / font_info.filename
+            font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
+            if font_info.path is not None and font_info.path != Path():
+                shutil.copy2(font_info.path, USER_FONT_DIR)
+            else:
+                raise Exception()
+            winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
+        reg_font_key.Close()
+        user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
-def uninstall_fonts(font_infos):
-    user32 = User32Library()
-    reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
-    for font_info in font_infos:
-        font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
-        winreg.DeleteValue(reg_font_key, font_family_subfamily)
-        if font_info.filename is not None:
-            os.remove(USER_FONT_DIR / font_info.filename)
-        else:
-            raise Exception()
-    reg_font_key.Close()
-    user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+    def uninstall_fonts(self, font_infos):
+        user32 = User32Library()
+        reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
+        for font_info in font_infos:
+            font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
+            winreg.DeleteValue(reg_font_key, font_family_subfamily)
+            if font_info.filename is not None:
+                os.remove(USER_FONT_DIR / font_info.filename)
+            else:
+                raise Exception()
+        reg_font_key.Close()
+        user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
     
-
 
 class IDWriteLocalizedStrings(IUnknown):
     _iid_ = GUID("{08256209-099a-4b34-b86d-c22b110e7771}")
@@ -165,7 +165,7 @@ class IDWriteFactory(IUnknown):
     ]
 
 
-class DirectWriteLibrary(CTypesLibrary):
+class DirectWriteLibrary(fontfinder._platforms.CTypesLibrary):
     def __init__(self):
         super().__init__(ctypes.windll, "dwrite")
 
@@ -179,7 +179,7 @@ class DirectWriteLibrary(CTypesLibrary):
         self.DWRITE_FACTORY_TYPE_ISOLATED = 1
 
 
-class User32Library(CTypesLibrary):
+class User32Library(fontfinder._platforms.CTypesLibrary):
     def __init__(self):
         super().__init__(ctypes.windll, "User32")
 

@@ -32,66 +32,64 @@ import shutil
 
 import semver
 
-from fontfinder.all_platforms import CTypesLibrary
+import fontfinder._platforms
 
 
 USER_FONT_DIR = Path("~/Library/Fonts").expanduser()
 
 
-def all_installed_families():
-    if platform.system() != "Darwin":
-        raise Exception("fontfinder.mac.all_installed_families() should only be called under macOS")
-    
-    if semver.Version.parse(platform.mac_ver()[0]) < semver.Version(10.6):
-        raise Exception("fontfinder.mac.all_installed_families() only supported by macOS 10.6 or later")
-    
-    cf = CoreFoundationLibrary()
-    ct = CoreTextLibrary()
+class MacPlatform(fontfinder._platforms.FontPlatform):
+    def all_installed_families(self):        
+        if semver.Version.parse(platform.mac_ver()[0]) < semver.Version(10.6):
+            raise Exception("fontfinder.mac.all_installed_families() only supported by macOS 10.6 or later")
+        
+        cf = CoreFoundationLibrary()
+        ct = CoreTextLibrary()
 
-    font_collection = ct.CTFontCollectionCreateFromAvailableFonts(None)
-    font_array = ct.CTFontCollectionCreateMatchingFontDescriptors(font_collection)
-    font_array_len = cf.CFArrayGetCount(font_array)
-    family_names = set()
-    for i in range(font_array_len):
-        font_descriptor = cf.CFArrayGetValueAtIndex(font_array, i)
+        font_collection = ct.CTFontCollectionCreateFromAvailableFonts(None)
+        font_array = ct.CTFontCollectionCreateMatchingFontDescriptors(font_collection)
+        font_array_len = cf.CFArrayGetCount(font_array)
+        family_names = set()
+        for i in range(font_array_len):
+            font_descriptor = cf.CFArrayGetValueAtIndex(font_array, i)
 
-        family_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontFamilyNameAttribute)
-        family_name = cf.cf_string_ref_to_python_str(family_cfstr)
-        cf.CFRelease(family_cfstr)
+            family_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontFamilyNameAttribute)
+            family_name = cf.cf_string_ref_to_python_str(family_cfstr)
+            cf.CFRelease(family_cfstr)
 
-        # style_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontStyleNameAttribute)
-        # style_name = cf.cf_string_ref_to_python_str(style_cfstr)
-        # cf.CFRelease(style_cfstr)
+            # style_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontStyleNameAttribute)
+            # style_name = cf.cf_string_ref_to_python_str(style_cfstr)
+            # cf.CFRelease(style_cfstr)
 
-        # display_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontDisplayNameAttribute)
-        # display_name = cf.cf_string_ref_to_python_str(display_cfstr)
-        # cf.CFRelease(display_cfstr)
+            # display_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontDisplayNameAttribute)
+            # display_name = cf.cf_string_ref_to_python_str(display_cfstr)
+            # cf.CFRelease(display_cfstr)
 
-        # postscript_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontNameAttribute)
-        # postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
-        # cf.CFRelease(postscript_cfstr)
+            # postscript_cfstr = ct.CTFontDescriptorCopyAttribute(font_descriptor, ct.kCTFontNameAttribute)
+            # postscript_name = cf.cf_string_ref_to_python_str(postscript_cfstr)
+            # cf.CFRelease(postscript_cfstr)
 
-        family_names.add(family_name)
-    cf.CFRelease(font_array)
-    cf.CFRelease(font_collection)
-    return sorted(list(family_names))
+            family_names.add(family_name)
+        cf.CFRelease(font_array)
+        cf.CFRelease(font_collection)
+        return sorted(list(family_names))
 
-def install_fonts(font_infos):
-    for font_info in font_infos:
-        if font_info.path is not None and font_info.path != Path():
-            shutil.copy2(font_info.path, USER_FONT_DIR)
-        else:
-            raise Exception()
+    def install_fonts(self, font_infos):
+        for font_info in font_infos:
+            if font_info.path is not None and font_info.path != Path():
+                shutil.copy2(font_info.path, USER_FONT_DIR)
+            else:
+                raise Exception()
 
-def uninstall_fonts(font_infos):
-    for font_info in font_infos:
-        if font_info.filename is not None:
-            os.remove(USER_FONT_DIR / font_info.filename)
-        else:
-            raise Exception()
+    def uninstall_fonts(self, font_infos):
+        for font_info in font_infos:
+            if font_info.filename is not None:
+                os.remove(USER_FONT_DIR / font_info.filename)
+            else:
+                raise Exception()
 
 
-class CoreFoundationLibrary(CTypesLibrary):
+class CoreFoundationLibrary(fontfinder._platforms.CTypesLibrary):
     def __init__(self):
         super().__init__(ctypes.cdll, "CoreFoundation", True,
                          "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation")
@@ -133,7 +131,7 @@ class CoreFoundationLibrary(CTypesLibrary):
         return python_str
 
 
-class CoreTextLibrary(CTypesLibrary):
+class CoreTextLibrary(fontfinder._platforms.CTypesLibrary):
     def __init__(self):
         super().__init__(ctypes.cdll, "CoreText", True,
                          "/System/Library/Frameworks/CoreText.framework/CoreText")

@@ -1,8 +1,7 @@
 from ctypes import CFUNCTYPE
 import ctypes.util
 import platform
-if platform.system() == "Windows":
-    from ctypes import WINFUNCTYPE
+
 
 class CTypesLibrary:
     IN:  int    = 1
@@ -48,5 +47,31 @@ class CTypesLibrary:
         Each arg_item should be
         (in_or_out_const, arg_type[, param_name_str[, default_value]])
         '''
+        from ctypes import WINFUNCTYPE
         return self.prototype(WINFUNCTYPE, result_type, func_name, *arg_items)
+
+
+class FontPlatform:
+    def __init__(self):
+        pass
+
+    def all_installed_families():
+        pass
+
+    def install_fonts(font_infos):
+        pass
+
+    def uninstall_fonts(font_infos):
+        pass
+
+
+def get_font_platform():
+    if platform.system() == "Darwin":
+        import fontfinder._platforms.mac
+        return fontfinder._platforms.mac.MacPlatform()
+    elif platform.system() == "Windows":
+        import fonfinder.platforms.windows
+        return fonfinder.platform.windows.WindowsPlatform()
+    else:
+        raise fontfinder.UnsupportedPlatformException()
 

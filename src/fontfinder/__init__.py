@@ -1,6 +1,12 @@
 '''
-Analyses the majority Unicode script used in a text string, and locates fonts that can help display that string.
-For now, only locates fonts in the Google Noto font collection.
+## Overview
+**fontfinder is a Python package for finding and installing fonts that can display the majority Unicode script used
+in a text string.** For now, `fontfinder` mostly locates fonts in the
+[Google Noto font collection](https://fonts.google.com/noto).
+
+Most functionality is provided by instantiating the `FontFinder` class.
+
+## Top-Level Objects
 '''
 from collections import Counter
 from dataclasses import dataclass, field
@@ -12,11 +18,9 @@ import tempfile
 import requests
 import unicodedataplus as udp
 
+import fontfinder
+import fontfinder._platforms
 from fontfinder.fontinfo import *
-if platform.system() == "Darwin":
-    from fontfinder import mac
-elif platform.system() == "Windows":
-    from fontfinder import windows
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -91,7 +95,7 @@ def none_of_str_in(attr_name, str_collection):
 
 
 class FontFinder:
-    '''FontFinder object exposes this package's functionality.'''
+    '''Main class for accessing this library's functionality.'''
     def __init__(self):
         self._all_known_fonts = None
         self._small_unihan_data_private = None
@@ -372,14 +376,8 @@ class FontFinder:
     def all_installed_families(self):
         '''Returns a list of strings of the family names of all fonts installed on the system.
         '''
-        if platform.system() == "Darwin":
-            all_installed_families = mac.all_installed_families()
-        elif platform.system() == "Windows":
-            all_installed_families = windows.all_installed_families()
-        else:
-            raise Exception("Unsupported platform for FontFinder.get_installed_families()")
-        
-        return all_installed_families
+        font_platform = fontfinder._platforms.get_font_platform()
+        return font_platform.all_installed_families()        
 
     def installed_families(self, family_name_or_names):
         family_names = family_name_or_names
@@ -414,20 +412,12 @@ class FontFinder:
         return temp_dir
 
     def install_fonts(self, font_infos):
-        if platform.system() == "Darwin":
-            mac.install_fonts(font_infos)
-        elif platform.system() == "Windows":
-            windows.install_fonts(font_infos)
-        else:
-            raise Exception("Unsupported platform for FontFinder.install_fonts()")
+        font_platform = fontfinder._platforms.get_font_platform()
+        font_platform.install_fonts(font_infos)        
      
     def uninstall_fonts(self, font_infos):
-        if platform.system() == "Darwin":
-            mac.uninstall_fonts(font_infos)
-        elif platform.system() == "Windows":
-            windows.uninstall_fonts(font_infos)
-        else:
-            raise Exception("Unsupported platform for FontFinder.uninstall_fonts()")
+        font_platform = fontfinder._platforms.get_font_platform()
+        font_platform.uninstall_fonts(font_infos)        
 
 
 @dataclass
@@ -447,4 +437,9 @@ class TextInfo:
     each script that appears in the text.'''
     
 
+class FontFinderException(Exception):
+    pass
+
+class UnsupportedPlatformException(FontFinderException):
+    pass
 
