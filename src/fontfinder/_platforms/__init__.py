@@ -70,8 +70,8 @@ def get_font_platform():
         import fontfinder._platforms.mac
         return fontfinder._platforms.mac.MacPlatform()
     elif platform.system() == "Windows":
-        import fonfinder.platforms.windows
-        return fonfinder.platform.windows.WindowsPlatform()
+        import fontfinder._platforms.windows
+        return fontfinder._platforms.windows.WindowsPlatform()
     else:
         raise fontfinder.UnsupportedPlatformException()
 
