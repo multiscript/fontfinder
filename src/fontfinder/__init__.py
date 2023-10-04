@@ -15,7 +15,6 @@ Coming soon.
 from collections import Counter
 import json
 from pathlib import Path
-import platform
 import tempfile
 
 import requests
