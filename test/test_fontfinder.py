@@ -9,6 +9,7 @@ import unicodedataplus as udp
 import pytest
 
 from fontfinder import *
+from fontfinder.textinfo import TextInfo
 
 
 FONT_INSTALL_SLEEP_STEP = 1

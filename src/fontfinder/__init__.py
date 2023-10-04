@@ -9,7 +9,6 @@ Most functionality is provided by instantiating the `FontFinder` class.
 ## Top-Level Objects
 '''
 from collections import Counter
-from dataclasses import dataclass, field
 import json
 from pathlib import Path
 import platform
@@ -18,10 +17,10 @@ import tempfile
 import requests
 import unicodedataplus as udp
 
-import fontfinder
-import fontfinder._platforms
+from fontfinder.textinfo import TextInfo
 from fontfinder.filters import *
 from fontfinder.fontinfo import *
+from fontfinder import _platforms
 
 
 MAX_CHARS_TO_ANALYSE: int = 2048
@@ -326,7 +325,7 @@ class FontFinder:
     def all_installed_families(self):
         '''Returns a list of strings of the family names of all fonts installed on the system.
         '''
-        font_platform = fontfinder._platforms.get_font_platform()
+        font_platform = _platforms.get_font_platform()
         return font_platform.all_installed_families()        
 
     def installed_families(self, family_name_or_names):
@@ -362,30 +361,13 @@ class FontFinder:
         return temp_dir
 
     def install_fonts(self, font_infos):
-        font_platform = fontfinder._platforms.get_font_platform()
+        font_platform = _platforms.get_font_platform()
         font_platform.install_fonts(font_infos)        
      
     def uninstall_fonts(self, font_infos):
-        font_platform = fontfinder._platforms.get_font_platform()
+        font_platform = _platforms.get_font_platform()
         font_platform.uninstall_fonts(font_infos)        
 
-
-@dataclass
-class TextInfo:
-    main_script: str = ""
-    '''Name of the most frequently used Unicode script in a piece of text.'''
-
-    script_variant: str = ""
-    '''a secondary string used when the value of `main_script` is insufficient for choosing an appropriate font.'''
-
-    emoji_count: int = 0
-    '''Count of characters who have either the Emoji Presentation property or the Extended_Pictographic property set
-    (independant of script).'''
-
-    script_count: Counter = field(default_factory=Counter)
-    '''A collections.Counter of the count of each Unicode script in the text. The keys are the string names of
-    each script that appears in the text.'''
-    
 
 class FontFinderException(Exception):
     pass
