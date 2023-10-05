@@ -8,7 +8,7 @@ version = "0.10.0"
 
 description = "Analyses the Unicode scripts used by strings, and locates fonts that can help display those strings."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 dependencies = [
     "requests>=2.31",
     "semver>=3.0.1",
