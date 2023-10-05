@@ -219,9 +219,27 @@ class TestFontFinder:
         print("Uninstalling fonts")
         self.uninstall_fonts_and_verify(ff, test_font_infos)
 
-    def full_test(self):
+    def test_full_test(self):
         ff = FontFinderWithTestFonts()
+        self.uninstall_fonts_and_verify(ff, ff.get_test_font_infos())
+
         text_info = TextInfo("Latin", "Fontfinder")
+        font_family = ff.find_family(text_info)
+        assert font_family == "Fontfinder"
+
+        font_infos = ff.find_family_fonts(font_family)
+        assert font_infos == ff.get_test_font_infos()
+
+        font_infos = ff.find_family_fonts_to_download(font_family)
+        assert font_infos == ff.get_test_font_infos()
+
+        temp_dir = tempfile.TemporaryDirectory()
+        font_infos = ff.download_fonts(font_infos, temp_dir.name)
+        self.install_fonts_and_verify(ff, font_infos)
+        temp_dir.cleanup()
+
+        self.uninstall_fonts_and_verify(ff, font_infos)
+
 
     def install_fonts_and_verify(self, font_finder, font_infos):
         font_finder.install_fonts(font_infos)
