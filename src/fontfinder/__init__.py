@@ -20,9 +20,9 @@ import tempfile
 import requests
 import unicodedataplus as udp
 
-from fontfinder.textinfo import TextInfo
+from fontfinder.data_classes import TextInfo
 from fontfinder.filters import *
-from fontfinder.fontinfo import *
+from fontfinder.data_classes import *
 from fontfinder import _platforms
 
 
@@ -44,7 +44,7 @@ class FontFinder:
         self._small_unihan_data_private = None
         
         self.max_analysis_chars: int = 2048
-        '''Maximum number of characters of a string to analyse for script information.'''
+        '''Maximum number of characters of a string examined by `FontFinder.analyse().'''
         
         self.zh_hant_use_hk = False
         '''If True, `FontFinder.analyse()` selects Hong Kong rather than Taiwanese fonts for Traditional
@@ -162,15 +162,18 @@ class FontFinder:
         The number of characters analysed is set by the instance attribute `max_analysis_chars`.
 
         The attributes of the `TextInfo` result object are set as follows:
-        - `main_script`:    name of the most-frequently-used Unicode script in `text`.
+        - `main_script`:    Name of the most-frequently-used Unicode script in `text`. This is the long Unicode
+                            script value (known as a property value alias), rather than the short 4-character
+                            script code.
 
-        - `script_variant`: a secondary string used when the value of `main_script` is insufficient for choosing
-                            an appropriate font.
+        - `script_variant`: A secondary string used when the value of `main_script` is insufficient for choosing
+                            an appropriate font. This is not a Unicode property, but a scheme only used by
+                            `fontfinder`. See `FontFinder.analyse()` for examples.
 
-        - `emoji_count`:    count of characters who have either the Emoji Presentation property or the
-                            Extended_Pictographic property set (independant of script).
+        - `emoji_count`:    Count of characters who have either the Emoji Presentation property or the
+                            Extended_Pictographic property set (independent of script).
 
-        - `script_count`:   a [collections.Counter](https://docs.python.org/3/library/collections.html#collections.Counter)
+        - `script_count`:   A [collections.Counter](https://docs.python.org/3/library/collections.html#collections.Counter)
                             of the count of each Unicode script in the text. The keys are the string names of each
                             script that appears in the text (including `Common`, `Inherited` and `Unknown`).
 
@@ -402,9 +405,11 @@ ANY_SCRIPT = object()
 
 
 class FontFinderException(Exception):
+    '''Base Exception class for this library.'''
     pass
 
 
 class UnsupportedPlatformException(FontFinderException):
+    '''Raised when an operation is not supported on the current operating system.'''
     pass
 

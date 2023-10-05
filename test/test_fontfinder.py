@@ -9,7 +9,6 @@ import unicodedataplus as udp
 import pytest
 
 from fontfinder import *
-from fontfinder.textinfo import TextInfo
 
 
 FONT_INSTALL_SLEEP_STEP = 1
@@ -62,7 +61,6 @@ class FontFinderTest(FontFinder):
 
 
 class TestFontFinder:
-
     def get_test_font_info(self):
         font_info = FontInfo(main_script="Latin", family_name="Fontfinder", subfamily_name="Regular",
                              postscript_name="Fontfinder-Regular", form=FontForm.SANS_SERIF,

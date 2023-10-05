@@ -1,5 +1,9 @@
+'''Dataclass objects and enumerations used by `fontfinder`.
+'''
+from collections import Counter
 import csv
 import dataclasses
+from dataclasses import dataclass, field
 import functools
 from enum import Enum, Flag, auto
 from pathlib import Path, PurePosixPath
@@ -7,36 +11,67 @@ import re
 from urllib.parse import urlparse
 
 
+@dataclass
+class TextInfo:
+    '''Stories Unicode script information about a string of text, suitable for selecting the best font to display
+    the text.
+    '''
+    main_script: str = ""
+    '''Name of the most frequently used Unicode script in a piece of text. This is the long Unicode script value
+    (known as a property value alias), rather than the short 4-character script code.'''
+
+    script_variant: str = ""
+    '''A secondary string used when the value of `main_script` is insufficient for choosing an appropriate font.
+    This is not a Unicode property, but a scheme only used by `fontfinder`. See `FontFinder.analyse()` for examples.'''
+
+    emoji_count: int = 0
+    '''Count of characters who have either the Emoji Presentation property or the Extended_Pictographic property set
+    (independent of script).'''
+
+    script_count: Counter = field(default_factory=Counter)
+    '''A [collections.Counter](https://docs.python.org/3/library/collections.html#collections.Counter) of the count
+    of each Unicode script in the text. The keys are the string names of each script that appears in the text.'''
+
+
 @dataclasses.dataclass(order=True)
 class FontInfo:
+    '''Stores fonta metadata about an individual font file.'''
+
     main_script: str
-    '''Primary Unicode script covered by the font.'''
+    '''Primary Unicode script covered by the font. The same format as `TextInfo.main_script`.'''
 
     script_variant: str
-    '''Script variant covered by the font.'''
+    '''Script variant covered by the font. The same format as `TextInfo.script_variant`.'''
 
     family_name: str
-    '''Font family name'''
+    '''Font family name.'''
 
     subfamily_name: str
-    '''Font subfamily name (also referred to as the style name)'''
+    '''Font subfamily name (sometimes also referred to as the style name).'''
 
     postscript_name: str
-    '''Font PostScript name'''
+    '''Font PostScript name.'''
 
     form: 'FontForm'
+    '''Enum of the font form.'''
 
     width: 'FontWidth'
+    '''Enum of the font width.'''
 
     weight: 'FontWeight'
+    '''Enum of the font weight.'''
 
     style: 'FontStyle'
+    '''Enum of the font style.'''
 
     format: 'FontFormat'
+    '''Enum of the font file format.'''
 
     build: 'FontBuild'
+    '''Enum of the font build (mainly for Google Noto fonts).'''
 
     tags: 'FontTag'
+    '''Enum of extra tags describing the font file.'''
 
     url: str = ""
     '''URL download source for the font.'''
@@ -67,6 +102,7 @@ class FontInfo:
         self.path = Path() if path is None else path
 
     def init_from_noto_url(self, url):
+        '''Uses the url of a Google Noto font to set as much of the font metadata as possible.'''
         url_path = urlparse(url).path
         self.form = FontForm.from_str(url_path)
         self.width = FontWidth.from_str(url_path)
@@ -103,6 +139,8 @@ class FontInfo:
 
     @property
     def filename(self):
+        '''Returns just the filename component of this font file, using the path if it has one, or otherwise its
+        URL.'''
         if self.path is not None and self.path != Path():
             filename = self.path.name
         elif self.url is not None and self.url != "":
@@ -112,9 +150,11 @@ class FontInfo:
         return filename 
 
     def copy(self):
+        '''Returns a copy of this `FontInfo`.'''
         return FontInfo(**dataclasses.asdict(self))
 
     def str_dict(self):
+        '''Returns a dictionary of strings representing this object.'''
         str_dict = dataclasses.asdict(self)
         # Convert Enum-type fields to their string names without the Enum type-name
         for field_name, field_value in str_dict.items():
@@ -135,6 +175,7 @@ class FontInfo:
     
     @classmethod
     def from_str_dict(cls, str_dict):
+        '''Takes a dictionary of strings and returns a new FontInfo object.'''
         # Convert the string names of Enum-type fields to Enum instances
         # Use an empty (but initialized) instance to confirm actual field types. (This is because we've used forward
         # references for their type declaration, which results in their dataclasses.field type showing
@@ -162,6 +203,7 @@ class FontInfo:
 
 
 def write_font_infos_to_csv(font_infos, csv_path):
+    '''Write a list of `FontInfo` objects to a CSV file with the given `csv_path`.'''
     with open(csv_path, "w") as file:
         field_names = [field.name for field in dataclasses.fields(FontInfo)]
         writer = csv.DictWriter(file, field_names)
@@ -170,6 +212,8 @@ def write_font_infos_to_csv(font_infos, csv_path):
             writer.writerow(font.str_dict())
 
 def read_font_infos_from_csv(csv_path):
+    '''Read a CSV file at `csv_path` previously created by `write_font_infos_to_csv()` and use it to create and
+    return a list of `FontInfo` objects.'''
     font_infos = []
     with open(csv_path, "r") as file:
         reader = csv.DictReader(file)
@@ -180,6 +224,7 @@ def read_font_infos_from_csv(csv_path):
 
 @functools.total_ordering
 class FontForm(Enum):
+    '''Enum of font forms.'''
     UNSET       = auto()
     SERIF       = auto()
     SANS_SERIF  = auto()
@@ -215,10 +260,12 @@ font_form_str_data = {
     FontForm.NASTALIQ:      ("Nastaliq",    re.compile(r"Nastaliq", re.IGNORECASE)),
     FontForm.RASHI:         ("Rashi",       re.compile(r"Rashi",    re.IGNORECASE)),
 }
+'''Data for string conversion to and from `FontForm`.'''
 
 
 @functools.total_ordering
 class FontWidth(Enum):
+    '''Enum of font widths.'''
     NORMAL      = auto()
     VARIABLE    = auto()
     EXTRA_COND  = auto()
@@ -253,10 +300,12 @@ font_width_str_data = {
     FontWidth.EXTRA_COND:   ("ExtraCondensed", re.compile(r"Extra.?Condensed", re.IGNORECASE)),
     FontWidth.SEMI_COND:    ("SemiCondensed",  re.compile(r"Semi.?Condensed",  re.IGNORECASE)),
 }
+'''Data for string conversion to and from `FontWidth`.'''
 
 
 @functools.total_ordering
 class FontWeight(Enum):
+    '''Enum of font weights.'''
     REGULAR     = auto()
     VARIABLE    = auto()
     DEMI_LIGHT  = auto()
@@ -300,10 +349,12 @@ font_weight_str_data = {
     FontWeight.EXTRA_BOLD:      ("ExtraBold",  re.compile(r"Extra.?Bold",      re.IGNORECASE)),
     FontWeight.BLACK:           ("Black",      re.compile(r"Black",            re.IGNORECASE)),
 }
+'''Data for string conversion to and from `FontWeight`.'''
 
 
 @functools.total_ordering
 class FontStyle(Enum):
+    '''Enum of font styles.'''
     UPRIGHT     = auto()
     ITALIC      = auto()
  
@@ -332,10 +383,12 @@ class FontStyle(Enum):
 font_style_str_data = {
     FontStyle.ITALIC:          ("Italic", re.compile(r"Italic",            re.IGNORECASE)),
 }
+'''Data for string conversion to and from `FontStyle`.'''
 
 
 @functools.total_ordering
 class FontFormat(Enum):
+    '''Enum of font file formats.'''
     UNSET       = ""
     OTF         = "OTF"
     OTC         = "OTC"
@@ -364,10 +417,12 @@ font_format_str_data = {
     FontFormat.OTC:             ("OTC", re.compile(r"\.OTC",            re.IGNORECASE)),
     FontFormat.TTF:             ("TTF", re.compile(r"\.TTF",            re.IGNORECASE)),
 }
+'''Data for string conversion to and from `FontFormat`.'''
 
 
 @functools.total_ordering
 class FontBuild(Enum):
+    '''Enum of font builds (mainly for Google Noto fonts).'''
     UNSET       = auto()
     UNHINTED    = auto()
     HINTED      = auto()
@@ -396,15 +451,22 @@ font_build_str_data = {
     FontBuild.UNHINTED:    ("Unhinted", re.compile(r"Unhinted",  re.IGNORECASE)),
     FontBuild.FULL:        ("Full",     re.compile(r"Full",      re.IGNORECASE))
 }
+'''Data for string conversion to and from `FontBuild`.'''
 
 
 @functools.total_ordering
 class FontTag(Flag):
+    '''Enum of extra tags describing the font file.'''
     MONO        = auto()
-    UI          = auto() # UI font
+    '''A monospaced font.'''
+    UI          = auto()
+    '''A font aimed at UI display.'''
     DISPLAY     = auto()
-    SLIM        = auto() # Noto slim-build variable font
-    LOOPED      = auto() # Thai looped-variants
+    '''A display font.'''
+    SLIM        = auto()
+    '''A Google Noto slim-build variable font.'''
+    LOOPED      = auto()
+    '''A looped variant (e.g. for Thai fonts)'''
 
     def __lt__(self, other):
         if not isinstance(other, type(self)):
