@@ -63,8 +63,8 @@ class FontFinder:
 
     def set_prefs(self) -> None:
         '''Sets the font preferences. See the source code for this method to examine the built-in preferences
-        that `fontfinder` provides 'out-of-the-box'. These can be replaced by overriding this method, or otherwise
-        changed by modifying the `font_family_prefs` and `family_member_prefs` instance attributes.
+        that `fontfinder` uses 'out-of-the-box'. These can be replaced either by overriding this method, or editing
+        the `font_family_prefs` and `family_member_prefs` instance attributes.
         
         Font preferences are dictionaries of lists of filter functions. The dictionary keys are one of:
         - the`fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
@@ -73,7 +73,7 @@ class FontFinder:
         
         The dictionary values are lists of filter functions. The filters are usually created
         using the filter factories in the `fontfinder.filters` module. However, any custom filter function can be used
-        that takes a single `fontfinder.fontinfo.FontInfo` argument and returns True if the object should be included
+        that takes a single `fontfinder.data_classes.FontInfo` argument and returns True if the object should be included
         in the filtered list.
 
         Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
@@ -123,7 +123,7 @@ class FontFinder:
 
     def analyse(self, text: str) -> TextInfo:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
-        `fontfinder.textinfo.TextInfo` object with the results.
+        `fontfinder.data_classes.TextInfo` object with the results.
 
         The number of characters analysed is set by the instance attribute `max_analyse_chars`.
 
@@ -206,11 +206,10 @@ class FontFinder:
                         script_count=script_count)
 
     def find_font_families(self, str_or_text_info: str | TextInfo) -> list[str]:
-        '''Returns a list of the family names (strings) of all fonts (known to the library) that are suitable for
+        '''Returns a list of the family names (strings) of all fonts known to the library that are suitable for
         displaying some text. No font family preferences are applied.
         
-        `str_or_text_info` should either be the string of text itself, or a `TextInfo` object returned by
-        `analyse()`.
+        `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
         '''
         font_infos = self._text_info_to_font_infos(str_or_text_info)
         # We use a dictionary as a set that preserves insertion order, to return families in their original order.
@@ -222,8 +221,7 @@ class FontFinder:
         `str_or_text_info`. "Most-suitable" is determined applying the filter functions in `font_family_prefs`.
         If, after applying these filters, more than one family remains, the first family is returned.
         
-        `str_or_text_info` should either be the string of text itself, or a `TextInfo` object returned by
-        `analyse()`.
+        `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
         '''
         font_infos = self._text_info_to_font_infos(str_or_text_info)
         if len(font_infos) == 0:
@@ -233,41 +231,6 @@ class FontFinder:
                                            self.font_family_prefs, count_func, font_infos)
         family_name = font_infos[0].family_name
         return family_name
-
-    def known_fonts(self, filter_func = None) -> list[FontInfo]:
-        '''Returns a list of FontInfo objects for all fonts known to this library.
-        
-        This is a large list, which is cached in memory the first time the method is called.'''
-        # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
-        # than memory, by caching the full list of font_infos in memory.
-        if self._all_known_fonts is None:
-            self._all_known_fonts = noto.get_noto_fonts()
-        return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
-
-    def known_scripts(self, filter_func = None) -> list[str]:
-        '''Returns a list of the `main_script` values for all the fonts known to this library.'''
-        return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
-
-    def known_script_variants(self, filter_func = None) -> list[(str, str)]:
-        '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
-        # Use a dictionary as an ordered set
-        return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
-
-    def all_unicode_scripts(self) -> list[str]:
-        '''Returns a list of all script values in the Unicode standard.'''
-        return list(udp.property_value_aliases['script'].keys())
-
-    def scripts_not_known(self) -> list[str]:
-        '''Returns a list of all the Unicode script values not supported by the fonts known to this library.'''
-        return sorted(set(self.all_unicode_scripts()) - set(self.known_scripts()) -
-                      set(["Common", "Inherited", "Unknown"]))
-
-    @property
-    def _small_unihan_data(self):
-        if self._small_unihan_data_private is None:
-            with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
-                self._small_unihan_data_private = json.load(small_unihan_file)
-        return self._small_unihan_data_private
 
     def find_family_members_to_install(self, family_name_or_names: str | Iterable[str]) -> list[FontInfo]:
         '''Returns a list of FontInfo objects for any of the font families in `family_name_or_names` that are not
@@ -400,6 +363,41 @@ class FontFinder:
     def uninstall_fonts(self, font_infos) -> None:
         font_platform = _platforms.get_font_platform()
         font_platform.uninstall_fonts(font_infos)        
+
+    def known_fonts(self, filter_func = None) -> list[FontInfo]:
+        '''Returns a list of FontInfo objects for all fonts known to this library.
+        
+        This is a large list, which is cached in memory the first time the method is called.'''
+        # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
+        # than memory, by caching the full list of font_infos in memory.
+        if self._all_known_fonts is None:
+            self._all_known_fonts = noto.get_noto_fonts()
+        return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
+
+    def known_scripts(self, filter_func = None) -> list[str]:
+        '''Returns a list of the `main_script` values for all the fonts known to this library.'''
+        return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
+
+    def known_script_variants(self, filter_func = None) -> list[(str, str)]:
+        '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
+        # Use a dictionary as an ordered set
+        return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
+
+    def all_unicode_scripts(self) -> list[str]:
+        '''Returns a list of all script values in the Unicode standard.'''
+        return list(udp.property_value_aliases['script'].keys())
+
+    def scripts_not_known(self) -> list[str]:
+        '''Returns a list of all the Unicode script values not supported by the fonts known to this library.'''
+        return sorted(set(self.all_unicode_scripts()) - set(self.known_scripts()) -
+                      set(["Common", "Inherited", "Unknown"]))
+
+    @property
+    def _small_unihan_data(self):
+        if self._small_unihan_data_private is None:
+            with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
+                self._small_unihan_data_private = json.load(small_unihan_file)
+        return self._small_unihan_data_private
 
 
 ANY_SCRIPT = object()
