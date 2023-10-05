@@ -240,7 +240,6 @@ class TestFontFinder:
 
         self.uninstall_fonts_and_verify(ff, font_infos)
 
-
     def install_fonts_and_verify(self, font_finder, font_infos):
         font_finder.install_fonts(font_infos)
         for i in range(MAX_FONT_INSTALL_RETRIES):
@@ -262,8 +261,7 @@ class TestFontFinder:
                 break
         assert font_infos[0].family_name not in font_families
 
-
-    # @pytest.mark.skip("Investigation test to examine variants with multiple families")
+    @pytest.mark.skip("Investigation test to examine variants with multiple families")
     def test_multi_family_script_variants(self):
         ff = FontFinder()
         for (main_script, script_variant) in ff.known_script_variants():
