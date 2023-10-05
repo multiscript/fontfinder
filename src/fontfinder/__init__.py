@@ -53,13 +53,13 @@ class FontFinder:
         '''If True, `FontFinder.analyse()` selects Hong Kong rather than Taiwanese fonts for Traditional
         Chinese script.'''
 
-        self.font_family_prefs = {}
+        self.family_prefs = {}
         '''Font preferences for selecting a single font-family for some text. This attribute is a dictionary of lists
         of filter functions. See `set_prefs()` for more info.'''
 
-        self.family_member_prefs = {}
-        '''Font preferences for selecting the members of a given font-family. This attribute is a dictionary of lists
-        of filter functions. See `set_prefs()` for more info.'''
+        self.family_font_prefs = {}
+        '''Font preferences for selecting font files within a given font-family. This attribute is a dictionary of
+        lists of filter functions. See `set_prefs()` for more info.'''
 
         self.set_prefs()
 
@@ -92,36 +92,38 @@ class FontFinder:
         ```
         '''
         # For Adlam, prefer joined to unjoined.
-        self.font_family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
+        self.family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
         # For Arabic, prefer the more traditional Naskh form
-        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+        self.family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
         # For Hebrew, prefer the more traditional Serif form
-        self.font_family_prefs[("Hebrew", "")] = [any_of("family_name", ["Noto Serif Hebrew"])]
+        self.family_prefs[("Hebrew", "")] = [any_of("family_name", ["Noto Serif Hebrew"])]
         # For Khitan Small Script, prefer Noto Serif Khitan Small Script, as the purpose of the other fonts isn't clear
-        self.font_family_prefs[("Khitan_Small_Script", "")] = [any_of("family_name",
+        self.family_prefs[("Khitan_Small_Script", "")] = [any_of("family_name",
                                                                      ["Noto Serif Khitan Small Script"])]
         # For Lao, prefer more traidtional looped fonts
-        self.font_family_prefs[("Lao", "")] = [any_of_str_in("family_name", ["Looped"])]
+        self.family_prefs[("Lao", "")] = [any_of_str_in("family_name", ["Looped"])]
         # For Nko, prefer Noto Sans NKo to unjoined
-        self.font_family_prefs[("Nko", "")] = [any_of("family_name", ["Noto Sans NKo"])]
+        self.family_prefs[("Nko", "")] = [any_of("family_name", ["Noto Sans NKo"])]
         # For Nushu, prefer Noto Sans Nushu as it is better for smaller font sizes
-        self.font_family_prefs[("Nushu", "")] = [any_of("family_name", ["Noto Sans Nushu"])]
+        self.family_prefs[("Nushu", "")] = [any_of("family_name", ["Noto Sans Nushu"])]
         # For Tamil, don't use the Supplement font
-        self.font_family_prefs[("Tamil", "")] = [none_of_str_in("family_name", ["Supplement"])]
-        # For Thai, prefer more traidtional looped fonts, and Noto Sans Thai Looped in particular
-        self.font_family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
+        self.family_prefs[("Tamil", "")] = [none_of_str_in("family_name", ["Supplement"])]
+        # For Thai, prefer more traditional looped fonts, and Noto Sans Thai Looped in particular
+        self.family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
         # Prefer sans-serif fonts, and exclude mono, display and UI forms where possible.
-        self.font_family_prefs[ANY_SCRIPT] = [any_of("form",        [FontForm.SANS_SERIF]),
+        self.family_prefs[ANY_SCRIPT] = [any_of("form",        [FontForm.SANS_SERIF]),
                                               none_of_in("tags",    [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
-        self.family_member_prefs[ANY_SCRIPT] = [none_of("width",    [FontWidth.VARIABLE]),
-                                                none_of("weight",   [FontWidth.VARIABLE]),
-                                                none_of_in("tags",  [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
-                                                any_of("build",     [FontBuild.FULL]),
-                                                any_of("build",     [FontBuild.HINTED]),
-                                                any_of("format",    [FontFormat.OTF]),
-                                                any_of("format",    [FontFormat.TTF]),
-                                                any_of("format",    [FontFormat.OTC]),
-                                               ]
+        
+        # With a font family, avoid variable fonts, and mono, display and UI fonts. Prefer full builds, and OTF files.
+        self.family_font_prefs[ANY_SCRIPT] = [none_of("width",    [FontWidth.VARIABLE]),
+                                              none_of("weight",   [FontWidth.VARIABLE]),
+                                              none_of_in("tags",  [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
+                                              any_of("build",     [FontBuild.FULL]),
+                                              any_of("build",     [FontBuild.HINTED]),
+                                              any_of("format",    [FontFormat.OTF]),
+                                              any_of("format",    [FontFormat.TTF]),
+                                              any_of("format",    [FontFormat.OTC]),
+                                             ]
 
     def analyse(self, text: str) -> TextInfo:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
@@ -207,7 +209,7 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
-    def find_font_families(self, str_or_text_info: str | TextInfo) -> list[str]:
+    def find_families(self, str_or_text_info: str | TextInfo) -> list[str]:
         '''Returns a list of the family names (strings) of all fonts known to the library that are suitable for
         displaying some text. No font family preferences are applied.
         
@@ -218,9 +220,9 @@ class FontFinder:
         family_names = {font_info.family_name: 1 for font_info in font_infos}
         return list(family_names.keys())
 
-    def find_font_family(self, str_or_text_info: str | TextInfo) -> str:
+    def find_family(self, str_or_text_info: str | TextInfo) -> str:
         '''Returns the family name (a string) of the single font family considered most-suitable for
-        `str_or_text_info`. "Most-suitable" is determined applying the filter functions in `font_family_prefs`.
+        `str_or_text_info`. "Most-suitable" is determined applying the filter functions in `family_prefs`.
         If, after applying these filters, more than one family remains, the first family is returned.
         
         `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
@@ -230,30 +232,20 @@ class FontFinder:
             return None
         count_func = lambda font_infos: len({font_info.family_name for font_info in font_infos})
         font_infos = self._apply_pref_dict(font_infos[0].main_script, font_infos[0].script_variant,
-                                           self.font_family_prefs, count_func, font_infos)
+                                           self.family_prefs, count_func, font_infos)
         family_name = font_infos[0].family_name
         return family_name
 
-    def find_family_members_to_install(self, family_name_or_names: str | Iterable[str]) -> list[FontInfo]:
-        '''Returns a list of FontInfo objects for any of the font families in `family_name_or_names` that are not
-        currently installed. The list is filtered according to the filter functions in the preference attribute
-        `family_member_prefs`.
-
-        `family_name_or_names` can be the string of a single font family names, or a list of strings of font family
-        names.
-        '''
-        family_names = self.not_installed_families(family_name_or_names)
-        return self.find_family_members(family_names)
-
-    def find_family_members(self, family_name_or_names: str | Iterable[str],
-                            main_script:str = None, script_variant:str = None) -> list[FontInfo]:
-        '''Returns a list of FontInfo objects for the font family name or names in `family_name_or_names`.
-        The list is filtered according to the filter functions in the preference attribute `family_member_prefs`.
+    def find_family_fonts(self, family_name_or_names: str | Iterable[str],
+                          main_script:str = None, script_variant:str = None) -> list[FontInfo]:
+        '''Returns a list of `FontInfo` objects for font files matching the given font family name or names.
+        The list is filtered using the filter functions in `family_font_prefs`.
          
-        `family_name_or_names` can be the string of a single font family names, or a list of strings of font family
-        names. `main_script` and `script_variant` can optionally be specified, to ensure these fields have
-        the correct value in the returned list. Otherwise, the first `main_script` and `script_variant` values
-        found (for the given family) are used.
+        `family_name_or_names` can be a single font family name, or an iterable of family names.
+
+        Some font families match several Unicode scripts. In these cases, `main_script` and `script_variant`
+        can optionally be specified, to ensure these fields have the correct value in the resulting `FontInfo` list.
+        Otherwise, `main_script` and `script_variant` will have the first values found within the given font families.
         '''
         family_names = family_name_or_names
         if isinstance(family_names, str):
@@ -270,9 +262,55 @@ class FontFinder:
         font_infos = [font_info for font_info in font_infos if font_info.main_script == main_script and \
                                                                font_info.script_variant == script_variant]
         count_func = len
-        font_infos = self._apply_pref_dict(main_script, script_variant, self.family_member_prefs, count_func,
+        font_infos = self._apply_pref_dict(main_script, script_variant, self.family_font_prefs, count_func,
                                            font_infos)
         return font_infos
+
+    def find_family_fonts_to_download(self, family_name_or_names: str | Iterable[str],
+                                      main_script:str = None, script_variant:str = None) -> list[FontInfo]:
+        '''Returns a list of `FontInfo` objects for font files that need to be downloaded. This list is formed
+        by finding fonts matching the given family names, where those families are not currently installed,
+        the filters in `family_font_prefs` have been applied, and download URLs are provided.
+
+        If the returned list is empty, then no fonts need to be downloaded, either because the font families are
+        already installed, or no download URLs are provided.
+        
+        `family_name_or_names` can be a single font family name, or an iterable of family names.
+
+        Some font families match several Unicode scripts. In these cases, `main_script` and `script_variant`
+        can optionally be specified, to ensure these fields have the correct value in the resulting `FontInfo` list.
+        Otherwise, `main_script` and `script_variant` will have the first values found within the given font families.
+        '''
+        family_names = self.not_installed_families(family_name_or_names)
+        font_infos = self.find_family_fonts(family_names, main_script, script_variant)
+        return self.download_fonts(font_infos)
+
+    def download_fonts(self, font_infos: Iterable[FontInfo],
+                       download_dir: str | Path = None)-> tempfile.TemporaryDirectory | None:
+        temp_dir = None
+        if download_dir is None:
+            temp_dir = tempfile.TemporaryDirectory()
+            download_dir = Path(temp_dir.name)
+        else:
+            download_dir = Path(download_dir)
+        font_infos = [font_info.copy() for font_info in font_infos]
+        for font_info in font_infos:
+            if font_info.url is None or font_info.url == "":
+                continue
+            response = requests.get(font_info.url, stream=True)
+            font_info.path = download_dir / font_info.filename
+            with open(font_info.path, 'wb') as file:
+                for chunk in response.iter_content(chunk_size=128):
+                    file.write(chunk)
+        return temp_dir
+
+    def install_fonts(self, font_infos: Iterable[FontInfo]) -> None:
+        font_platform = _platforms.get_font_platform()
+        font_platform.install_fonts(font_infos)        
+     
+    def uninstall_fonts(self, font_infos: Iterable[FontInfo]) -> None:
+        font_platform = _platforms.get_font_platform()
+        font_platform.uninstall_fonts(font_infos)        
 
     def _text_info_to_font_infos(self, str_or_text_info):
         if isinstance(str_or_text_info, str):
@@ -321,7 +359,7 @@ class FontFinder:
         return cur_list
 
     def all_installed_families(self) -> list[str]:
-        '''Returns a list of strings of the family names of all fonts installed on the system.
+        '''Returns a list of the family names of all fonts installed on the system.
         '''
         font_platform = _platforms.get_font_platform()
         return font_platform.all_installed_families()        
@@ -340,31 +378,9 @@ class FontFinder:
         all_installed_families = set(self.all_installed_families())
         return [family_name for family_name in family_names if family_name not in all_installed_families]
 
-    def download_fonts(self, font_infos, download_dir = None) -> tempfile.TemporaryDirectory | None:
-        temp_dir = None
-        if download_dir is None:
-            temp_dir = tempfile.TemporaryDirectory()
-            download_dir = Path(temp_dir.name)
-        else:
-            download_dir = Path(download_dir)
-        font_infos = [font_info.copy() for font_info in font_infos]
-        for font_info in font_infos:
-            if font_info.url is None or font_info.url == "":
-                continue
-            response = requests.get(font_info.url, stream=True)
-            font_info.path = download_dir / font_info.filename
-            with open(font_info.path, 'wb') as file:
-                for chunk in response.iter_content(chunk_size=128):
-                    file.write(chunk)
-        return temp_dir
-
-    def install_fonts(self, font_infos) -> None:
-        font_platform = _platforms.get_font_platform()
-        font_platform.install_fonts(font_infos)        
-     
-    def uninstall_fonts(self, font_infos) -> None:
-        font_platform = _platforms.get_font_platform()
-        font_platform.uninstall_fonts(font_infos)        
+    def downloadable_fonts(self, font_infos: Iterable[FontInfo]) -> list[FontInfo]:
+        '''Return the list of `font_infos` filtered to those that have download URLs provided.'''
+        return [font_info for font_info in font_infos if font_info.url is not None and font_info.url != ""]
 
     def known_fonts(self, filter_func = None) -> list[FontInfo]:
         '''Returns a list of FontInfo objects for all fonts known to this library.

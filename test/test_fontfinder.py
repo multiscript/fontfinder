@@ -123,13 +123,13 @@ class TestFontFinder:
     def test_find_font_families(self):
         ff = FontFinder()
         for sample_text in sample_texts:
-            family_names = ff.find_font_families(sample_text['text'])
+            family_names = ff.find_families(sample_text['text'])
             assert sample_text['expected_family_names'] == family_names
 
     def test_find_font_family(self):
         ff = FontFinder()
         for sample_text in sample_texts:
-            family_name = ff.find_font_family(sample_text['text'])
+            family_name = ff.find_family(sample_text['text'])
             assert sample_text['expected_family_name'] == family_name
 
     def test_find_family_members(self):
@@ -137,9 +137,9 @@ class TestFontFinder:
         main_script = "Latin"
         script_variant = ""
         print("Finding family")
-        family_name = ff.find_font_family(TextInfo(main_script, script_variant))
+        family_name = ff.find_family(TextInfo(main_script, script_variant))
         print("Finding family members")
-        ff.find_family_members(family_name)
+        ff.find_family_fonts(family_name)
 
     def test_all_installed_families(self):
         ff = FontFinder()
@@ -157,9 +157,9 @@ class TestFontFinder:
         font_infos = []
         for (main_script, script_variant) in ff.known_script_variants():
             print(f"{main_script}, {script_variant}")
-            font_family = ff.find_font_family(TextInfo(main_script, script_variant))
+            font_family = ff.find_family(TextInfo(main_script, script_variant))
             print(font_family)
-            font_infos.extend(ff.find_family_members(font_family, main_script, script_variant))
+            font_infos.extend(ff.find_family_fonts(font_family, main_script, script_variant))
         filename = "known_script_variants.csv"
         self._font_infos_test_to_csv(font_infos, filename, test_mode)
 
@@ -244,7 +244,7 @@ class TestFontFinder:
     def test_multi_family_script_variants(self):
         ff = FontFinder()
         for (main_script, script_variant) in ff.known_script_variants():
-            font_families = ff.find_font_families(TextInfo(main_script, script_variant))
+            font_families = ff.find_families(TextInfo(main_script, script_variant))
             if len(font_families) > 1:
                 print(f"{main_script}, {script_variant}:")
                 print(font_families)
