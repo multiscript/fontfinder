@@ -76,14 +76,14 @@ class FontInfo:
     url: str = ""
     '''URL download source for the font.'''
 
-    path: Path = Path()
-    '''Path to the font on the local filesystem for installation.'''
+    downloaded_path: Path = Path()
+    '''Path to the downloaded font on the local filesystem for installation.'''
 
     def __init__(self, main_script: str = None, script_variant: str = None, family_name: str = None,
                  subfamily_name: str = None, postscript_name: str = None, form: 'FontForm' = None,
                  width: 'FontWidth' = None, weight: 'FontWeight' = None, style: 'FontStyle' = None,
                  format: 'FontFormat' = None, build: 'FontBuild' = None, tags: 'FontTag' = None, url: str  = None,
-                 path: Path = None 
+                 downloaded_path: Path = None 
                 ):
 
         self.main_script = "" if main_script is None else main_script
@@ -99,7 +99,7 @@ class FontInfo:
         self.build = FontBuild.UNSET if build is None else build
         self.tags = FontTag(0) if tags is None else tags
         self.url = "" if url is None else url
-        self.path = Path() if path is None else path
+        self.downloaded_path = Path() if downloaded_path is None else downloaded_path
 
     def init_from_noto_url(self, url):
         '''Uses the url of a Google Noto font to set as much of the font metadata as possible.'''
@@ -141,8 +141,8 @@ class FontInfo:
     def filename(self):
         '''Returns just the filename component of this font file, using the path if it has one, or otherwise its
         URL.'''
-        if self.path is not None and self.path != Path():
-            filename = self.path.name
+        if self.downloaded_path is not None and self.downloaded_path != Path():
+            filename = self.downloaded_path.name
         elif self.url is not None and self.url != "":
             filename = PurePosixPath(urlparse(self.url).path).name
         else:

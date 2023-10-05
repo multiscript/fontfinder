@@ -74,8 +74,8 @@ class WindowsPlatform(fontfinder._platforms.FontPlatform):
         for font_info in font_infos:
             dest_path = USER_FONT_DIR / font_info.filename
             font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
-            if font_info.path is not None and font_info.path != Path():
-                shutil.copy2(font_info.path, USER_FONT_DIR)
+            if font_info.downloaded_path is not None and font_info.downloaded_path != Path():
+                shutil.copy2(font_info.downloaded_path, USER_FONT_DIR)
             else:
                 raise Exception()
             winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))

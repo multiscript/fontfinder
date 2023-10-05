@@ -29,28 +29,28 @@ class FontFinderTest(FontFinder):
                           width=FontWidth.NORMAL, weight=FontWeight.REGULAR, style=FontStyle.UPRIGHT,
                           format=FontFormat.OTF,
                           url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Regular.otf",
-                          path=Path(__file__, "../data/Fontfinder-Regular.otf").resolve())
+                          downloaded_path=Path(__file__, "../data/Fontfinder-Regular.otf").resolve())
                          )
         font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
                           subfamily_name="Bold", postscript_name="Fontfinder-Bold", form=FontForm.SANS_SERIF,
                           width=FontWidth.NORMAL, weight=FontWeight.BOLD, style=FontStyle.UPRIGHT,
                           format=FontFormat.OTF,
                           url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Bold.otf",
-                          path=Path(__file__, "../data/Fontfinder-Bold.otf").resolve())
+                          downloaded_path=Path(__file__, "../data/Fontfinder-Bold.otf").resolve())
                          )
         font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
                           subfamily_name="Italic", postscript_name="Fontfinder-Italic", form=FontForm.SANS_SERIF,
                           width=FontWidth.NORMAL, weight=FontWeight.REGULAR, style=FontStyle.ITALIC,
                           format=FontFormat.OTF,
                           url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Italic.otf",
-                          path=Path(__file__, "../data/Fontfinder-Italic.otf").resolve())
+                          downloaded_path=Path(__file__, "../data/Fontfinder-Italic.otf").resolve())
                          )
         font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
                           subfamily_name="Bold Italic", postscript_name="Fontfinder-BoldItalic",
                           form=FontForm.SANS_SERIF, width=FontWidth.NORMAL, weight=FontWeight.BOLD,
                           style=FontStyle.ITALIC, format=FontFormat.OTF,
                           url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-BoldItalic.otf",
-                          path=Path(__file__, "../data/Fontfinder-BoldItalic.otf").resolve())
+                          downloaded_path=Path(__file__, "../data/Fontfinder-BoldItalic.otf").resolve())
                          )
         return font_infos
     
@@ -67,7 +67,7 @@ class TestFontFinder:
                              width=FontWidth.NORMAL, weight=FontWeight.REGULAR, style=FontStyle.UPRIGHT,
                              format=FontFormat.OTF,
                              url="https://github.com/multiscript/fontfinder/raw/main/test/data/Fontfinder-Regular.otf",
-                             path=Path(__file__, "../data/Fontfinder-Regular.otf").resolve()
+                             downloaded_path=Path(__file__, "../data/Fontfinder-Regular.otf").resolve()
                              )
         return font_info
 

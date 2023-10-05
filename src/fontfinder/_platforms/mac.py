@@ -76,8 +76,8 @@ class MacPlatform(fontfinder._platforms.FontPlatform):
 
     def install_fonts(self, font_infos):
         for font_info in font_infos:
-            if font_info.path is not None and font_info.path != Path():
-                shutil.copy2(font_info.path, USER_FONT_DIR)
+            if font_info.downloaded_path is not None and font_info.downloaded_path != Path():
+                shutil.copy2(font_info.downloaded_path, USER_FONT_DIR)
             else:
                 raise Exception()
 
