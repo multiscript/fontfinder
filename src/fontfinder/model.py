@@ -149,6 +149,11 @@ class FontInfo:
             filename = None
         return filename 
 
+    @property
+    def fullname(self):
+        '''Returns a string of the family and subfamily named combined (separated by a space).'''
+        return f"{self.family_name} {self.subfamily_name}".strip()
+
     def copy(self):
         '''Returns a copy of this `FontInfo`.'''
         return FontInfo(**dataclasses.asdict(self))

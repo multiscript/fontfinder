@@ -34,6 +34,7 @@ import shutil
 from sys import getwindowsversion
 import winreg
 
+from fontfinder import FontFinderException
 import fontfinder._platforms
 
 
@@ -86,12 +87,12 @@ class WindowsPlatform(fontfinder._platforms.FontPlatform):
         user32 = User32Library()
         reg_font_key = winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, USER_FONT_REG_PATH)
         for font_info in font_infos:
-            font_family_subfamily = f"{font_info.family_name} {font_info.subfamily_name}".strip()
-            winreg.DeleteValue(reg_font_key, font_family_subfamily)
-            if font_info.filename is not None:
-                os.remove(USER_FONT_DIR / font_info.filename)
-            else:
-                raise Exception()
+            if font_info.family_name is None or font_info.family_name == "":
+                raise FontFinderException("Can't uninstall font without a family name")
+            winreg.DeleteValue(reg_font_key, font_info.fullname)
+            if font_info.filename is None:
+                raise FontFinderException("Can't uninstall font without a filename")
+            os.remove(USER_FONT_DIR / font_info.filename)
         reg_font_key.Close()
         user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
     

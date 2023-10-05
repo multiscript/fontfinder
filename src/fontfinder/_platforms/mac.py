@@ -32,6 +32,7 @@ import shutil
 
 import semver
 
+from fontfinder import FontFinderException
 import fontfinder._platforms
 
 
@@ -83,10 +84,9 @@ class MacPlatform(fontfinder._platforms.FontPlatform):
 
     def uninstall_fonts(self, font_infos):
         for font_info in font_infos:
-            if font_info.filename is not None:
-                os.remove(USER_FONT_DIR / font_info.filename)
-            else:
-                raise Exception()
+            if font_info.filename is None:
+                raise FontFinderException("Can't uninstall font without a filename")
+            os.remove(USER_FONT_DIR / font_info.filename)
 
 
 class CoreFoundationLibrary(fontfinder._platforms.CTypesLibrary):

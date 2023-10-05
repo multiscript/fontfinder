@@ -299,10 +299,17 @@ class FontFinder:
         return font_infos
 
     def install_fonts(self, font_infos: Iterable[FontInfo]) -> None:
+        '''Install the font files in `font_infos`. The `downloaded_path` of each `FontInfo` must point to the
+        actual font file in the filesystem.
+        
+        Font are installed to the user font collection, rather than the system-wide font collection.'''
         font_platform = _platforms.get_font_platform()
         font_platform.install_fonts(font_infos)        
      
     def uninstall_fonts(self, font_infos: Iterable[FontInfo]) -> None:
+        '''Uninstall the font files in `font_infos`. The fonts must exist the the user font collection, otherwise they
+        will not be uninstalled.
+        '''
         font_platform = _platforms.get_font_platform()
         font_platform.uninstall_fonts(font_infos)        
 
