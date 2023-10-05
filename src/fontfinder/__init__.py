@@ -16,6 +16,7 @@ from collections import Counter
 import json
 from pathlib import Path
 import tempfile
+from typing import Iterable
 
 import requests
 import unicodedataplus as udp
@@ -60,7 +61,7 @@ class FontFinder:
 
         self.set_prefs()
 
-    def set_prefs(self):
+    def set_prefs(self) -> None:
         '''Sets the font preferences. See the source code for this method to examine the built-in preferences
         that `fontfinder` provides 'out-of-the-box'. These can be replaced by overriding this method, or otherwise
         changed by modifying the `font_family_prefs` and `family_member_prefs` instance attributes.
@@ -120,7 +121,7 @@ class FontFinder:
                                                 any_of("format",    [FontFormat.OTC]),
                                                ]
 
-    def analyse(self, text: str):
+    def analyse(self, text: str) -> TextInfo:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
         `fontfinder.textinfo.TextInfo` object with the results.
 
@@ -204,7 +205,7 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
-    def find_font_families(self, str_or_text_info) -> list[str]:
+    def find_font_families(self, str_or_text_info: str | TextInfo) -> list[str]:
         '''Returns a list of the family names (strings) of all fonts (known to the library) that are suitable for
         displaying some text. No font family preferences are applied.
         
@@ -216,7 +217,7 @@ class FontFinder:
         family_names = {font_info.family_name: 1 for font_info in font_infos}
         return list(family_names.keys())
 
-    def find_font_family(self, str_or_text_info):
+    def find_font_family(self, str_or_text_info: str | TextInfo) -> str:
         '''Returns the family name (a string) of the single font family considered most-suitable for
         `str_or_text_info`. "Most-suitable" is determined applying the filter functions in `font_family_prefs`.
         If, after applying these filters, more than one family remains, the first family is returned.
@@ -233,7 +234,7 @@ class FontFinder:
         family_name = font_infos[0].family_name
         return family_name
 
-    def known_fonts(self, filter_func = None):
+    def known_fonts(self, filter_func = None) -> list[FontInfo]:
         '''Returns a list of FontInfo objects for all fonts known to this library.
         
         This is a large list, which is cached in memory the first time the method is called.'''
@@ -243,20 +244,20 @@ class FontFinder:
             self._all_known_fonts = noto.get_noto_fonts()
         return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
 
-    def known_scripts(self, filter_func = None):
+    def known_scripts(self, filter_func = None) -> list[str]:
         '''Returns a list of the `main_script` values for all the fonts known to this library.'''
         return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
 
-    def known_script_variants(self, filter_func = None):
+    def known_script_variants(self, filter_func = None) -> list[(str, str)]:
         '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
         # Use a dictionary as an ordered set
         return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
 
-    def all_unicode_scripts(self):
+    def all_unicode_scripts(self) -> list[str]:
         '''Returns a list of all script values in the Unicode standard.'''
         return list(udp.property_value_aliases['script'].keys())
 
-    def scripts_not_known(self):
+    def scripts_not_known(self) -> list[str]:
         '''Returns a list of all the Unicode script values not supported by the fonts known to this library.'''
         return sorted(set(self.all_unicode_scripts()) - set(self.known_scripts()) -
                       set(["Common", "Inherited", "Unknown"]))
@@ -267,9 +268,8 @@ class FontFinder:
             with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
                 self._small_unihan_data_private = json.load(small_unihan_file)
         return self._small_unihan_data_private
-    
 
-    def find_family_members_to_install(self, family_name_or_names):
+    def find_family_members_to_install(self, family_name_or_names: str | Iterable[str]) -> list[FontInfo]:
         '''Returns a list of FontInfo objects for any of the font families in `family_name_or_names` that are not
         currently installed. The list is filtered according to the filter functions in the preference attribute
         `family_member_prefs`.
@@ -280,7 +280,8 @@ class FontFinder:
         family_names = self.not_installed_families(family_name_or_names)
         return self.find_family_members(family_names)
 
-    def find_family_members(self, family_name_or_names, main_script=None, script_variant=None):
+    def find_family_members(self, family_name_or_names: str | Iterable[str],
+                            main_script:str = None, script_variant:str = None) -> list[FontInfo]:
         '''Returns a list of FontInfo objects for the font family name or names in `family_name_or_names`.
         The list is filtered according to the filter functions in the preference attribute `family_member_prefs`.
          
@@ -354,27 +355,27 @@ class FontFinder:
                 cur_list = new_list
         return cur_list
 
-    def all_installed_families(self):
+    def all_installed_families(self) -> list[str]:
         '''Returns a list of strings of the family names of all fonts installed on the system.
         '''
         font_platform = _platforms.get_font_platform()
         return font_platform.all_installed_families()        
 
-    def installed_families(self, family_name_or_names):
+    def installed_families(self, family_name_or_names) -> list[str]:
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
         all_installed_families = set(self.all_installed_families())
         return [family_name for family_name in family_names if family_name in all_installed_families]
 
-    def not_installed_families(self, family_name_or_names):
+    def not_installed_families(self, family_name_or_names) -> list[str]:
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
         all_installed_families = set(self.all_installed_families())
         return [family_name for family_name in family_names if family_name not in all_installed_families]
 
-    def download_fonts(self, font_infos, download_dir = None):
+    def download_fonts(self, font_infos, download_dir = None) -> tempfile.TemporaryDirectory | None:
         temp_dir = None
         if download_dir is None:
             temp_dir = tempfile.TemporaryDirectory()
@@ -392,11 +393,11 @@ class FontFinder:
                     file.write(chunk)
         return temp_dir
 
-    def install_fonts(self, font_infos):
+    def install_fonts(self, font_infos) -> None:
         font_platform = _platforms.get_font_platform()
         font_platform.install_fonts(font_infos)        
      
-    def uninstall_fonts(self, font_infos):
+    def uninstall_fonts(self, font_infos) -> None:
         font_platform = _platforms.get_font_platform()
         font_platform.uninstall_fonts(font_infos)        
 
