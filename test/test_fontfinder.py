@@ -187,19 +187,23 @@ class TestFontFinder:
         #         assert False
         assert write_fonts == read_fonts
 
-    def test_download_fonts(self):
+    def test_download_fonts(self, test_mode = TestMode.TEST):
         ff = FontFinderTest()
         test_font_infos = ff.get_test_font_infos()
-        download_dir = None #Path("~/Desktop/TestFontFinder/Download").expanduser()
-        # download_dir.mkdir(parents=True, exist_ok=True)
-        temp_download_dir = ff.download_fonts(test_font_infos, download_dir)
-        if temp_download_dir is not None:
-            download_dir = temp_download_dir.name
+        temp_dir = None
+        if test_mode is TestMode.TEST:
+            temp_dir = tempfile.TemporaryDirectory()
+            download_dir = temp_dir.name
+        elif test_mode is TestMode.OBSERVE:
+            download_dir = Path("~/Desktop/TestFontFinder/Download").expanduser()
+            download_dir.mkdir(parents=True, exist_ok=True)
+
+        ff.download_fonts(test_font_infos, download_dir)
         filenames = [font_info.filename for font_info in test_font_infos]
         cmp_result = filecmp.cmpfiles(download_dir, Path(__file__, "../data").resolve(), filenames,
                                       shallow=False)
-        if temp_download_dir is not None:
-            temp_download_dir.cleanup()
+        if temp_dir is not None:
+            temp_dir.cleanup()
         assert cmp_result[1] == []
         assert cmp_result[2] == []
 

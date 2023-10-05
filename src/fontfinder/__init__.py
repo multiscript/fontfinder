@@ -238,13 +238,13 @@ class FontFinder:
 
     def find_family_fonts(self, family_name_or_names: str | Iterable[str],
                           main_script:str = None, script_variant:str = None) -> list[FontInfo]:
-        '''Returns a list of `FontInfo` objects for font files matching the given font family name or names.
-        The list is filtered using the filter functions in `family_font_prefs`.
+        '''Returns a list of `FontInfo` objects for font files matching the given font family names.
+        The list is filtered using the functions in `family_font_prefs`.
          
         `family_name_or_names` can be a single font family name, or an iterable of family names.
 
         Some font families match several Unicode scripts. In these cases, `main_script` and `script_variant`
-        can optionally be specified, to ensure these fields have the correct value in the resulting `FontInfo` list.
+        can optionally be specified, to ensure these fields have the correct value in the returned `FontInfo` list.
         Otherwise, `main_script` and `script_variant` will have the first values found within the given font families.
         '''
         family_names = family_name_or_names
@@ -270,7 +270,7 @@ class FontFinder:
                                       main_script:str = None, script_variant:str = None) -> list[FontInfo]:
         '''Returns a list of `FontInfo` objects for font files that need to be downloaded. This list is formed
         by finding fonts matching the given family names, where those families are not currently installed,
-        the filters in `family_font_prefs` have been applied, and download URLs are provided.
+        the filters in `family_font_prefs` have been applied, and the fonts have download URLs provided.
 
         If the returned list is empty, then no fonts need to be downloaded, either because the font families are
         already installed, or no download URLs are provided.
@@ -285,24 +285,18 @@ class FontFinder:
         font_infos = self.find_family_fonts(family_names, main_script, script_variant)
         return self.download_fonts(font_infos)
 
-    def download_fonts(self, font_infos: Iterable[FontInfo],
-                       download_dir: str | Path = None)-> tempfile.TemporaryDirectory | None:
-        temp_dir = None
-        if download_dir is None:
-            temp_dir = tempfile.TemporaryDirectory()
-            download_dir = Path(temp_dir.name)
-        else:
-            download_dir = Path(download_dir)
-        font_infos = [font_info.copy() for font_info in font_infos]
+    def download_fonts(self, font_infos: Iterable[FontInfo], download_dir: str | Path) -> list[FontInfo]:
+        '''Downloads the font files in `font_infos`, in preparation for installation. Returns a list of copied
+        `FontInfo` objects where the `downloaded_path` attribute points to each new file.'''
+        download_dir = Path(download_dir)
+        font_infos = self.downloadable_fonts([font_info.copy() for font_info in font_infos])
         for font_info in font_infos:
-            if font_info.url is None or font_info.url == "":
-                continue
             response = requests.get(font_info.url, stream=True)
             font_info.path = download_dir / font_info.filename
             with open(font_info.path, 'wb') as file:
                 for chunk in response.iter_content(chunk_size=128):
                     file.write(chunk)
-        return temp_dir
+        return font_infos
 
     def install_fonts(self, font_infos: Iterable[FontInfo]) -> None:
         font_platform = _platforms.get_font_platform()
