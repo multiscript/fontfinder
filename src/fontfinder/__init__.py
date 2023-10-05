@@ -43,8 +43,8 @@ class FontFinder:
         self._all_known_fonts = None
         self._small_unihan_data_private = None
         
-        self.max_analysis_chars: int = 2048
-        '''Maximum number of characters of a string examined by `FontFinder.analyse().'''
+        self.max_analyse_chars: int = 2048
+        '''Maximum number of characters examined by `FontFinder.analyse().'''
         
         self.zh_hant_use_hk = False
         '''If True, `FontFinder.analyse()` selects Hong Kong rather than Taiwanese fonts for Traditional
@@ -159,7 +159,7 @@ class FontFinder:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
         `fontfinder.textinfo.TextInfo` object with the results.
 
-        The number of characters analysed is set by the instance attribute `max_analysis_chars`.
+        The number of characters analysed is set by the instance attribute `max_analyse_chars`.
 
         The attributes of the `TextInfo` result object are set as follows:
         - `main_script`:    Name of the most-frequently-used Unicode script in `text`. This is the long Unicode
@@ -193,7 +193,7 @@ class FontFinder:
         script_count = Counter()
         unihan_counter = Counter()
         emoji_count = 0
-        for char in text[0:min(len(text), self.max_analysis_chars)]:
+        for char in text[0:min(len(text), self.max_analyse_chars)]:
             script_count[udp.script(char)] += 1
             if udp.is_emoji_presentation(char) or udp.is_extended_pictographic(char):
                 emoji_count += 1
