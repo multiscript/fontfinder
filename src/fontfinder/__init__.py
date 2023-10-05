@@ -120,41 +120,6 @@ class FontFinder:
                                                 any_of("format",    [FontFormat.OTC]),
                                                ]
 
-    def known_fonts(self, filter_func = None):
-        '''Returns a list of FontInfo objects for all fonts known to this library.
-        
-        This is a large list, which is cached in memory the first time the method is called.'''
-        # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
-        # than memory, by caching the full list of font_infos in memory.
-        if self._all_known_fonts is None:
-            self._all_known_fonts = noto.get_noto_fonts()
-        return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
-
-    def known_scripts(self, filter_func = None):
-        '''Returns a list of the `main_script` values for all the fonts known to this library.'''
-        return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
-
-    def known_script_variants(self, filter_func = None):
-        '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
-        # Use a dictionary as an ordered set
-        return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
-
-    def all_unicode_scripts(self):
-        '''Returns a list of all script values in the Unicode standard.'''
-        return list(udp.property_value_aliases['script'].keys())
-
-    def scripts_not_known(self):
-        '''Returns a list of all the Unicode script values not supported by the fonts known to this library.'''
-        return sorted(set(self.all_unicode_scripts()) - set(self.known_scripts()) -
-                      set(["Common", "Inherited", "Unknown"]))
-
-    @property
-    def _small_unihan_data(self):
-        if self._small_unihan_data_private is None:
-            with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
-                self._small_unihan_data_private = json.load(small_unihan_file)
-        return self._small_unihan_data_private
-    
     def analyse(self, text: str):
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
         `fontfinder.textinfo.TextInfo` object with the results.
@@ -239,7 +204,7 @@ class FontFinder:
         return TextInfo(main_script=main_script, script_variant=script_variant, emoji_count=emoji_count,
                         script_count=script_count)
 
-    def find_font_families(self, str_or_text_info):
+    def find_font_families(self, str_or_text_info) -> list[str]:
         '''Returns a list of the family names (strings) of all fonts (known to the library) that are suitable for
         displaying some text. No font family preferences are applied.
         
@@ -267,6 +232,42 @@ class FontFinder:
                                            self.font_family_prefs, count_func, font_infos)
         family_name = font_infos[0].family_name
         return family_name
+
+    def known_fonts(self, filter_func = None):
+        '''Returns a list of FontInfo objects for all fonts known to this library.
+        
+        This is a large list, which is cached in memory the first time the method is called.'''
+        # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
+        # than memory, by caching the full list of font_infos in memory.
+        if self._all_known_fonts is None:
+            self._all_known_fonts = noto.get_noto_fonts()
+        return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
+
+    def known_scripts(self, filter_func = None):
+        '''Returns a list of the `main_script` values for all the fonts known to this library.'''
+        return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
+
+    def known_script_variants(self, filter_func = None):
+        '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
+        # Use a dictionary as an ordered set
+        return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
+
+    def all_unicode_scripts(self):
+        '''Returns a list of all script values in the Unicode standard.'''
+        return list(udp.property_value_aliases['script'].keys())
+
+    def scripts_not_known(self):
+        '''Returns a list of all the Unicode script values not supported by the fonts known to this library.'''
+        return sorted(set(self.all_unicode_scripts()) - set(self.known_scripts()) -
+                      set(["Common", "Inherited", "Unknown"]))
+
+    @property
+    def _small_unihan_data(self):
+        if self._small_unihan_data_private is None:
+            with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
+                self._small_unihan_data_private = json.load(small_unihan_file)
+        return self._small_unihan_data_private
+    
 
     def find_family_members_to_install(self, family_name_or_names):
         '''Returns a list of FontInfo objects for any of the font families in `family_name_or_names` that are not
