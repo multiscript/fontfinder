@@ -21,7 +21,7 @@ class TestMode(Enum):
     OBSERVE = auto()    # Observe output: Use known instead of temp directories, don't unzip word docs, don't test
 
 
-class FontFinderTest(FontFinder):
+class FontFinderWithTestFonts(FontFinder):
     def get_test_font_infos(self):
         font_infos = []
         font_infos.append(FontInfo(main_script="Latin", script_variant="Fontfinder", family_name="Fontfinder",
@@ -188,7 +188,7 @@ class TestFontFinder:
         assert write_fonts == read_fonts
 
     def test_download_fonts(self, test_mode = TestMode.TEST):
-        ff = FontFinderTest()
+        ff = FontFinderWithTestFonts()
         test_font_infos = ff.get_test_font_infos()
         temp_dir = None
         if test_mode is TestMode.TEST:
@@ -208,41 +208,42 @@ class TestFontFinder:
         assert cmp_result[2] == []
 
     def test_install_fonts(self):
-        ff = FontFinderTest()
-        font_families = []
+        ff = FontFinderWithTestFonts()
         test_font_infos = ff.get_test_font_infos()
-        print("Uninstalling font")
+        print("Uninstalling fonts")
+        self.uninstall_fonts_and_verify(ff, test_font_infos)
+
+        print("Installing fonts")
+        self.install_fonts_and_verify(ff, test_font_infos)
+
+        print("Uninstalling fonts")
+        self.uninstall_fonts_and_verify(ff, test_font_infos)
+
+    def full_test(self):
+        ff = FontFinderWithTestFonts()
+        text_info = TextInfo("Latin", "Fontfinder")
+
+    def install_fonts_and_verify(self, font_finder, font_infos):
+        font_finder.install_fonts(font_infos)
+        for i in range(MAX_FONT_INSTALL_RETRIES):
+            time.sleep(FONT_INSTALL_SLEEP_STEP)
+            font_families = font_finder.all_installed_families()
+            if font_infos[0].family_name in font_families:
+                break
+        assert font_infos[0].family_name in font_families
+
+    def uninstall_fonts_and_verify(self, font_finder, font_infos):
         try:
-            ff.uninstall_fonts(test_font_infos)
+            font_finder.uninstall_fonts(font_infos)
         except FileNotFoundError:
             pass
         for i in range(MAX_FONT_INSTALL_RETRIES):
             time.sleep(FONT_INSTALL_SLEEP_STEP)
-            font_families = ff.all_installed_families()
-            if test_font_infos[0].family_name not in font_families:
+            font_families = font_finder.all_installed_families()
+            if font_infos[0].family_name not in font_families:
                 break
-        assert test_font_infos[0].family_name not in font_families
+        assert font_infos[0].family_name not in font_families
 
-        print("Installing font")
-        ff.install_fonts(test_font_infos)
-        for i in range(MAX_FONT_INSTALL_RETRIES):
-            time.sleep(FONT_INSTALL_SLEEP_STEP)
-            font_families = ff.all_installed_families()
-            if test_font_infos[0].family_name in font_families:
-                break
-        assert test_font_infos[0].family_name in font_families
-
-        print("Uninstalling font")
-        try:
-            ff.uninstall_fonts(test_font_infos)
-        except FileNotFoundError:
-            pass
-        for i in range(MAX_FONT_INSTALL_RETRIES):
-            time.sleep(FONT_INSTALL_SLEEP_STEP)
-            font_families = ff.all_installed_families()
-            if test_font_infos[0].family_name not in font_families:
-                break
-        assert test_font_infos[0].family_name not in font_families
 
     # @pytest.mark.skip("Investigation test to examine variants with multiple families")
     def test_multi_family_script_variants(self):
