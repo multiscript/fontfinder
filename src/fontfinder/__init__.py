@@ -21,9 +21,9 @@ from typing import Iterable
 import requests
 import unicodedataplus as udp
 
-from fontfinder.data_classes import TextInfo
+from fontfinder.model import TextInfo
 from fontfinder.filters import *
-from fontfinder.data_classes import *
+from fontfinder.model import *
 from fontfinder import _platforms
 
 
@@ -73,7 +73,7 @@ class FontFinder:
         
         The dictionary values are lists of filter functions. The filters are usually created
         using the filter factories in the `fontfinder.filters` module. However, any custom filter function can be used
-        that takes a single `fontfinder.data_classes.FontInfo` argument and returns True if the object should be included
+        that takes a single `fontfinder.model.FontInfo` argument and returns True if the object should be included
         in the filtered list.
 
         Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
@@ -123,7 +123,7 @@ class FontFinder:
 
     def analyse(self, text: str) -> TextInfo:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
-        `fontfinder.data_classes.TextInfo` object with the results.
+        `fontfinder.model.TextInfo` object with the results.
 
         The number of characters analysed is set by the instance attribute `max_analyse_chars`.
 

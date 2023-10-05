@@ -6,7 +6,7 @@ import requests
 import shutil
 
 import fontfinder
-from fontfinder.data_classes import FontInfo, FontForm, FontWidth, FontWeight, FontStyle, FontFormat, FontBuild 
+from fontfinder.model import FontInfo, FontForm, FontWidth, FontWeight, FontStyle, FontFormat, FontBuild 
 
 
 NOTO_MAIN_JSON_URL = "https://notofonts.github.io/noto.json"
