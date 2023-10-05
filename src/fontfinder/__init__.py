@@ -4,6 +4,8 @@
 in a text string.** For now, `fontfinder` mostly locates fonts in the
 [Google Noto font collection](https://fonts.google.com/noto).
 
+Font enumeration and installation is currently supported on macOS (using CoreText) and Windows (using DirectWrite).
+
 Most functionality is provided by instantiating the `FontFinder` class.
 
 ## Examples
