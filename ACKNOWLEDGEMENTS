@@ -1,5 +1,5 @@
-Parts of this library are heavily based on the FindSystemFontsFilename library
-by moi15moi (https://github.com/moi15moi/FindSystemFontsFilename/)
+Parts of this library are derived from code in the FindSystemFontsFilename
+library by moi15moi (https://github.com/moi15moi/FindSystemFontsFilename/)
 
 FindSystemFontsFilename licence:
 ---------------------------------
