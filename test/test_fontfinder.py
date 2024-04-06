@@ -400,7 +400,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Arabic',
  'main_script': 'Arabic',
  'script_variant': '',
- 'expected_family_names': ['Noto Naskh Arabic', 'Noto Naskh Arabic UI', 'Noto Sans Arabic'],
+ 'expected_family_names': ['Noto Kufi Arabic', 'Noto Naskh Arabic', 'Noto Naskh Arabic UI', 'Noto Sans Arabic'],
  'expected_family_name': 'Noto Naskh Arabic',
  'text':
 '''
