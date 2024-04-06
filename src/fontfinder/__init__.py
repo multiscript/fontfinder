@@ -283,7 +283,8 @@ class FontFinder:
         '''
         family_names = self.not_installed_families(family_name_or_names)
         font_infos = self.find_family_fonts(family_names, main_script, script_variant)
-        return self.downloadable_fonts(font_infos)
+        font_infos = self.downloadable_fonts(font_infos)
+        return font_infos
 
     def download_fonts(self, font_infos: Iterable[FontInfo], download_dir: str | Path) -> list[FontInfo]:
         '''Downloads the font files in `font_infos`, in preparation for installation. Returns a list of copied

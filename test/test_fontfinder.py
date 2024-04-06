@@ -55,9 +55,11 @@ class FontFinderWithTestFonts(FontFinder):
         return font_infos
     
     def known_fonts(self, filter_func = None):
-        known_fonts = super().known_fonts(filter_func)
-        known_fonts.extend(self.get_test_font_infos())
-        return known_fonts
+        if self._all_known_fonts is None:
+            # Add our test fonts to the cached collection
+            super().known_fonts(filter_func)
+            self._all_known_fonts.extend(self.get_test_font_infos())
+        return super().known_fonts(filter_func)
 
 
 class TestFontFinder:
@@ -120,19 +122,19 @@ class TestFontFinder:
             assert sample_text['main_script'] == text_info.main_script
             assert sample_text['script_variant'] == text_info.script_variant
 
-    def test_find_font_families(self):
+    def test_find_families(self):
         ff = FontFinder()
         for sample_text in sample_texts:
             family_names = ff.find_families(sample_text['text'])
             assert sample_text['expected_family_names'] == family_names
 
-    def test_find_font_family(self):
+    def test_find_family(self):
         ff = FontFinder()
         for sample_text in sample_texts:
             family_name = ff.find_family(sample_text['text'])
             assert sample_text['expected_family_name'] == family_name
 
-    def test_find_family_members(self):
+    def test_find_family_fonts(self):
         ff = FontFinder()
         main_script = "Latin"
         script_variant = ""
@@ -141,18 +143,26 @@ class TestFontFinder:
         print("Finding family members")
         ff.find_family_fonts(family_name)
 
+    def test_find_empty_family_fonts(self):
+        ff = FontFinder()
+        font_infos = ff.find_family_fonts([])
+        assert font_infos == []
+
+        font_infos = ff.find_family_fonts([], "Latin")
+        assert font_infos == []
+
     def test_all_installed_families(self):
         ff = FontFinder()
         all_installed_families = ff.all_installed_families()
         pprint(all_installed_families)
 
-    def test_known_fonts_to_csv(self, test_mode = TestMode.OBSERVE):
+    def test_known_fonts_to_csv(self, test_mode = TestMode.TEST):
         ff = FontFinder()
         font_infos = ff.known_fonts()
         filename = "known_fonts.csv"
         self._font_infos_test_to_csv(font_infos, filename, test_mode)
 
-    def test_script_variants_to_csv(self, test_mode = TestMode.OBSERVE):
+    def test_script_variants_to_csv(self, test_mode = TestMode.TEST):
         ff = FontFinder()
         font_infos = []
         for (main_script, script_variant) in ff.known_script_variants():
@@ -237,6 +247,9 @@ class TestFontFinder:
         font_infos = ff.download_fonts(font_infos, temp_dir.name)
         self.install_fonts_and_verify(ff, font_infos)
         temp_dir.cleanup()
+
+        expect_empty = ff.find_family_fonts_to_download(font_family)
+        assert len(expect_empty) == 0
 
         self.uninstall_fonts_and_verify(ff, font_infos)
 
