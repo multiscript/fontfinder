@@ -69,16 +69,16 @@ class FontFinder:
         the `font_family_prefs` and `family_member_prefs` instance attributes.
         
         Font preferences are dictionaries of lists of filter functions. The dictionary keys are one of:
-        - the `fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
         - A tuple of `(main_script, script_variant)`. Preferences under these keys will only apply to that particular
           script and variant combination.
+        - the `fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
+        Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
         
         The dictionary values are lists of filter functions. The filters are usually created
         using the filter factories in the `fontfinder.filters` module. However, any custom filter function can be used
         that takes a single `fontfinder.model.FontInfo` argument and returns True if the object should be included
         in the filtered list.
 
-        Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
         If applying a preference would result in all remaining fonts being excluded, the preference is ignored.
 
         Some example preferences:
