@@ -70,7 +70,7 @@ class FontFinder:
         
         Font preferences are dictionaries of lists of filter functions. The dictionary keys are one of:
         - the `fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
-        - A tuple of `(main_script, script_variant)`. Preferences under these keys will only apply to that particula
+        - A tuple of `(main_script, script_variant)`. Preferences under these keys will only apply to that particular
           script and variant combination.
         
         The dictionary values are lists of filter functions. The filters are usually created
