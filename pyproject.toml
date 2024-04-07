@@ -11,8 +11,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "requests>=2.31",
-    "semver>=3.0.1",
-    "unicodedataplus>=15.0.0",
+    "semver>=3.0.2",
+    "unicodedataplus>=15.1.0",
     "comtypes>=1.2.0;platform_system=='Windows'",
 ]
 classifiers = [
@@ -31,7 +31,7 @@ docs = [
   "pdoc"
 ]
 unihan = [
-  "unihan-etl", "typing_extensions"
+  "unihan-etl>=0.34", "typing_extensions"
 ]
 
 [project.urls]

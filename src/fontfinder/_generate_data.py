@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 
-import unihan_etl.process
+import unihan_etl.core
 
 import fontfinder
 
@@ -20,7 +20,7 @@ def generate_small_unihan():
             "work_dir": work_dir,
             "format": "json"
         }
-        packager = unihan_etl.process.Packager(packager_options)
+        packager = unihan_etl.core.Packager(packager_options)
         packager.download()
         packager.export()
 
