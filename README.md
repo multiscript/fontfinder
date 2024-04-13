@@ -1,5 +1,4 @@
 # fontfinder
-Analyses the majority Unicode script used in a text string, and locates fonts that can help display that string.
-For now, only locates fonts in the Google Noto font collection.
-
-Under development. Not yet released.
+**fontfinder is a Python package for finding and installing fonts for Unicode scripts. It's useful
+when generating documents that must specify a font family and will be viewed across multiple platforms.**
+For now, `fontfinder` mostly locates fonts in the [Google Noto font collection](https://fonts.google.com/noto).
