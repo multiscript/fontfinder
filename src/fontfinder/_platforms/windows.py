@@ -58,7 +58,7 @@ class WindowsPlatform(fontfinder._platforms.FontPlatform):
             if font_info.downloaded_path is not None and font_info.downloaded_path != Path():
                 shutil.copy2(font_info.downloaded_path, USER_FONT_DIR)
             else:
-                raise Exception()
+                raise FontFinderException("Can't install font without a path to the downloaded font file")
             winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
         reg_font_key.Close()
         user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)

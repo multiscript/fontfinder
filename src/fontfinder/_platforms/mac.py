@@ -60,7 +60,7 @@ class MacPlatform(fontfinder._platforms.FontPlatform):
             if font_info.downloaded_path is not None and font_info.downloaded_path != Path():
                 shutil.copy2(font_info.downloaded_path, USER_FONT_DIR)
             else:
-                raise Exception()
+                raise FontFinderException("Can't install font without a path to the downloaded font file")
 
     def uninstall_fonts(self, font_infos):
         for font_info in font_infos:
