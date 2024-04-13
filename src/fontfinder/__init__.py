@@ -74,55 +74,54 @@ class FontFinder:
         - the `fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
         Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
         
-        The dictionary values are lists of filter functions. The filters are usually created
-        using the filter factories in the `fontfinder.filters` module. However, any custom filter function can be used
-        that takes a single `fontfinder.model.FontInfo` argument and returns True if the object should be included
-        in the filtered list.
-
+        The dictionary values are lists of filter functions. Filter functions take a single
+        `fontfinder.model.FontInfo` argument and return True if the argument should be included in the filtered list.
+        It's usually easiest to create filter functions using the filter factores in the `fontfinder.filters` module.
+        
         If applying a preference would result in all remaining fonts being excluded, the preference is ignored.
 
         Some example preferences:
         ```python
         # For Arabic, prefer the more traditional Naskh form
-        self.font_family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+        self.family_prefs[("Arabic", "")] = [attr_in("family_name", ["Noto Naskh Arabic"])]
 
         # Prefer sans-serif fonts, and exclude mono, display and UI forms where possible.
-        self.font_family_prefs[ANY_SCRIPT] = [any_of("form",     [FontForm.SANS_SERIF]),
-                                              none_of_in("tags", [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
+        self.family_prefs[ANY_SCRIPT] = [attr_in("form",           [FontForm.SANS_SERIF]),
+                                         attr_not_contains("tags", [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
         ```
         '''
         # For Adlam, prefer joined to unjoined.
-        self.family_prefs[("Adlam", "")] = [any_of("family_name", ["Noto Sans Adlam"])]
+        self.family_prefs[("Adlam", "")] = [attr_in("family_name", ["Noto Sans Adlam"])]
         # For Arabic, prefer the more traditional Naskh form
-        self.family_prefs[("Arabic", "")] = [any_of("family_name", ["Noto Naskh Arabic"])]
+        self.family_prefs[("Arabic", "")] = [attr_in("family_name", ["Noto Naskh Arabic"])]
         # For Hebrew, prefer the more traditional Serif form
-        self.family_prefs[("Hebrew", "")] = [any_of("family_name", ["Noto Serif Hebrew"])]
+        self.family_prefs[("Hebrew", "")] = [attr_in("family_name", ["Noto Serif Hebrew"])]
         # For Khitan Small Script, prefer Noto Serif Khitan Small Script, as the purpose of the other fonts isn't clear
-        self.family_prefs[("Khitan_Small_Script", "")] = [any_of("family_name",
-                                                                     ["Noto Serif Khitan Small Script"])]
+        self.family_prefs[("Khitan_Small_Script", "")] = [attr_in("family_name",
+                                                                 ["Noto Serif Khitan Small Script"])]
         # For Lao, prefer more traidtional looped fonts
-        self.family_prefs[("Lao", "")] = [any_of_str_in("family_name", ["Looped"])]
+        self.family_prefs[("Lao", "")] = [attr_contains_str("family_name", ["Looped"])]
         # For Nko, prefer Noto Sans NKo to unjoined
-        self.family_prefs[("Nko", "")] = [any_of("family_name", ["Noto Sans NKo"])]
+        self.family_prefs[("Nko", "")] = [attr_in("family_name", ["Noto Sans NKo"])]
         # For Nushu, prefer Noto Sans Nushu as it is better for smaller font sizes
-        self.family_prefs[("Nushu", "")] = [any_of("family_name", ["Noto Sans Nushu"])]
+        self.family_prefs[("Nushu", "")] = [attr_in("family_name", ["Noto Sans Nushu"])]
         # For Tamil, don't use the Supplement font
-        self.family_prefs[("Tamil", "")] = [none_of_str_in("family_name", ["Supplement"])]
+        self.family_prefs[("Tamil", "")] = [attr_not_contains_str("family_name", ["Supplement"])]
         # For Thai, prefer more traditional looped fonts, and Noto Sans Thai Looped in particular
-        self.family_prefs[("Thai", "")] = [any_of("family_name", ["Noto Sans Thai Looped"])]
+        self.family_prefs[("Thai", "")] = [attr_in("family_name", ["Noto Sans Thai Looped"])]
         # Prefer sans-serif fonts, and exclude mono, display and UI forms where possible.
-        self.family_prefs[ANY_SCRIPT] = [any_of("form",        [FontForm.SANS_SERIF]),
-                                              none_of_in("tags",    [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
+        self.family_prefs[ANY_SCRIPT] = [attr_in("form",           [FontForm.SANS_SERIF]),
+                                         attr_not_contains("tags", [FontTag.MONO, FontTag.DISPLAY, FontTag.UI])]
         
         # With a font family, avoid variable fonts, and mono, display and UI fonts. Prefer full builds, and OTF files.
-        self.family_font_prefs[ANY_SCRIPT] = [none_of("width",    [FontWidth.VARIABLE]),
-                                              none_of("weight",   [FontWidth.VARIABLE]),
-                                              none_of_in("tags",  [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
-                                              any_of("build",     [FontBuild.FULL]),
-                                              any_of("build",     [FontBuild.HINTED]),
-                                              any_of("format",    [FontFormat.OTF]),
-                                              any_of("format",    [FontFormat.TTF]),
-                                              any_of("format",    [FontFormat.OTC]),
+        self.family_font_prefs[ANY_SCRIPT] = [attr_not_in("width",      [FontWidth.VARIABLE]),
+                                              attr_not_in("weight",     [FontWidth.VARIABLE]),
+                                              attr_not_contains("tags", [FontTag.MONO, FontTag.DISPLAY, FontTag.UI]),
+                                              attr_in("build",          [FontBuild.FULL]),
+                                              attr_in("build",          [FontBuild.HINTED]),
+                                              attr_in("format",         [FontFormat.OTF]),
+                                              attr_in("format",         [FontFormat.TTF]),
+                                              attr_in("format",         [FontFormat.OTC]),
                                              ]
 
     def analyse(self, text: str) -> TextInfo:
@@ -138,7 +137,7 @@ class FontFinder:
 
         - `script_variant`: A secondary string used when the value of `main_script` is insufficient for choosing
                             an appropriate font. This is not a Unicode property, but a scheme only used by
-                            `fontfinder`. See `FontFinder.analyse()` for examples.
+                            `fontfinder`.
 
         - `emoji_count`:    Count of characters who have either the Emoji Presentation property or the
                             Extended_Pictographic property set (independent of script).

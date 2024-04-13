@@ -74,13 +74,13 @@ class TestFontFinder:
         return font_info
 
     def test_any_of_str_in(self):
-        filter = any_of_str_in("family_name", ["mono", "display"])
+        filter = attr_contains_str("family_name", ["mono", "display"])
         assert filter(FontInfo(family_name="Some Font Mono"))
         assert filter(FontInfo(family_name="Some Display Font"))
         assert not filter(FontInfo(family_name="Some Font UI"))
 
     def test_none_of_str_in(self):
-        filter = none_of_str_in("family_name", ["mono", "display"])
+        filter = attr_not_contains_str("family_name", ["mono", "display"])
         assert not filter(FontInfo(family_name="Some Font Mono"))
         assert not filter(FontInfo(family_name="Some Display Font"))
         assert filter(FontInfo(family_name="Some Font UI"))
