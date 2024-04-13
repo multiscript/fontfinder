@@ -72,6 +72,7 @@ class FontFinder:
         - A tuple of `(main_script, script_variant)`. Preferences under these keys will only apply to that particular
           script and variant combination.
         - the `fontfinder.ANY_SCRIPT` object. Preferences under this key will apply to any script.
+        
         Preferences for particular script/variant combinations are applied before preferences for `ANY_SCRIPT`.
         
         The dictionary values are lists of filter functions. Filter functions take a single
@@ -131,8 +132,9 @@ class FontFinder:
         The number of characters analysed is set by the instance attribute `max_analyse_chars`.
 
         The attributes of the `TextInfo` result object are set as follows:
-        - `main_script`:    Name of the most-frequently-used Unicode script in `text`. This is the long Unicode
-                            script value (known as a property value alias), rather than the short 4-character
+        - `main_script`:    Name of the most-frequently-used Unicode script in `text`. This is the [long Unicode
+                            script value (known as a property value
+                            alias)](https://unicode.org/reports/tr24/#Script_Value_Aliases), rather than the shorter
                             script code.
 
         - `script_variant`: A secondary string used when the value of `main_script` is insufficient for choosing
@@ -307,7 +309,7 @@ class FontFinder:
         font_platform.install_fonts(font_infos)        
      
     def uninstall_fonts(self, font_infos: Iterable[FontInfo]) -> None:
-        '''Uninstall the font files in `font_infos`. The fonts must exist the the user font collection, otherwise they
+        '''Uninstall the font files in `font_infos`. The fonts must exist in the user font collection, otherwise they
         will not be uninstalled.
         '''
         font_platform = _platforms.get_font_platform()
@@ -333,7 +335,7 @@ class FontFinder:
         return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())
 
     def all_unicode_scripts(self) -> list[str]:
-        '''Returns a list of all script values in the Unicode standard.'''
+        '''Returns a list of all script values (property value aliases) in the Unicode standard.'''
         return list(udp.property_value_aliases['script'].keys())
 
     def scripts_not_known(self) -> list[str]:
@@ -348,7 +350,8 @@ class FontFinder:
         return font_platform.all_installed_families()        
 
     def installed_families(self, family_name_or_names: str | Iterable[str]) -> list[str]:
-        '''Returns a new list of the given `family_name_or_names` that are currently installed on the system.'''
+        '''For a given font family name or iterable of names, return a filtered list containing just those
+        families that are currently installed on the system.'''
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
@@ -356,7 +359,8 @@ class FontFinder:
         return [family_name for family_name in family_names if family_name in all_installed_families]
 
     def not_installed_families(self, family_name_or_names: str | Iterable[str]) -> list[str]:
-        '''Returns a new list of the given `family_name_or_names` that are not currently installed on the system.'''
+        '''For a given font family name or iterable of names, return a filtered list containing just those
+        families that are not currently installed on the system.'''
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
@@ -364,7 +368,8 @@ class FontFinder:
         return [family_name for family_name in family_names if family_name not in all_installed_families]
 
     def downloadable_fonts(self, font_infos: Iterable[FontInfo]) -> list[FontInfo]:
-        '''Return the list of `font_infos` filtered to those that have download URLs provided.'''
+        '''For a given iterable of `font_infos`, return a filtered list containing just those `FontInfo`s that
+        have download URLs provided.'''
         return [font_info for font_info in font_infos if font_info.url is not None and font_info.url != ""]
 
     @property
