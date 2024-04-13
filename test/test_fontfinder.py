@@ -219,15 +219,19 @@ class TestFontFinder:
         assert cmp_result[2] == []
 
     def test_install_fonts(self):
+        print("Uninstalling fonts")
         ff = FontFinderWithTestFonts()
         test_font_infos = ff.get_test_font_infos()
-        print("Uninstalling fonts")
         self.uninstall_fonts_and_verify(ff, test_font_infos)
 
         print("Installing fonts")
+        ff = FontFinderWithTestFonts()
+        test_font_infos = ff.get_test_font_infos()
         self.install_fonts_and_verify(ff, test_font_infos)
 
         print("Uninstalling fonts")
+        ff = FontFinderWithTestFonts()
+        test_font_infos = ff.get_test_font_infos()
         self.uninstall_fonts_and_verify(ff, test_font_infos)
 
     def test_full_test(self):
@@ -559,8 +563,10 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'main_script': 'Common',
  'script_variant': 'Emoji',
  'expected_family_names': ['Noto Color Emoji', 'Apple Color Emoji'] if platform.system() == "Darwin" else 
+                          ['Noto Color Emoji', 'Segoe UI Emoji'] if platform.system() == "Windows" else
                           ['Noto Color Emoji'],
  'expected_family_name': 'Apple Color Emoji' if platform.system() == "Darwin" else
+                         'Segoe UI Emoji' if platform.system() == "Windows" else
                          'Noto Color Emoji',
  'text': # Text below is just some sample emoji
 '''

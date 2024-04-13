@@ -14,7 +14,7 @@ import shutil
 from sys import getwindowsversion
 import winreg
 
-from fontfinder import FontFinderException
+from fontfinder import FontFinder, FontFinderException
 import fontfinder._platforms
 
 
@@ -61,7 +61,8 @@ class WindowsPlatform(fontfinder._platforms.FontPlatform):
                 raise FontFinderException("Can't install font without a path to the downloaded font file")
             winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
         reg_font_key.Close()
-        user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+        # For some reason, broadcasting the font change seems to be hanging in Windows 11, so we omit for now:
+        # user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
     def uninstall_fonts(self, font_infos):
         user32 = User32Library()
@@ -74,8 +75,26 @@ class WindowsPlatform(fontfinder._platforms.FontPlatform):
                 raise FontFinderException("Can't uninstall font without a filename")
             os.remove(USER_FONT_DIR / font_info.filename)
         reg_font_key.Close()
-        user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+        # For some reason, broadcasting the font change seems to be hanging in Windows 11, so we omit for now:
+        # user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+
+    def known_platform_fonts(self) -> list[fontfinder.FontInfo]:
+        # Use Segoe UI Emoji for emoji.
+        font_infos = []
+        font_infos.append(fontfinder.FontInfo(main_script="Common", script_variant="Emoji",
+                          family_name="Segoe UI Emoji",
+                          subfamily_name="Regular", postscript_name="SegoeUIEmoji",
+                          form=fontfinder.FontForm.UNSET, width=fontfinder.FontWidth.NORMAL,
+                          weight=fontfinder.FontWeight.REGULAR, style=fontfinder.FontStyle.UPRIGHT,
+                          format=fontfinder.FontFormat.TTF, build=fontfinder.FontBuild.UNSET,
+                          url=""))
+        return font_infos
     
+    def set_platform_prefs(self, font_finder: FontFinder) -> None:
+        # Use Segoe UI Emoji for emoji.
+        font_finder.family_prefs[("Common", "Emoji")] = [fontfinder.filters.attr_in("family_name",
+                                                                                    ["Segoe UI Emoji"])]
+
 
 class IDWriteLocalizedStrings(IUnknown):
     _iid_ = GUID("{08256209-099a-4b34-b86d-c22b110e7771}")
