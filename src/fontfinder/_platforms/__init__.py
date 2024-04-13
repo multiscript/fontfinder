@@ -2,8 +2,7 @@ from ctypes import CFUNCTYPE
 import ctypes.util
 import platform
 
-from fontfinder import UnsupportedPlatformException
-
+import fontfinder
 
 class CTypesLibrary:
     IN:  int    = 1
@@ -75,5 +74,5 @@ def get_font_platform():
         import fontfinder._platforms.windows
         return fontfinder._platforms.windows.WindowsPlatform()
     else:
-        raise UnsupportedPlatformException()
+        raise fontfinder.UnsupportedPlatformException()
 
