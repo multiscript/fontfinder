@@ -62,6 +62,7 @@ class FontFinder:
         lists of filter functions. See `set_prefs()` for more info.'''
 
         self.set_prefs()
+        self.set_platform_prefs()
 
     def set_prefs(self) -> None:
         '''Sets the font preferences. See the source code for this method to examine the built-in preferences
@@ -124,6 +125,14 @@ class FontFinder:
                                               attr_in("format",         [FontFormat.TTF]),
                                               attr_in("format",         [FontFormat.OTC]),
                                              ]
+
+    def set_platform_prefs(self) -> None:
+        '''Sets any platform-specific font preferences. See the source code in the various sub-modules in
+        `_platforms` to examine the built-in platform-specific preferences.
+        
+        This method is called only after `set_prefs()` has set the platform-independant font preferences.'''
+        font_platform = _platforms.get_font_platform()
+        font_platform.set_platform_prefs(self)       
 
     def analyse(self, text: str) -> TextInfo:
         '''Analyse an initial portion of `text` for the Unicode scripts it uses. Returns a
@@ -322,7 +331,11 @@ class FontFinder:
         # Even though noto.get_noto_fonts() can filter on the fly, for now we choose to optimise for speed, rather
         # than memory, by caching the full list of font_infos in memory.
         if self._all_known_fonts is None:
-            self._all_known_fonts = noto.get_noto_fonts()
+            self._all_known_fonts = []
+            self._all_known_fonts.extend(noto.get_noto_fonts())
+            font_platform = _platforms.get_font_platform()
+            self._all_known_fonts.extend(font_platform.known_platform_fonts())
+
         return [font_info for font_info in self._all_known_fonts if (filter_func is None or filter_func(font_info))]
 
     def known_scripts(self, filter_func = None) -> list[str]:

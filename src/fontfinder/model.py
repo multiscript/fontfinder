@@ -74,10 +74,10 @@ class FontInfo:
     '''Enum of extra tags describing the font file.'''
 
     url: str = ""
-    '''URL download source for the font.'''
+    '''URL download source for the font. Empty string if download is not available.'''
 
     downloaded_path: Path = Path()
-    '''Path to the downloaded font on the local filesystem for installation.'''
+    '''Path to the downloaded font on the local filesystem for installation. Empty if not set.'''
 
     def __init__(self, main_script: str = None, script_variant: str = None, family_name: str = None,
                  subfamily_name: str = None, postscript_name: str = None, form: 'FontForm' = None,

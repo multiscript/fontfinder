@@ -1,6 +1,7 @@
 from collections import Counter
 import contextlib
 import filecmp
+import platform
 from pprint import pprint
 import tempfile
 import time
@@ -557,8 +558,10 @@ livelihood of humans and many other forms of life, and causing widespread extinc
 {'language': 'Emoji',
  'main_script': 'Common',
  'script_variant': 'Emoji',
- 'expected_family_names': ['Noto Color Emoji'],
- 'expected_family_name': 'Noto Color Emoji',
+ 'expected_family_names': ['Noto Color Emoji', 'Apple Color Emoji'] if platform.system() == "Darwin" else 
+                          ['Noto Color Emoji'],
+ 'expected_family_name': 'Apple Color Emoji' if platform.system() == "Darwin" else
+                         'Noto Color Emoji',
  'text': # Text below is just some sample emoji
 '''
 😀😃😄😁🐶🐱🐭🐹🍏🍎🍐🍊⚽️🏀🏈⚾️🚗🚕🚙🚌⌚️📱📲💻🩷❤️🧡💛🏳️🏴🏴‍☠️🏁

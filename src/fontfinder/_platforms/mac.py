@@ -12,8 +12,9 @@ import shutil
 
 import semver
 
-from fontfinder import FontFinderException
+from fontfinder import FontFinder, FontFinderException
 import fontfinder._platforms
+import fontfinder.filters
 
 
 USER_FONT_DIR = Path("~/Library/Fonts").expanduser()
@@ -67,6 +68,23 @@ class MacPlatform(fontfinder._platforms.FontPlatform):
             if font_info.filename is None:
                 raise FontFinderException("Can't uninstall font without a filename")
             os.remove(USER_FONT_DIR / font_info.filename)
+
+    def known_platform_fonts(self) -> list[fontfinder.FontInfo]:
+        # Use Apple Color Emoji for emoji.
+        font_infos = []
+        font_infos.append(fontfinder.FontInfo(main_script="Common", script_variant="Emoji",
+                          family_name="Apple Color Emoji",
+                          subfamily_name="Regular", postscript_name="AppleColorEmoji",
+                          form=fontfinder.FontForm.UNSET, width=fontfinder.FontWidth.NORMAL,
+                          weight=fontfinder.FontWeight.REGULAR, style=fontfinder.FontStyle.UPRIGHT,
+                          format=fontfinder.FontFormat.TTF, build=fontfinder.FontBuild.UNSET,
+                          url=""))
+        return font_infos
+    
+    def set_platform_prefs(self, font_finder: FontFinder) -> None:
+        # Use Apple Color Emoji for emoji.
+        font_finder.family_prefs[("Common", "Emoji")] = [fontfinder.filters.attr_in("family_name",
+                                                                                    ["Apple Color Emoji"])]
 
 
 class CoreFoundationLibrary(fontfinder._platforms.CTypesLibrary):

@@ -1,6 +1,7 @@
 from ctypes import CFUNCTYPE
 import ctypes.util
 import platform
+from typing import Iterable
 
 import fontfinder
 
@@ -57,12 +58,28 @@ class FontPlatform:
         pass
 
     def all_installed_families():
+        '''Return a list of font family names available on this platform.'''
         pass
 
-    def install_fonts(font_infos):
+    def install_fonts(self, font_infos: Iterable[fontfinder.FontInfo]) -> None:
+        '''Install the font files in `font_infos`. The `downloaded_path` of each `FontInfo` must point to the
+        actual font file in the filesystem.
+        
+        Font are installed to the user font collection, rather than the system-wide font collection.'''
         pass
 
-    def uninstall_fonts(font_infos):
+    def uninstall_fonts(self, font_infos: Iterable[fontfinder.FontInfo]) -> None:
+        '''Uninstall the font files in `font_infos`. The fonts must exist in the user font collection, otherwise they
+        will not be uninstalled.
+        '''
+        pass
+
+    def known_platform_fonts(self) -> list[fontfinder.FontInfo]:
+        '''Returns a list of FontInfo objects for all fonts known to this library that are unique to this platform.
+        '''
+        pass
+
+    def set_platform_prefs(self, font_finder: 'fontfinder.FontFinder') -> None:
         pass
 
 
