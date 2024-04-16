@@ -8,12 +8,12 @@ if platform.system() == "Windows":
     import comtypes
     from comtypes import COMError, GUID, HRESULT, IUnknown, STDMETHOD, WINFUNCTYPE
     from sys import getwindowsversion
+    import winreg
 import ctypes
 from ctypes import byref, POINTER, wintypes
 import os
 from pathlib import Path
 import shutil
-import winreg
 
 from fontfinder import FontFinder, FontFinderException
 import fontfinder._platforms
