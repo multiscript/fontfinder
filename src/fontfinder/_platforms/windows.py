@@ -3,6 +3,7 @@
 #
 # See ACKNOWLEDGEMENTS file.
 #
+import platform
 if platform.system() == "Windows":
     import comtypes
     from comtypes import COMError, GUID, HRESULT, IUnknown, STDMETHOD, WINFUNCTYPE
@@ -10,7 +11,6 @@ if platform.system() == "Windows":
     import winreg
     from ctypes import wintypes
 
-    import platform
     import ctypes
     from ctypes import byref, POINTER
     import os
