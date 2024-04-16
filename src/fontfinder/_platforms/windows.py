@@ -4,23 +4,23 @@
 # See ACKNOWLEDGEMENTS file.
 #
 import platform
+import ctypes
+from ctypes import byref, POINTER
+import os
+from pathlib import Path
+import shutil
 if platform.system() == "Windows":
     import comtypes
     from comtypes import COMError, GUID, HRESULT, IUnknown, STDMETHOD, WINFUNCTYPE
     from sys import getwindowsversion
     import winreg
-import ctypes
-from ctypes import byref, POINTER, wintypes
-import os
-from pathlib import Path
-import shutil
+    from ctypes import wintypes
+
+    USER_FONT_DIR = Path("~\\AppData\\Local\\Microsoft\\Windows\\Fonts").expanduser()
+    USER_FONT_REG_PATH = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
 
 from fontfinder import FontFinder, FontFinderException
 import fontfinder._platforms
-
-
-USER_FONT_DIR = Path("~\\AppData\\Local\\Microsoft\\Windows\\Fonts").expanduser()
-USER_FONT_REG_PATH = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
 
 
 class WindowsPlatform(fontfinder._platforms.FontPlatform):
