@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 import tempfile
 
-import unihan_etl.core
 
 import fontfinder
 
@@ -14,6 +13,8 @@ def generate_small_unihan():
     '''Utility function for creating a subset of the Unicode Unihan database needed by `fontfinder`.
     This function recreates the local subset. As `fontfinder` is distributed with a working copy
     of the subset (`small_unihan.json`) you should never need to call this method.'''
+    import unihan_etl.core
+
     with tempfile.TemporaryDirectory() as work_dir:
         packager_options = {
             "destination": str(_FULL_UNIHAN_PATH),
