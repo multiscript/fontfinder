@@ -64,8 +64,7 @@ if platform.system() == "Windows":
                     raise FontFinderException("Can't install font without a path to the downloaded font file")
                 winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
             reg_font_key.Close()
-            # For some reason, broadcasting the font change seems to be hanging in Windows 11, so we omit for now:
-            # user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+            user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
         def uninstall_fonts(self, font_infos):
             user32 = User32Library()
@@ -78,8 +77,7 @@ if platform.system() == "Windows":
                     raise FontFinderException("Can't uninstall font without a filename")
                 os.remove(USER_FONT_DIR / font_info.filename)
             reg_font_key.Close()
-            # For some reason, broadcasting the font change seems to be hanging in Windows 11, so we omit for now:
-            # user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+            user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
         def known_platform_fonts(self) -> list[fontfinder.FontInfo]:
             # Use Segoe UI Emoji for emoji.
