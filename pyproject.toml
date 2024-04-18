@@ -35,7 +35,7 @@ unihan = [
 ]
 
 [project.urls]
-# "Documentation" = ""
+"Documentation" = "https://multiscript.app/fontfinder"
 "Source" = "https://github.com/multiscript/fontfinder"
 "Issue Tracker" = "https://github.com/multiscript/fontfinder/issues"
 
