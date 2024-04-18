@@ -44,3 +44,6 @@ where = ["src"]
 include = ["fontfinder*"]  
 exclude = ["tests*"] 
 namespaces = false
+
+[tool.setuptools.package-data]
+"fontfinder.data" = ["*.json"]
