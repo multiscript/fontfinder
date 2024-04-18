@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "fontfinder"
 version = "0.10.0"
 
-description = "Analyses the Unicode scripts used by strings, and locates fonts that can help display those strings."
+description = "Package for finding and installing fonts for Unicode scripts."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

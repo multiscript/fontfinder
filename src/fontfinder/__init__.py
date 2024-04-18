@@ -159,7 +159,7 @@ class FontFinder:
         # For Khitan Small Script, prefer Noto Serif Khitan Small Script, as the purpose of the other fonts isn't clear
         self.family_prefs[("Khitan_Small_Script", "")] = [attr_in("family_name",
                                                                  ["Noto Serif Khitan Small Script"])]
-        # For Lao, prefer more traidtional looped fonts
+        # For Lao, prefer more traditional looped fonts
         self.family_prefs[("Lao", "")] = [attr_contains_str("family_name", ["Looped"])]
         # For Nko, prefer Noto Sans NKo to unjoined
         self.family_prefs[("Nko", "")] = [attr_in("family_name", ["Noto Sans NKo"])]
@@ -279,7 +279,7 @@ class FontFinder:
 
     def find_families(self, str_or_text_info: str | TextInfo) -> list[str]:
         '''Returns a list of the family names (strings) of all fonts known to the library that are suitable for
-        displaying some text. No font family preferences are applied.
+        `str_or_text_info`. No font family preferences are applied.
         
         `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
         '''
@@ -289,8 +289,8 @@ class FontFinder:
         return list(family_names.keys())
 
     def find_family(self, str_or_text_info: str | TextInfo) -> str:
-        '''Returns the family name (a string) of the single font family considered most-suitable for
-        `str_or_text_info`. "Most-suitable" is determined applying the filter functions in `family_prefs`.
+        '''Returns the family name (a string) of the preferred font family for `str_or_text_info`.
+        The preferred font family is determined applying the filter functions in `family_prefs`.
         If, after applying these filters, more than one family remains, the first family is returned.
         
         `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
@@ -355,8 +355,9 @@ class FontFinder:
         return font_infos
 
     def download_fonts(self, font_infos: Iterable[FontInfo], download_dir: str | Path) -> list[FontInfo]:
-        '''Downloads the font files in `font_infos`, in preparation for installation. Returns a list of copied
-        `FontInfo` objects where the `downloaded_path` attribute points to each new file.'''
+        '''Downloads the font files in `font_infos`, in preparation for installation. The font files are downloaded
+        to `download_dir`. Returns a list of copied `FontInfo` objects where the `downloaded_path` attribute points
+        to each new file.'''
         download_dir = Path(download_dir)
         font_infos = self.downloadable_fonts([font_info.copy() for font_info in font_infos])
         for font_info in font_infos:
