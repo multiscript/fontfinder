@@ -318,21 +318,29 @@ class FontFinder:
         family_names = family_name_or_names
         if isinstance(family_names, str):
             family_names = [family_names]
-        font_infos = self.known_fonts(lambda font_info: font_info.family_name in family_names)
-        if len(font_infos) == 0:
-            return font_infos
-        # font_infos can be duplicated under multiple script variants. If no script and variant is specified, we
-        # just pick the first.
-        if main_script is None:
-            main_script = font_infos[0].main_script
-        if script_variant is None:
-            script_variant = font_infos[0].script_variant
-        font_infos = [font_info for font_info in font_infos if font_info.main_script == main_script and \
-                                                               font_info.script_variant == script_variant]
-        count_func = len
-        font_infos = self._apply_pref_dict(main_script, script_variant, self.family_font_prefs, count_func,
-                                           font_infos)
-        return font_infos
+        
+        result_font_infos = []
+        for family_name in family_names:
+            font_infos = self.known_fonts(lambda font_info: font_info.family_name == family_name)
+            if len(font_infos) == 0:
+                continue
+            # font_infos can be duplicated under multiple script variants. If no script and variant is specified, we
+            # just pick the first.
+            if main_script is None:
+                family_main_script = font_infos[0].main_script
+            else:
+                family_main_script = main_script
+            if script_variant is None:
+                family_script_variant = font_infos[0].script_variant
+            else:
+                family_script_variant = script_variant
+            font_infos = [font_info for font_info in font_infos if font_info.main_script == family_main_script and \
+                                                                font_info.script_variant == family_script_variant]
+            count_func = len
+            font_infos = self._apply_pref_dict(main_script, script_variant, self.family_font_prefs, count_func,
+                                            font_infos)
+            result_font_infos.extend(font_infos)
+        return result_font_infos
 
     def find_family_fonts_to_download(self, family_name_or_names: str | Iterable[str],
                                       main_script:str = None, script_variant:str = None) -> list[FontInfo]:
