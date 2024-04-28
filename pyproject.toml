@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fontfinder"
-version = "0.10.0"
+version = "0.11.0"
 
 description = "Package for finding and installing fonts for Unicode scripts."
 readme = "README.md"

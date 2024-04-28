@@ -1,2 +1,4 @@
+- v0.11.0:
+  - Fixed bug where FontFinder.find_family_fonts() only returned font info for first family name in the list.
 - v0.10.0:
   - Initial release
