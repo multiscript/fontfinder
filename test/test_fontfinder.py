@@ -150,18 +150,15 @@ class TestFontFinder:
 
         font_infos_1 = ff.find_family_fonts(family_1)
         fullnames_1 = {font_info.fullname for font_info in font_infos_1}
-        print(fullnames_1)
         assert len(fullnames_1) > 0
 
         font_infos_2 = ff.find_family_fonts(family_2)
         fullnames_2 = {font_info.fullname for font_info in font_infos_2}
-        print(fullnames_2)
         assert len(fullnames_2) > 0
         assert fullnames_1 != fullnames_2
 
         font_infos_combo = ff.find_family_fonts([family_1, family_2])
         fullnames_combo = {font_info.fullname for font_info in font_infos_combo}
-        print(fullnames_combo)
         assert fullnames_combo == fullnames_1 | fullnames_2
 
     def test_find_empty_family_fonts(self):
