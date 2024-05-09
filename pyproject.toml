@@ -48,3 +48,6 @@ namespaces = false
 
 [tool.setuptools.package-data]
 fontfinder = ["data/*.json"]
+
+[project.entry_points.pyinstaller40]
+hook-dirs = "fontfinder.__pyinstaller:get_hook_dirs"
