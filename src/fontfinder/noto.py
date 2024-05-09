@@ -19,10 +19,10 @@ NOTO_CJK_BASE_URL = "https://github.com/notofonts/noto-cjk/raw/main/"
 '''Base URL of CJK Noto font download location.'''
 
 
-_NOTO_MAIN_JSON_REF_PATH = Path(fontfinder._DATA_DIR_PATH, "noto.json").resolve()
+_NOTO_MAIN_JSON_REF_PATH = Path(fontfinder._REF_DATA_DIR_PATH, "noto.json").resolve()
 '''Path of reference copy of noto.json distributed with this package.'''
 
-_NOTO_MAIN_JSON_PATH = Path(fontfinder._DATA_DIR_PATH, "latest", "noto.json").resolve()
+_NOTO_MAIN_JSON_USER_PATH = Path(fontfinder._USER_DATA_DIR_PATH, "cache", "noto.json").resolve()
 '''Path of updated, cached copy of noto.json.'''
 
 _NOTO_MAIN_JSON_MAX_AGE = datetime.timedelta(days=1)
@@ -40,20 +40,20 @@ def get_noto_fonts(filter_func = None):
 
 def _get_noto_main_data():
     '''Return main Noto JSON data as a Python object, handling cache as necessary.'''
-    if not _NOTO_MAIN_JSON_PATH.exists():
+    if not _NOTO_MAIN_JSON_USER_PATH.exists():
         # Copy noto.json distributed with this package
-        _NOTO_MAIN_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(_NOTO_MAIN_JSON_REF_PATH, _NOTO_MAIN_JSON_PATH)
+        _NOTO_MAIN_JSON_USER_PATH.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(_NOTO_MAIN_JSON_REF_PATH, _NOTO_MAIN_JSON_USER_PATH)
 
-    last_mod_time = datetime.datetime.fromtimestamp(_NOTO_MAIN_JSON_PATH.stat().st_mtime)
+    last_mod_time = datetime.datetime.fromtimestamp(_NOTO_MAIN_JSON_USER_PATH.stat().st_mtime)
     if (datetime.datetime.now() - last_mod_time) >= _NOTO_MAIN_JSON_MAX_AGE:
         # Update cached noto.json
         noto_json_text = requests.get(NOTO_MAIN_JSON_URL)
-        with open(_NOTO_MAIN_JSON_PATH, "w") as file:
+        with open(_NOTO_MAIN_JSON_USER_PATH, "w") as file:
             file.write(noto_json_text.text)
     
     # Read cached noto.json
-    with open(_NOTO_MAIN_JSON_PATH, "r") as file:
+    with open(_NOTO_MAIN_JSON_USER_PATH, "r") as file:
         noto_data = json.load(file)
     return noto_data
             

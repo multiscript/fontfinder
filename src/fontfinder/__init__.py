@@ -78,6 +78,7 @@ from pathlib import Path
 import tempfile
 from typing import Iterable
 
+import platformdirs
 import requests
 import unicodedataplus as udp
 
@@ -87,11 +88,15 @@ from fontfinder.model import *
 from fontfinder import _platforms
 
 
-_DATA_DIR_PATH = Path(__file__, "../data").resolve()
-'''Path to font data'''
-_DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
+_REF_DATA_DIR_PATH = Path(__file__, "../data").resolve()
+'''Path to reference font data (within package)'''
+_REF_DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-_SMALL_UNIHAN_PATH = Path(_DATA_DIR_PATH, "small_unihan.json").resolve()
+_USER_DATA_DIR_PATH = platformdirs.user_data_path("fontfinder")
+'''Path to user data path for fontfinder (outside of package)'''
+_USER_DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+_SMALL_UNIHAN_PATH = Path(_REF_DATA_DIR_PATH, "small_unihan.json").resolve()
 '''Path to subset of Unihan data neede for CJK font selection.'''
 
 # We wait until now to import Noto data so that data path constants above are set.

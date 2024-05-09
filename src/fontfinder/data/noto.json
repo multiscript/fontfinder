@@ -3073,10 +3073,10 @@
      ]
     },
     "latest_release": {
-     "notes": "Noto Sans Egyptian Hieroglyphs v2.001\n\nThis release fixes a number of fontbakery fails.\n",
-     "published": "2022-09-19T08:47:34",
-     "url": "https://github.com/notofonts/egyptian-hieroglyphs/releases/tag/NotoSansEgyptianHieroglyphs-v2.001",
-     "version": "v2.001"
+     "notes": "Noto Sans Egyptian Hieroglyphs v2.002\n\nThis release adds support for various codepoints added in Unicode 14.\nThanks to @mercury13 (drawing) and @dwerning (consultancy).\n",
+     "published": "2024-04-15T09:29:21+00:00",
+     "url": "https://github.com/notofonts/egyptian-hieroglyphs/releases/tag/NotoSansEgyptianHieroglyphs-v2.002",
+     "version": "v2.002"
     }
    }
   },
@@ -3086,11 +3086,6 @@
     "number": 16,
     "title": "Strange metrics?",
     "url": "https://github.com/notofonts/egyptian-hieroglyphs/issues/16"
-   },
-   {
-    "number": 12,
-    "title": "Should we increase 25CC to the size of an average hiero?",
-    "url": "https://github.com/notofonts/egyptian-hieroglyphs/issues/12"
    },
    {
     "number": 9,
@@ -5310,7 +5305,7 @@
       "fonts/NotoRashiHebrew/full/ttf/NotoRashiHebrew-Regular.ttf",
       "fonts/NotoRashiHebrew/full/ttf/NotoRashiHebrew-SemiBold.ttf",
       "fonts/NotoRashiHebrew/full/ttf/NotoRashiHebrew-Thin.ttf",
-      "fonts/NotoRashiHebrew/full/variable-ttf/NotoRashiHebrew[wght].ttf"
+      "fonts/NotoRashiHebrew/full/variable/NotoRashiHebrew[wght].ttf"
      ],
      "hinted": [
       "fonts/NotoRashiHebrew/hinted/ttf/NotoRashiHebrew-Black.ttf",
@@ -5343,14 +5338,14 @@
       "fonts/NotoRashiHebrew/unhinted/ttf/NotoRashiHebrew-Regular.ttf",
       "fonts/NotoRashiHebrew/unhinted/ttf/NotoRashiHebrew-SemiBold.ttf",
       "fonts/NotoRashiHebrew/unhinted/ttf/NotoRashiHebrew-Thin.ttf",
-      "fonts/NotoRashiHebrew/unhinted/variable-ttf/NotoRashiHebrew[wght].ttf"
+      "fonts/NotoRashiHebrew/unhinted/variable/NotoRashiHebrew[wght].ttf"
      ]
     },
     "latest_release": {
-     "notes": "Noto Rashi Hebrew v1.006\n\nThis release replaces the Latin subset in full builds with Noto Serif.\n",
-     "published": "2022-07-25T08:08:17",
-     "url": "https://github.com/notofonts/hebrew/releases/tag/NotoRashiHebrew-v1.006",
-     "version": "v1.006"
+     "notes": "Noto Rashi Hebrew v1.007\n\nThis release:\n\n* Fixes interpolation issues (#35)\n* Corrects the width (#39) and position of marks under double-yud and double-vov (#38, thanks to @markhdavid)\n* Improves the anchoring of yod (#40, thanks to @markhdavid)\n* Adds the U+053F yod triangle character (#46)\n* Improves the spacing of tsadi (#33)\n",
+     "published": "2024-04-22T14:08:01+00:00",
+     "url": "https://github.com/notofonts/hebrew/releases/tag/NotoRashiHebrew-v1.007",
+     "version": "v1.007"
     }
    },
    "Noto Sans Hebrew": {
@@ -5429,7 +5424,7 @@
       "fonts/NotoSansHebrew/full/ttf/NotoSansHebrew-SemiCondensedSemiBold.ttf",
       "fonts/NotoSansHebrew/full/ttf/NotoSansHebrew-SemiCondensedThin.ttf",
       "fonts/NotoSansHebrew/full/ttf/NotoSansHebrew-Thin.ttf",
-      "fonts/NotoSansHebrew/full/variable-ttf/NotoSansHebrew[wdth,wght].ttf"
+      "fonts/NotoSansHebrew/full/variable/NotoSansHebrew[wdth,wght].ttf"
      ],
      "hinted": [
       "fonts/NotoSansHebrew/hinted/ttf/NotoSansHebrew-Black.ttf",
@@ -5543,14 +5538,14 @@
       "fonts/NotoSansHebrew/unhinted/ttf/NotoSansHebrew-SemiCondensedSemiBold.ttf",
       "fonts/NotoSansHebrew/unhinted/ttf/NotoSansHebrew-SemiCondensedThin.ttf",
       "fonts/NotoSansHebrew/unhinted/ttf/NotoSansHebrew-Thin.ttf",
-      "fonts/NotoSansHebrew/unhinted/variable-ttf/NotoSansHebrew[wdth,wght].ttf"
+      "fonts/NotoSansHebrew/unhinted/variable/NotoSansHebrew[wdth,wght].ttf"
      ]
     },
     "latest_release": {
-     "notes": "Noto Sans Hebrew v2.003\n\nThis is an administrative release.\n",
-     "published": "2022-07-15T08:08:34",
-     "url": "https://github.com/notofonts/hebrew/releases/tag/NotoSansHebrew-v2.003",
-     "version": "v2.003"
+     "notes": "Noto Sans Hebrew v2.004\n\nThis release:\n\n* Fixes interpolation issues\n* Corrects the width (#39) and position of marks under double-yud and double-vov (#38, thanks to @markhdavid)\n* Removes semibold masters\n* Adds the U+053F yod triangle character (#46)\n* Improves the spacing of decomposed dagesh forms (#47)\n",
+     "published": "2024-04-22T13:35:47+00:00",
+     "url": "https://github.com/notofonts/hebrew/releases/tag/NotoSansHebrew-v2.004",
+     "version": "v2.004"
     }
    },
    "Noto Serif Hebrew": {
@@ -5629,7 +5624,7 @@
       "fonts/NotoSerifHebrew/full/ttf/NotoSerifHebrew-SemiCondensedSemiBold.ttf",
       "fonts/NotoSerifHebrew/full/ttf/NotoSerifHebrew-SemiCondensedThin.ttf",
       "fonts/NotoSerifHebrew/full/ttf/NotoSerifHebrew-Thin.ttf",
-      "fonts/NotoSerifHebrew/full/variable-ttf/NotoSerifHebrew[wdth,wght].ttf"
+      "fonts/NotoSerifHebrew/full/variable/NotoSerifHebrew[wdth,wght].ttf"
      ],
      "hinted": [
       "fonts/NotoSerifHebrew/hinted/ttf/NotoSerifHebrew-Black.ttf",
@@ -5743,23 +5738,33 @@
       "fonts/NotoSerifHebrew/unhinted/ttf/NotoSerifHebrew-SemiCondensedSemiBold.ttf",
       "fonts/NotoSerifHebrew/unhinted/ttf/NotoSerifHebrew-SemiCondensedThin.ttf",
       "fonts/NotoSerifHebrew/unhinted/ttf/NotoSerifHebrew-Thin.ttf",
-      "fonts/NotoSerifHebrew/unhinted/variable-ttf/NotoSerifHebrew[wdth,wght].ttf"
+      "fonts/NotoSerifHebrew/unhinted/variable/NotoSerifHebrew[wdth,wght].ttf"
      ]
     },
     "latest_release": {
-     "notes": "Noto Serif Hebrew v2.003\n\nThis is a maintenance release.\n",
-     "published": "2022-07-13T13:28:21",
-     "url": "https://github.com/notofonts/hebrew/releases/tag/NotoSerifHebrew-v2.003",
-     "version": "v2.003"
+     "notes": "Noto Serif Hebrew v2.004\n\nThis release:\n\n* Corrects the position of marks under double-yud and double-vov (#38, thanks to @markhdavid)\n* Adds the U+053F yod triangle character (#46)\n",
+     "published": "2024-04-22T14:00:25+00:00",
+     "url": "https://github.com/notofonts/hebrew/releases/tag/NotoSerifHebrew-v2.004",
+     "version": "v2.004"
     }
    }
   },
   "gh_url": "https://notofonts.github.io/hebrew",
   "issues": [
    {
-    "number": 46,
-    "title": "U+05EF missing",
-    "url": "https://github.com/notofonts/hebrew/issues/46"
+    "number": 50,
+    "title": "Overlap issues with shin dot and holam",
+    "url": "https://github.com/notofonts/hebrew/issues/50"
+   },
+   {
+    "number": 48,
+    "title": "Diamond dots?",
+    "url": "https://github.com/notofonts/hebrew/issues/48"
+   },
+   {
+    "number": 47,
+    "title": "Dagesh overlaps in heavier weights of Noto Sans Hebrew",
+    "url": "https://github.com/notofonts/hebrew/issues/47"
    },
    {
     "number": 37,
@@ -5770,11 +5775,6 @@
     "number": 36,
     "title": "Noto Rashi Hebrew - no support for U+FB1E (Hebrew Point Judeo-Spanish Varika)",
     "url": "https://github.com/notofonts/hebrew/issues/36"
-   },
-   {
-    "number": 33,
-    "title": "Kerning of the letter \u05e6",
-    "url": "https://github.com/notofonts/hebrew/issues/33"
    },
    {
     "number": 12,
@@ -8891,6 +8891,26 @@
   "gh_url": "https://notofonts.github.io/latin-greek-cyrillic",
   "issues": [
    {
+    "number": 476,
+    "title": "Wrong font families",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/476"
+   },
+   {
+    "number": 475,
+    "title": "Kerning problem in with Greek capital A in Noto Serif italics",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/475"
+   },
+   {
+    "number": 474,
+    "title": "Kerning and overlapping issues in heavier weights of Noto Serif",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/474"
+   },
+   {
+    "number": 472,
+    "title": "-> symbols don't align very well",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/472"
+   },
+   {
     "number": 470,
     "title": "Add U+1DFA",
     "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/470"
@@ -10468,34 +10488,29 @@
   "gh_url": "https://notofonts.github.io/math",
   "issues": [
    {
+    "number": 81,
+    "title": "Sync Greek with Noto Sans",
+    "url": "https://github.com/notofonts/math/issues/81"
+   },
+   {
+    "number": 77,
+    "title": "Make serif as a stub, just to recycle existing serif glyphs",
+    "url": "https://github.com/notofonts/math/issues/77"
+   },
+   {
+    "number": 73,
+    "title": "Inconsistent kerning",
+    "url": "https://github.com/notofonts/math/issues/73"
+   },
+   {
+    "number": 71,
+    "title": "Alpha and kappa are a bit too close to their latin lookalikes",
+    "url": "https://github.com/notofonts/math/issues/71"
+   },
+   {
     "number": 67,
     "title": "Request for a bold math font for use in section and title headers",
     "url": "https://github.com/notofonts/math/issues/67"
-   },
-   {
-    "number": 66,
-    "title": "Add missing Arabic math symbols",
-    "url": "https://github.com/notofonts/math/issues/66"
-   },
-   {
-    "number": 65,
-    "title": "Support all characters that have defined macros in unicode-math LaTeX package",
-    "url": "https://github.com/notofonts/math/issues/65"
-   },
-   {
-    "number": 64,
-    "title": "Arabic math alpahabet needs redesign",
-    "url": "https://github.com/notofonts/math/issues/64"
-   },
-   {
-    "number": 63,
-    "title": "Redesigns",
-    "url": "https://github.com/notofonts/math/pull/63"
-   },
-   {
-    "number": 62,
-    "title": "Why does the source include `gcommaaccent`?",
-    "url": "https://github.com/notofonts/math/issues/62"
    },
    {
     "number": 61,
@@ -10503,44 +10518,9 @@
     "url": "https://github.com/notofonts/math/issues/61"
    },
    {
-    "number": 60,
-    "title": "Binary and relational operators are too small and misaligned vertically",
-    "url": "https://github.com/notofonts/math/issues/60"
-   },
-   {
-    "number": 59,
-    "title": "Monospace math alphanumeric glyphs are not distinguishable from sans-serif ones ",
-    "url": "https://github.com/notofonts/math/issues/59"
-   },
-   {
     "number": 58,
     "title": "`ssty` variants are too bold",
     "url": "https://github.com/notofonts/math/issues/58"
-   },
-   {
-    "number": 54,
-    "title": "Request to consider splitting Noto Sans Math into two fonts---a serif and a sans serif one",
-    "url": "https://github.com/notofonts/math/issues/54"
-   },
-   {
-    "number": 53,
-    "title": "Minusplus symbol misaligned",
-    "url": "https://github.com/notofonts/math/issues/53"
-   },
-   {
-    "number": 52,
-    "title": "Sans coproduct sign is confusable with disjoint union",
-    "url": "https://github.com/notofonts/math/issues/52"
-   },
-   {
-    "number": 51,
-    "title": "Integrals are too upright and confusable with brackets/lines",
-    "url": "https://github.com/notofonts/math/issues/51"
-   },
-   {
-    "number": 44,
-    "title": "Wrong symbols for multi-storey brackets",
-    "url": "https://github.com/notofonts/math/issues/44"
    },
    {
     "number": 36,
@@ -10551,11 +10531,6 @@
     "number": 7,
     "title": "Best-fit Bidi_Mirroring_Glyph could be better",
     "url": "https://github.com/notofonts/math/issues/7"
-   },
-   {
-    "number": 5,
-    "title": "Missing anchor points in Noto Sans Math",
-    "url": "https://github.com/notofonts/math/issues/5"
    }
   ],
   "repo_url": "https://www.github.com/notofonts/math",
@@ -11744,6 +11719,11 @@
   "gh_url": "https://notofonts.github.io/nastaliq",
   "issues": [
    {
+    "number": 66,
+    "title": "Missing ligatures",
+    "url": "https://github.com/notofonts/nastaliq/issues/66"
+   },
+   {
     "number": 65,
     "title": "Need Help With Android font issue",
     "url": "https://github.com/notofonts/nastaliq/issues/65"
@@ -12164,11 +12144,6 @@
   },
   "gh_url": "https://notofonts.github.io/old-hungarian",
   "issues": [
-   {
-    "number": 17,
-    "title": "It might to good thing add syllable like ligatures.",
-    "url": "https://github.com/notofonts/old-hungarian/issues/17"
-   },
    {
     "number": 16,
     "title": "Small and capital letter must be aligned to a baseline.",
@@ -14121,14 +14096,14 @@
   "gh_url": "https://notofonts.github.io/symbols",
   "issues": [
    {
+    "number": 83,
+    "title": "Starting work on U16 legacy ex?",
+    "url": "https://github.com/notofonts/symbols/issues/83"
+   },
+   {
     "number": 82,
     "title": "Character spacing problem \u266d\u266f\u266e",
     "url": "https://github.com/notofonts/symbols/issues/82"
-   },
-   {
-    "number": 81,
-    "title": "U+1D377 \"\ud834\udf77\" TALLY MARK ONE is spaced improperly",
-    "url": "https://github.com/notofonts/symbols/issues/81"
    },
    {
     "number": 80,
@@ -14295,6 +14270,11 @@
   },
   "gh_url": "https://notofonts.github.io/syriac",
   "issues": [
+   {
+    "number": 26,
+    "title": "Weights 200, 300, 500-800 present on Google Fonts but not here (even in googlefonts/, for all three variants)",
+    "url": "https://github.com/notofonts/syriac/issues/26"
+   },
    {
     "number": 24,
     "title": "Interpolation problems in `NotoSansSyriac[wght].ttf`",
@@ -15946,10 +15926,10 @@
      ]
     },
     "latest_release": {
-     "notes": "Ported from noto-source",
-     "published": "2022-06-20T15:10:02",
-     "url": "https://github.com/notofonts/test/releases/tag/NotoSansTest-v1.000",
-     "version": "v1.000"
+     "notes": "Noto Sans Test v1.002\n\nThere are no changes in this release.\n",
+     "published": "2024-04-15T10:03:54+00:00",
+     "url": "https://github.com/notofonts/test/releases/tag/NotoSansTest-v1.002",
+     "version": "v1.002"
     }
    },
    "Noto Serif Test": {
@@ -16874,7 +16854,7 @@
   "issues": [
    {
     "number": 19,
-    "title": "Hello, I found an issue with a ligature, it is mentioned in the file attached",
+    "title": "Ligature issues.",
     "url": "https://github.com/notofonts/tifinagh/issues/19"
    },
    {
