@@ -1,18 +1,30 @@
 
+'''
+Utility script for downloading and generating local copies of Unicode and Noto data for use by fontfinder.
+This script is only used during development, and not by users of fontfinder.
+'''
 import json
 from pathlib import Path
 import tempfile
 
+import requests
+
 import fontfinder
+from fontfinder import noto
 
 
-def update_noto_data():
-    pass
+def download_noto_ref_data():
+    response = requests.get(noto.NOTO_MAIN_JSON_URL)
+    with open(noto._NOTO_MAIN_JSON_REF_PATH, "w", encoding="utf-8") as file:
+        file.write(response.text)
+
+def download_script_metadata_ref():
+    response = requests.get(fontfinder._SCRIPT_METADATA_URL)
+    with open(fontfinder._SCRIPT_METADATA_PATH, "w", encoding="utf-8") as file:
+        file.write(response.text)
 
 def generate_small_unihan():
-    '''Utility function for creating a subset of the Unicode Unihan database needed by `fontfinder`.
-    This function recreates the local subset. As `fontfinder` is distributed with a working reference
-    copy of the subset (`small_unihan.json`) you should never need to call this method.'''
+    '''Creates the subset of the Unicode Unihan database needed by `fontfinder`.'''
     import unihan_etl.core
 
     with tempfile.TemporaryDirectory() as full_unihan_dir:
@@ -42,5 +54,7 @@ def generate_small_unihan():
         
 
 if __name__ == '__main__':
+    download_noto_ref_data()
+    download_script_metadata_ref()
     generate_small_unihan()
 

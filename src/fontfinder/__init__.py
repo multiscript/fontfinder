@@ -99,6 +99,12 @@ _USER_DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 _SMALL_UNIHAN_PATH = Path(_REF_DATA_DIR_PATH, "small_unihan.json").resolve()
 '''Path to subset of Unihan data needed for CJK font selection.'''
 
+_SCRIPT_METADATA_URL = "https://raw.githubusercontent.com/unicode-org/cldr-json/main/cldr-json/cldr-core/scriptMetadata.json"
+'''URL of script metadata from the Unicode Common Locale Data Repository (CLDR).'''
+
+_SCRIPT_METADATA_PATH = Path(_REF_DATA_DIR_PATH, "scriptMetadata.json").resolve()
+'''Path to local copy of script metadata from the Unicode Common Locale Data Repository (CLDR).'''
+
 # We wait until now to import Noto data so that data path constants above are set.
 from fontfinder import noto 
 
