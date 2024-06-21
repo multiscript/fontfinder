@@ -64,7 +64,7 @@ if platform.system() == "Windows":
                     raise FontFinderException("Can't install font without a path to the downloaded font file")
                 winreg.SetValueEx(reg_font_key, font_family_subfamily, 0, winreg.REG_SZ, str(dest_path))
             reg_font_key.Close()
-            user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+            user32.SendNotifyMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
         def uninstall_fonts(self, font_infos):
             user32 = User32Library()
@@ -77,7 +77,7 @@ if platform.system() == "Windows":
                     raise FontFinderException("Can't uninstall font without a filename")
                 os.remove(USER_FONT_DIR / font_info.filename)
             reg_font_key.Close()
-            user32.SendMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
+            user32.SendNotifyMessageW(user32.HWND_BROADCAST, user32.WM_FONTCHANGE, 0, 0)
 
         def known_platform_fonts(self) -> list[fontfinder.FontInfo]:
             # Use Segoe UI Emoji for emoji.
@@ -184,11 +184,11 @@ if platform.system() == "Windows":
         def __init__(self):
             super().__init__(ctypes.windll, "User32")
 
-            self.SendMessageW = self.w_prototype(
-                wintypes.LONG, "SendMessageW", (self.IN, wintypes.HWND, "hWnd"),
-                                            (self.IN, wintypes.UINT, "Msg"),
-                                            (self.IN, wintypes.WPARAM, "wParam"),
-                                            (self.IN, wintypes.LPARAM, "lParam")
+            self.SendNotifyMessageW = self.w_prototype(
+                wintypes.BOOL, "SendNotifyMessageW", (self.IN, wintypes.HWND, "hWnd"),
+                                                     (self.IN, wintypes.UINT, "Msg"),
+                                                     (self.IN, wintypes.WPARAM, "wParam"),
+                                                     (self.IN, wintypes.LPARAM, "lParam")
             )
 
             self.HWND_BROADCAST = wintypes.HWND(0xffff)
