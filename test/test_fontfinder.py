@@ -275,6 +275,16 @@ class TestFontFinder:
 
         self.uninstall_fonts_and_verify(ff, font_infos)
 
+    def test_is_rtl(self):
+        ff = FontFinder()
+        assert not ff.is_rtl("Latin")
+        assert ff.is_rtl("Arabic")
+        assert ff.is_rtl("Hebrew")
+
+        for sample_text in sample_texts:
+            text_info = ff.analyse(sample_text['text'])
+            assert sample_text['is_rtl'] == ff.is_rtl(text_info)
+
     def install_fonts_and_verify(self, font_finder, font_infos):
         font_finder.install_fonts(font_infos)
         for i in range(MAX_FONT_INSTALL_RETRIES):
@@ -324,6 +334,7 @@ sample_texts = [
  'script_variant': '',
  'expected_family_names': ['Noto Sans', 'Noto Sans Mono', 'Noto Serif', 'Noto Serif Display'],
  'expected_family_name': 'Noto Sans',
+ 'is_rtl': False,
  'text':
 '''
 Earth is the third planet from the Sun and the only place known in the universe where life has originated and found
@@ -370,6 +381,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'script_variant': 'zh-Hans',
  'expected_family_names': ['Noto Sans CJK SC', 'Noto Serif CJK SC'],
  'expected_family_name': 'Noto Sans CJK SC',
+ 'is_rtl': False,
  'text':
 '''
 地球是太阳系中由內及外的第三顆行星，距离太阳149 597 870.7公里/1天文單位，是宇宙中人類已知唯一存在生命的天体[3]，也
@@ -396,6 +408,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'script_variant': 'zh-Hant',
  'expected_family_names': ['Noto Sans CJK TC', 'Noto Serif CJK TC'],
  'expected_family_name': 'Noto Sans CJK TC',
+ 'is_rtl': False,
  'text':
 '''
 佢距離太陽 1.5 億公里（1個天文單位）遠，係太陽系嘅行星入面第三近太陽嘅－排正喺水星同金星之後。佢嘅質量係 5.97 ×
@@ -425,6 +438,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'expected_family_names': ['Noto Kufi Arabic', 'Noto Naskh Arabic', 'Noto Naskh Arabic UI', 'Noto Sans Arabic',
                            'Noto Sans Arabic UI'],
  'expected_family_name': 'Noto Naskh Arabic',
+ 'is_rtl': True,
  'text':
 '''
 الأَرْض (رمزها: 🜨) هي ثالث كواكب المجموعة الشمسية بعدًا عن الشمس بعد عطارد والزهرة، وتُعتبر من أكبر الكواكب
@@ -460,6 +474,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'script_variant': 'ja',
  'expected_family_names': ['Noto Sans CJK JP', 'Noto Serif CJK JP'],
  'expected_family_name': 'Noto Sans CJK JP',
+ 'is_rtl': False,
  'text':
 '''
 地球とは人類が住んでいる天体、つまり人類の足元にある天体のことである。「地」という字・概念と「球」という字・概念で
@@ -507,6 +522,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'script_variant': '',
  'expected_family_names': ['Noto Sans CJK KR', 'Noto Serif CJK KR'],
  'expected_family_name': 'Noto Sans CJK KR',
+ 'is_rtl': False,
  'text':
 '''
 지구(地球, 영어: Earth)는 태양으로부터 세 번째 행성이며, 조금 두꺼운 대기층으로 둘러싸여 있고, 지금까지 발견된
@@ -544,6 +560,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'script_variant': '',
  'expected_family_names': ['Noto Sans Devanagari', 'Noto Serif Devanagari'],
  'expected_family_name': 'Noto Sans Devanagari',
+ 'is_rtl': False,
  'text':
 '''
 पृथ्वी (प्रतीक: 🜨) सौर मण्डल में सूर्य से तीसरा ग्रह है और एकमात्र खगोलीय वस्तु है जो जीवन को आश्रय देने के लिए
@@ -586,6 +603,7 @@ livelihood of humans and many other forms of life, and causing widespread extinc
  'expected_family_name': 'Apple Color Emoji' if platform.system() == "Darwin" else
                          'Segoe UI Emoji' if platform.system() == "Windows" else
                          'Noto Color Emoji',
+ 'is_rtl': False,
  'text': # Text below is just some sample emoji
 '''
 😀😃😄😁🐶🐱🐭🐹🍏🍎🍐🍊⚽️🏀🏈⚾️🚗🚕🚙🚌⌚️📱📲💻🩷❤️🧡💛🏳️🏴🏴‍☠️🏁

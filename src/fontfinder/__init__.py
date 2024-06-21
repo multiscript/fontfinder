@@ -114,6 +114,7 @@ class FontFinder:
     def __init__(self):
         self._all_known_fonts = None
         self._small_unihan_data_private = None
+        self._script_metadata_private = None
         
         self.max_analyse_chars: int = 2048
         '''Maximum number of characters examined by `FontFinder.analyse().'''
@@ -402,6 +403,20 @@ class FontFinder:
         font_platform = _platforms.get_font_platform()
         font_platform.uninstall_fonts(font_infos)        
 
+    def is_rtl(self, script_or_text_info: str | TextInfo) -> bool:
+        '''Returns True if the text direction of the given Unicode script is right-to-left.
+        
+        `script_or_text_info` must be either the long script name (i.e. the Unicode property value alias), or a
+        `TextInfo` object, in which case the `main_script` attribute of the `TextInfo` will be used.
+        '''
+        long_script = script_or_text_info
+        if isinstance(long_script, TextInfo):
+            long_script = long_script.main_script
+        
+        short_script = udp.property_value_aliases["script"][long_script][0]
+        is_rtl = (self._script_metadata[short_script]["rtl"] == "YES")
+        return is_rtl
+
     def known_fonts(self, filter_func = None) -> list[FontInfo]:
         '''Returns a list of FontInfo objects for all fonts known to this library.
         
@@ -469,6 +484,13 @@ class FontFinder:
             with open(_SMALL_UNIHAN_PATH, "r", encoding="utf-8") as small_unihan_file:
                 self._small_unihan_data_private = json.load(small_unihan_file)
         return self._small_unihan_data_private
+
+    @property
+    def _script_metadata(self):
+        if self._script_metadata_private is None:
+            with open(_SCRIPT_METADATA_PATH, "r", encoding="utf-8") as script_metadata_file:
+                self._script_metadata_private = json.load(script_metadata_file)["scriptMetadata"]
+        return self._script_metadata_private
 
     def _text_info_to_font_infos(self, str_or_text_info):
         if isinstance(str_or_text_info, str):
