@@ -97,7 +97,7 @@ _USER_DATA_DIR_PATH = platformdirs.user_data_path("fontfinder")
 _USER_DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
 _SMALL_UNIHAN_PATH = Path(_REF_DATA_DIR_PATH, "small_unihan.json").resolve()
-'''Path to subset of Unihan data neede for CJK font selection.'''
+'''Path to subset of Unihan data needed for CJK font selection.'''
 
 # We wait until now to import Noto data so that data path constants above are set.
 from fontfinder import noto 
