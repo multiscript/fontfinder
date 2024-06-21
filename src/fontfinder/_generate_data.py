@@ -6,6 +6,9 @@ import tempfile
 import fontfinder
 
 
+def update_noto_data():
+    pass
+
 def generate_small_unihan():
     '''Utility function for creating a subset of the Unicode Unihan database needed by `fontfinder`.
     This function recreates the local subset. As `fontfinder` is distributed with a working reference
@@ -26,7 +29,7 @@ def generate_small_unihan():
             packager.export()
 
         with open(full_unihan_path) as full_unihan_file:
-            with open(fontfinder._SMALL_UNIHAN_PATH, "w") as small_unihan_file:
+            with open(fontfinder._SMALL_UNIHAN_PATH, "w", encoding="utf-8") as small_unihan_file:
                 full_records = json.load(full_unihan_file)
                 selected_keys = ['kTraditionalVariant', 'kSimplifiedVariant']
                 small_records = {}

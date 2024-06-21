@@ -460,7 +460,7 @@ class FontFinder:
     @property
     def _small_unihan_data(self):
         if self._small_unihan_data_private is None:
-            with open(_SMALL_UNIHAN_PATH) as small_unihan_file:
+            with open(_SMALL_UNIHAN_PATH, "r", encoding="utf-8") as small_unihan_file:
                 self._small_unihan_data_private = json.load(small_unihan_file)
         return self._small_unihan_data_private
 

@@ -209,7 +209,7 @@ class FontInfo:
 
 def write_font_infos_to_csv(font_infos, csv_path):
     '''Write a list of `FontInfo` objects to a CSV file with the given `csv_path`.'''
-    with open(csv_path, "w") as file:
+    with open(csv_path, "w", encoding="utf-8") as file:
         field_names = [field.name for field in dataclasses.fields(FontInfo)]
         writer = csv.DictWriter(file, field_names)
         writer.writeheader()
@@ -220,7 +220,7 @@ def read_font_infos_from_csv(csv_path):
     '''Read a CSV file at `csv_path` previously created by `write_font_infos_to_csv()` and use it to create and
     return a list of `FontInfo` objects.'''
     font_infos = []
-    with open(csv_path, "r") as file:
+    with open(csv_path, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         for row in reader:
             font_infos.append(FontInfo.from_str_dict(row))

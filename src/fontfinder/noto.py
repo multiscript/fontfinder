@@ -49,11 +49,11 @@ def _get_noto_main_data():
     if (datetime.datetime.now() - last_mod_time) >= _NOTO_MAIN_JSON_MAX_AGE:
         # Update cached noto.json
         noto_json_text = requests.get(NOTO_MAIN_JSON_URL)
-        with open(_NOTO_MAIN_JSON_USER_PATH, "w") as file:
+        with open(_NOTO_MAIN_JSON_USER_PATH, "w", encoding="utf-8") as file:
             file.write(noto_json_text.text)
     
     # Read cached noto.json
-    with open(_NOTO_MAIN_JSON_USER_PATH, "r") as file:
+    with open(_NOTO_MAIN_JSON_USER_PATH, "r", encoding="utf-8") as file:
         noto_data = json.load(file)
     return noto_data
             
