@@ -35,6 +35,7 @@ def generate_small_unihan():
                     if len(small_entry) > 0:
                         small_records[full_record['char']] = small_entry
                 json.dump(small_records, small_unihan_file)
+                print(f"Save small Unihan data to {fontfinder._SMALL_UNIHAN_PATH}")
         
 
 if __name__ == '__main__':

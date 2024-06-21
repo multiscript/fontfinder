@@ -1,5 +1,7 @@
 # Release Process
 
+  1. Save the latest copy of https://notofonts.github.io/noto.json into src/fontfinder/data/noto.json
+  1. Run `python src/fontfinder/_generate_data.py` which will update `small_unihan.json` 
   1. Update version numbers in `pyproject.toml` and 'CHANGES.md`
   1. If first build: `pip install build`
   1. Remove old `dist/` directory
