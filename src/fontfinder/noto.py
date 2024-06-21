@@ -85,7 +85,7 @@ def _get_noto_main_fonts(filter_func = None):
                 script_variant = "Urdu"
             elif script_key == "math" or script_key == "music" or script_key == "symbols" or \
                  script_key == "mayan-numerals" or script_key == "indic-siyaq-numbers" or \
-                 script_key == "ottoman-siyaq-numbers":
+                 script_key == "ottoman-siyaq-numbers" or script_key == "znamenny":
                 # These are all "pseudo-script-names" for characters who actual script is mostly "Common".
                 main_script = "Common"
                 script_variant = script_key.replace('-', '_').title()
