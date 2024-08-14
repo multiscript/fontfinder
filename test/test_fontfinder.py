@@ -123,6 +123,20 @@ class TestFontFinder:
             assert sample_text['main_script'] == text_info.main_script
             assert sample_text['script_variant'] == text_info.script_variant
 
+    def test_empty_text(self):
+        ff = FontFinder()
+        text_info = ff.analyse('')
+        assert text_info.main_script == ''
+        assert text_info.script_variant == ''
+        assert text_info.emoji_count == 0
+        assert len(text_info.script_count) == 0
+
+        assert ff.find_families(text_info) == []
+        assert ff.find_family(text_info) == None
+
+        assert ff.find_families('') == []
+        assert ff.find_family('') == None
+
     def test_find_families(self):
         ff = FontFinder()
         for sample_text in sample_texts:
@@ -284,6 +298,11 @@ class TestFontFinder:
         for sample_text in sample_texts:
             text_info = ff.analyse(sample_text['text'])
             assert sample_text['is_rtl'] == ff.is_rtl(text_info)
+    
+    def test_is_rtl_empty_text(self):
+        ff = FontFinder()
+        assert ff.is_rtl('blah') == False
+        assert ff.is_rtl(ff.analyse('')) == False
 
     def install_fonts_and_verify(self, font_finder, font_infos):
         font_finder.install_fonts(font_infos)

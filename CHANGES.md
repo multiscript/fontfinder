@@ -1,3 +1,5 @@
+- v0.14.0:
+  - Fixed errors that occurred when trying to analyse an empty string.
 - v0.13.0:
   - Fixed bug on Windows where installing or uninstalling fonts could hang.
   - Added FontFinder.is_rtl() method for discovering if a script's text direction is right-to-left.

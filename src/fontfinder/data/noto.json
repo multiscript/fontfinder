@@ -695,9 +695,24 @@
   "gh_url": "https://notofonts.github.io/arabic",
   "issues": [
    {
-    "number": 232,
-    "title": "Incorrect diacritic position for letter jeem when using bullets in InDesign",
-    "url": "https://github.com/notofonts/arabic/issues/232"
+    "number": 248,
+    "title": " Incorrect Font Weight Rendering When Printing",
+    "url": "https://github.com/notofonts/arabic/issues/248"
+   },
+   {
+    "number": 245,
+    "title": "Use the tailed form of U+0620 KASHMIRI YEH as per Unicode consensus",
+    "url": "https://github.com/notofonts/arabic/issues/245"
+   },
+   {
+    "number": 242,
+    "title": "Is there a way to get ARABIC KASRA be placed beneath the letter instead of ARABIC SHADDA?",
+    "url": "https://github.com/notofonts/arabic/issues/242"
+   },
+   {
+    "number": 241,
+    "title": "Noto Naskh Arabic diacritics slightly small and close to base characters",
+    "url": "https://github.com/notofonts/arabic/issues/241"
    },
    {
     "number": 230,
@@ -1241,15 +1256,20 @@
      ]
     },
     "latest_release": {
-     "notes": "Noto Serif Balinese v2.006\n\nThis release:\n\n* Fixes third level conjunct stacks (#3, #4)\n* Monospaces the musical symbols (#6)\n* Improves anchors of marks on dotted circles (#16)\n* Adds the Unicode 14 character ARCHAIC JNYA (#34)\n* Adds a default language system\n",
-     "published": "2024-05-16T10:54:52+00:00",
-     "url": "https://github.com/notofonts/balinese/releases/tag/NotoSerifBalinese-v2.006",
-     "version": "v2.006"
+     "notes": "Noto Serif Balinese v2.007\n\nThis release fixes overlaps between some above marks (#8)\n",
+     "published": "2024-07-09T08:41:06+00:00",
+     "url": "https://github.com/notofonts/balinese/releases/tag/NotoSerifBalinese-v2.007",
+     "version": "v2.007"
     }
    }
   },
   "gh_url": "https://notofonts.github.io/balinese",
   "issues": [
+   {
+    "number": 41,
+    "title": "U+1B37 BALINESE VOWEL SIGN ULU SARI overlaps above-base marks",
+    "url": "https://github.com/notofonts/balinese/issues/41"
+   },
    {
     "number": 34,
     "title": "Third-level la needs drawing",
@@ -1259,11 +1279,6 @@
     "number": 12,
     "title": "Balinese subjoined consonants block ligatures",
     "url": "https://github.com/notofonts/balinese/issues/12"
-   },
-   {
-    "number": 8,
-    "title": "Overlapping above-base marks in Balinese",
-    "url": "https://github.com/notofonts/balinese/issues/8"
    },
    {
     "number": 5,
@@ -2026,6 +2041,11 @@
   },
   "gh_url": "https://notofonts.github.io/canadian-aboriginal",
   "issues": [
+   {
+    "number": 8,
+    "title": "Canadian-aboriginal uni18F3 - outstroke added. Minor fixes to uni18D4\u2026",
+    "url": "https://github.com/notofonts/canadian-aboriginal/pull/8"
+   },
    {
     "number": 3,
     "title": "Identical glyphs for U+144A and U+18F3",
@@ -7180,7 +7200,13 @@
    }
   },
   "gh_url": "https://notofonts.github.io/khmer",
-  "issues": [],
+  "issues": [
+   {
+    "number": 29,
+    "title": "Noto Sans Khmer appears Black on latest browsers on Android",
+    "url": "https://github.com/notofonts/khmer/issues/29"
+   }
+  ],
   "repo_url": "https://www.github.com/notofonts/khmer",
   "tier": 2,
   "title": "Noto Khmer"
@@ -7901,7 +7927,13 @@
    }
   },
   "gh_url": "https://notofonts.github.io/lao",
-  "issues": [],
+  "issues": [
+   {
+    "number": 18,
+    "title": "Virama positioning",
+    "url": "https://github.com/notofonts/lao/issues/18"
+   }
+  ],
   "repo_url": "https://www.github.com/notofonts/lao",
   "tier": 3,
   "title": "Noto Lao"
@@ -8891,6 +8923,21 @@
   "gh_url": "https://notofonts.github.io/latin-greek-cyrillic",
   "issues": [
    {
+    "number": 484,
+    "title": "Alternate with low circumflex for \u27e8\u0125\u27e9; smaller white space in \u27e8t\u0302\u27e9 ",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/484"
+   },
+   {
+    "number": 483,
+    "title": "Missing minus sign (U+2212) ",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/483"
+   },
+   {
+    "number": 482,
+    "title": "[googlefonts] Thin Serif Greek has noticeable extra thick parts",
+    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/482"
+   },
+   {
     "number": 480,
     "title": "Missing characters",
     "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/480"
@@ -8989,11 +9036,6 @@
     "number": 446,
     "title": "Design inconsistency in Cyrillic",
     "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/446"
-   },
-   {
-    "number": 434,
-    "title": "Noto Sans Bold not working in Google Docs",
-    "url": "https://github.com/notofonts/latin-greek-cyrillic/issues/434"
    },
    {
     "number": 426,
@@ -10520,21 +10562,6 @@
   "gh_url": "https://notofonts.github.io/math",
   "issues": [
    {
-    "number": 87,
-    "title": "OpenType MATH Table in latest release",
-    "url": "https://github.com/notofonts/math/issues/87"
-   },
-   {
-    "number": 86,
-    "title": "Some vertical variants have variants themselves",
-    "url": "https://github.com/notofonts/math/issues/86"
-   },
-   {
-    "number": 85,
-    "title": "U+2974, U+2975, and U+2B49 have incorrect tildes",
-    "url": "https://github.com/notofonts/math/issues/85"
-   },
-   {
     "number": 81,
     "title": "Sync Greek with Noto Sans",
     "url": "https://github.com/notofonts/math/issues/81"
@@ -10543,11 +10570,6 @@
     "number": 77,
     "title": "Make serif as a stub, just to recycle existing serif glyphs",
     "url": "https://github.com/notofonts/math/issues/77"
-   },
-   {
-    "number": 73,
-    "title": "Inconsistent kerning",
-    "url": "https://github.com/notofonts/math/issues/73"
    },
    {
     "number": 71,
@@ -10918,10 +10940,10 @@
      ]
     },
     "latest_release": {
-     "notes": "Noto Sans Mongolian 3.001\n\nThis release upgrades the embedded Latin subset in full builds to GF Latin Core.\n",
-     "published": "2023-11-07T08:59:56+00:00",
-     "url": "https://github.com/notofonts/mongolian/releases/tag/NotoSansMongolian-v3.001",
-     "version": "v3.001"
+     "notes": "Noto Sans Mongolian v3.002\n\nThis release updates the shaping rules to meet the published standard (UTN#57).\n",
+     "published": "2024-07-24T17:01:39+00:00",
+     "url": "https://github.com/notofonts/mongolian/releases/tag/NotoSansMongolian-v3.002",
+     "version": "v3.002"
     }
    }
   },
@@ -11679,7 +11701,13 @@
    }
   },
   "gh_url": "https://notofonts.github.io/nag-mundari",
-  "issues": [],
+  "issues": [
+   {
+    "number": 6,
+    "title": "U+1E4EC and U+1E4ED are misplaced on U+25CC DOTTED CIRCLE",
+    "url": "https://github.com/notofonts/nag-mundari/issues/6"
+   }
+  ],
   "repo_url": "https://www.github.com/notofonts/nag-mundari",
   "tier": 3,
   "title": "Noto Sans Nag Mundari"
@@ -11740,7 +11768,7 @@
       "fonts/NotoNastaliqUrdu/full/slim-variable-ttf/NotoNastaliqUrdu[wght].ttf",
       "fonts/NotoNastaliqUrdu/full/ttf/NotoNastaliqUrdu-Bold.ttf",
       "fonts/NotoNastaliqUrdu/full/ttf/NotoNastaliqUrdu-Regular.ttf",
-      "fonts/NotoNastaliqUrdu/full/variable/NotoNastaliqUrdu[wght].ttf"
+      "fonts/NotoNastaliqUrdu/full/variable-ttf/NotoNastaliqUrdu[wght].ttf"
      ],
      "hinted": [
       "fonts/NotoNastaliqUrdu/hinted/ttf/NotoNastaliqUrdu-Bold.ttf",
@@ -11752,78 +11780,28 @@
       "fonts/NotoNastaliqUrdu/unhinted/slim-variable-ttf/NotoNastaliqUrdu[wght].ttf",
       "fonts/NotoNastaliqUrdu/unhinted/ttf/NotoNastaliqUrdu-Bold.ttf",
       "fonts/NotoNastaliqUrdu/unhinted/ttf/NotoNastaliqUrdu-Regular.ttf",
-      "fonts/NotoNastaliqUrdu/unhinted/variable/NotoNastaliqUrdu[wght].ttf"
+      "fonts/NotoNastaliqUrdu/unhinted/variable-ttf/NotoNastaliqUrdu[wght].ttf"
      ]
     },
     "latest_release": {
-     "notes": "Noto Nastaliq Urdu v3.009\n\n*Important*: This release replaces the yanked v3.008.\n\nThis release:\n\n* Encodes a number of new characters: U+06B5 LAM WITH SMALL V, U+06AD NG, U+06CB VE (#50), U+0695 RE WITH V BELOW (#53), U+0682, U+0690, U+0692, U+0694, U+0695, U+0697, U+069D, U+069F, U+06A3, U+06A5, U+06AC, U+06AD, U+06AE, U+06B2, U+06B4, U+06B5, U+06B6, U+06B8, U+06B9, U+06BF, U+06C5, U+06C8, U+06C9, U+06CB, U+06D1, U+0764, U+0765, U+0766 (#10)\n* Improves the positioning of the LOW ALEF character (#7)\n* Uses localized form of digits after a subtending mark (#47)\n* Improves the contextualization of the divine name ligature (#4)\n* Improves the display of isolated U+0768 NOON WITH SMALL TAH (#6)\n* Fixes the position of nuktas and tahs ove lam (#16)\n",
-     "published": "2023-10-02T12:00:24+00:00",
-     "url": "https://github.com/notofonts/nastaliq/releases/tag/NotoNastaliqUrdu-v3.009",
-     "version": "v3.009"
+     "notes": "Noto Nastaliq Urdu v4.000\n\nThis is a major re-engineering of the font, which fixes most open issues. Dot positioning and bari ye handling has been extensively revised. Some connections have been simplified, reducing the glyphset dramatically.\n",
+     "published": "2024-07-17T17:00:20+00:00",
+     "url": "https://github.com/notofonts/nastaliq/releases/tag/NotoNastaliqUrdu-v4.000",
+     "version": "v4.000"
     }
    }
   },
   "gh_url": "https://notofonts.github.io/nastaliq",
   "issues": [
    {
-    "number": 67,
-    "title": "Overlap in the string '\u0631\u0641\u062d'",
-    "url": "https://github.com/notofonts/nastaliq/issues/67"
-   },
-   {
-    "number": 66,
-    "title": "Missing ligatures",
-    "url": "https://github.com/notofonts/nastaliq/issues/66"
-   },
-   {
-    "number": 65,
-    "title": "Need Help With Android font issue",
-    "url": "https://github.com/notofonts/nastaliq/issues/65"
-   },
-   {
-    "number": 64,
-    "title": "dot collision, lam followed by peh",
-    "url": "https://github.com/notofonts/nastaliq/issues/64"
-   },
-   {
-    "number": 63,
-    "title": "Collision between U+0650 ARABIC KASRA ARABIC KASRAH(\u25cc\u0650) and U+0628 ARABIC LETTER BEH(\u0628)",
-    "url": "https://github.com/notofonts/nastaliq/issues/63"
-   },
-   {
-    "number": 51,
-    "title": "Shape of U+066B ARABIC DECIMAL SEPARATOR",
-    "url": "https://github.com/notofonts/nastaliq/issues/51"
-   },
-   {
     "number": 14,
     "title": "Add support for Central Asian Turkic language characters to Noto Nastaliq Urdu",
     "url": "https://github.com/notofonts/nastaliq/issues/14"
    },
    {
-    "number": 15,
-    "title": "Noto Nastaliq Urdu: Joining issues with U+0648 ARABIC LETTER WAW",
-    "url": "https://github.com/notofonts/nastaliq/issues/15"
-   },
-   {
-    "number": 13,
-    "title": "Noto Nastaliq Urdu: Regression in swash seen/sheen",
-    "url": "https://github.com/notofonts/nastaliq/issues/13"
-   },
-   {
-    "number": 9,
-    "title": "Noto Nastaliq Urdu: Some more sequences ending in U+06D2 ARABIC LETTER YEH BARREE (\u06d2) with incorrect dot positioning",
-    "url": "https://github.com/notofonts/nastaliq/issues/9"
-   },
-   {
     "number": 8,
     "title": "Nastaliq curly vowel signs are not curly enough",
     "url": "https://github.com/notofonts/nastaliq/issues/8"
-   },
-   {
-    "number": 3,
-    "title": "Noto Nastaliq support for Balti Graf U+08C8",
-    "url": "https://github.com/notofonts/nastaliq/issues/3"
    }
   ],
   "repo_url": "https://www.github.com/notofonts/nastaliq",
@@ -12840,7 +12818,13 @@
    }
   },
   "gh_url": "https://notofonts.github.io/pau-cin-hau",
-  "issues": [],
+  "issues": [
+   {
+    "number": 1,
+    "title": "Request for new style of Pau Cin Hau Alphabets to add the next version of Notosans PauCinHau regular",
+    "url": "https://github.com/notofonts/pau-cin-hau/issues/1"
+   }
+  ],
   "repo_url": "https://www.github.com/notofonts/pau-cin-hau",
   "tier": 3,
   "title": "Noto Pau Cin Hau"
@@ -16126,7 +16110,13 @@
    }
   },
   "gh_url": "https://notofonts.github.io/thaana",
-  "issues": [],
+  "issues": [
+   {
+    "number": 4,
+    "title": "Noto Sans Thaana font no longer following Faruma style (?)",
+    "url": "https://github.com/notofonts/thaana/issues/4"
+   }
+  ],
   "repo_url": "https://www.github.com/notofonts/thaana",
   "tier": 3,
   "title": "Noto Thaana"
@@ -17441,6 +17431,11 @@
   },
   "gh_url": "https://notofonts.github.io/znamenny",
   "issues": [
+   {
+    "number": 5,
+    "title": "fix typos",
+    "url": "https://github.com/notofonts/znamenny/pull/5"
+   },
    {
     "number": 4,
     "title": " U+1CFBB ZNAMENNY NEUME STRELA KRYUKOVAYA GROMOPOVODNAYA WITH DOUBLE ZAPYATAYA lacks vertical stroke",

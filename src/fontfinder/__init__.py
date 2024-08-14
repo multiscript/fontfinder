@@ -265,7 +265,8 @@ class FontFinder:
             script_variant = ""
 
         # Handle emoji
-        if (len(non_generic_count) == 0 and emoji_count > 0) or emoji_count > non_generic_count.most_common(1)[0][1]:
+        if (len(non_generic_count) == 0 and emoji_count > 0) or \
+           (len(non_generic_count) > 0  and emoji_count > non_generic_count.most_common(1)[0][1]):
             main_script = "Common"
             script_variant = "Emoji"
 
@@ -291,7 +292,8 @@ class FontFinder:
 
     def find_families(self, str_or_text_info: str | TextInfo) -> list[str]:
         '''Returns a list of the family names (strings) of all fonts known to the library that are suitable for
-        `str_or_text_info`. No font family preferences are applied.
+        `str_or_text_info`. No font family preferences are applied. If no suitable family names are found,
+        an empty list is returned.
         
         `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
         '''
@@ -300,10 +302,11 @@ class FontFinder:
         family_names = {font_info.family_name: 1 for font_info in font_infos}
         return list(family_names.keys())
 
-    def find_family(self, str_or_text_info: str | TextInfo) -> str:
+    def find_family(self, str_or_text_info: str | TextInfo) -> str | None:
         '''Returns the family name (a string) of the preferred font family for `str_or_text_info`.
         The preferred font family is determined applying the filter functions in `family_prefs`.
         If, after applying these filters, more than one family remains, the first family is returned.
+        If no preferred font family is found, None is returned.
         
         `str_or_text_info` should either be the text string itself, or a `TextInfo` object returned by `analyse()`.
         '''
@@ -404,7 +407,8 @@ class FontFinder:
         font_platform.uninstall_fonts(font_infos)        
 
     def is_rtl(self, script_or_text_info: str | TextInfo) -> bool:
-        '''Returns True if the text direction of the given Unicode script is right-to-left.
+        '''Returns True if the text direction of the given Unicode script is right-to-left, otherwise False.
+        If the script name is not found, returns False.
         
         `script_or_text_info` must be either the long script name (i.e. the Unicode property value alias), or a
         `TextInfo` object, in which case the `main_script` attribute of the `TextInfo` will be used.
@@ -412,8 +416,10 @@ class FontFinder:
         long_script = script_or_text_info
         if isinstance(long_script, TextInfo):
             long_script = long_script.main_script
-        
-        short_script = udp.property_value_aliases["script"][long_script][0]
+
+        short_script = udp.property_value_aliases["script"].get(long_script, [None])[0]
+        if short_script is None:
+            return False
         is_rtl = (self._script_metadata[short_script]["rtl"] == "YES")
         return is_rtl
 
