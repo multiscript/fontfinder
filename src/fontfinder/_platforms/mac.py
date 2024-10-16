@@ -11,7 +11,7 @@ if platform.system() == "Darwin":
     import os
     import shutil
 
-    import semver
+    from packaging import version
 
     from fontfinder import FontFinder, FontFinderException
     import fontfinder._platforms
@@ -23,7 +23,7 @@ if platform.system() == "Darwin":
 
     class MacPlatform(fontfinder._platforms.FontPlatform):
         def all_installed_families(self):        
-            if semver.Version.parse(platform.mac_ver()[0]) < semver.Version(10.6):
+            if version.Version(platform.mac_ver()[0]) < version.Version('10.6'):
                 raise Exception("fontfinder.mac.all_installed_families() only supported by macOS 10.6 or later")
             
             cf = CoreFoundationLibrary()
