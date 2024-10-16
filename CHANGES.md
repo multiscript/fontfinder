@@ -1,3 +1,6 @@
+- v0.15.0:
+  - Updated to Unicode 16.0.0
+  - Fixed bug on macOS due to poor parsing of the macOS version number.
 - v0.14.0:
   - Fixed errors that occurred when trying to analyse an empty string.
 - v0.13.0:
