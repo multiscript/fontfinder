@@ -110,8 +110,8 @@ class TestFontFinder:
         print("Unicode Scripts Not Covered:")
         scripts_not_known = ff.scripts_not_known()
         pprint(scripts_not_known)
-        scripts_not_known == ['Garay', 'Gurung_Khema', 'Kirat_Rai', 'Ol_Onal', 'Sunuwar', 'Todhri', 'Tulu_Tigalari']
-                             # These are new scripts in Unicode 16, not yet covered by Noto fonts.
+        assert scripts_not_known == ['Garay', 'Gurung_Khema', 'Kirat_Rai', 'Ol_Onal', 'Todhri', 'Tulu_Tigalari']
+                                    # These are new scripts in Unicode 16, not yet covered by Noto fonts.
         print("Noto Pseudo-Scripts Not in Unicode:")
         not_in_unicode = list(set(ff.known_scripts()) - set(ff.all_unicode_scripts()) - {''})
         print(not_in_unicode)
@@ -202,6 +202,7 @@ class TestFontFinder:
             print(f"{main_script}, {script_variant}")
             font_family = ff.find_family(TextInfo(main_script, script_variant))
             print(font_family)
+            assert font_family is not None
             font_infos.extend(ff.find_family_fonts(font_family, main_script, script_variant))
         filename = "known_script_variants.csv"
         self._font_infos_test_to_csv(font_infos, filename, test_mode)
@@ -234,6 +235,7 @@ class TestFontFinder:
         ff = FontFinderWithTestFonts()
         test_font_infos = ff.get_test_font_infos()
         temp_dir = None
+        download_dir = None
         if test_mode is TestMode.TEST:
             temp_dir = tempfile.TemporaryDirectory()
             download_dir = temp_dir.name
@@ -241,6 +243,7 @@ class TestFontFinder:
             download_dir = Path("~/Desktop/TestFontFinder/Download").expanduser()
             download_dir.mkdir(parents=True, exist_ok=True)
 
+        assert download_dir is not None
         ff.download_fonts(test_font_infos, download_dir)
         filenames = [font_info.filename for font_info in test_font_infos]
         cmp_result = filecmp.cmpfiles(download_dir, Path(__file__, "../data").resolve(), filenames,
@@ -307,6 +310,7 @@ class TestFontFinder:
 
     def install_fonts_and_verify(self, font_finder, font_infos):
         font_finder.install_fonts(font_infos)
+        font_families = []
         for i in range(MAX_FONT_INSTALL_RETRIES):
             time.sleep(FONT_INSTALL_SLEEP_STEP)
             font_families = font_finder.all_installed_families()
@@ -319,12 +323,31 @@ class TestFontFinder:
             font_finder.uninstall_fonts(font_infos)
         except FileNotFoundError:
             pass
+        font_families = [font_infos[0].family_name]
         for i in range(MAX_FONT_INSTALL_RETRIES):
             time.sleep(FONT_INSTALL_SLEEP_STEP)
             font_families = font_finder.all_installed_families()
             if font_infos[0].family_name not in font_families:
                 break
         assert font_infos[0].family_name not in font_families
+
+    def test_unihan_generation(self):
+        import unihan_etl.core
+
+        with tempfile.TemporaryDirectory() as full_unihan_dir:
+            full_unihan_path = Path(full_unihan_dir, "full_unihan.json").resolve()
+
+            with tempfile.TemporaryDirectory() as work_dir:
+                packager_options = {
+                    "destination": str(full_unihan_path),
+                    "work_dir": work_dir,
+                    "format": "json",
+                    "cache": False
+                }
+                packager = unihan_etl.core.Packager(packager_options)
+                packager.download()
+                packager.export()
+
 
     @pytest.mark.skip("Investigation test to examine variants with multiple families")
     def test_multi_family_script_variants(self):

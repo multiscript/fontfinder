@@ -34,7 +34,8 @@ def generate_small_unihan():
             packager_options = {
                 "destination": str(full_unihan_path),
                 "work_dir": work_dir,
-                "format": "json"
+                "format": "json",
+                "cache": False
             }
             packager = unihan_etl.core.Packager(packager_options)
             packager.download()
