@@ -319,8 +319,8 @@ class FontFinder:
         family_name = font_infos[0].family_name
         return family_name
 
-    def find_family_fonts(self, family_name_or_names: str | Iterable[str],
-                          main_script:str = None, script_variant:str = None) -> list[FontInfo]:
+    def find_family_fonts(self, family_name_or_names: str | Iterable[str], main_script:str | None = None,
+                          script_variant:str | None = None) -> list[FontInfo]:
         '''Returns a list of `FontInfo` objects for font files matching the given font family names.
         The list is filtered using the functions in `family_font_prefs`.
          
@@ -357,8 +357,8 @@ class FontFinder:
             result_font_infos.extend(font_infos)
         return result_font_infos
 
-    def find_family_fonts_to_download(self, family_name_or_names: str | Iterable[str],
-                                      main_script:str = None, script_variant:str = None) -> list[FontInfo]:
+    def find_family_fonts_to_download(self, family_name_or_names: str | Iterable[str], main_script:str | None = None,
+                                      script_variant:str | None = None) -> list[FontInfo]:
         '''Returns a list of `FontInfo` objects for font files that need to be downloaded. This list is formed
         by finding fonts matching the given family names, where those families are not currently installed,
         the filters in `family_font_prefs` have been applied, and the fonts have download URLs provided.
@@ -382,9 +382,12 @@ class FontFinder:
         to `download_dir`. Returns a list of copied `FontInfo` objects where the `downloaded_path` attribute points
         to each new file.'''
         download_dir = Path(download_dir)
+        # Filter font_infos to only those that have download URLs
         font_infos = self.downloadable_fonts([font_info.copy() for font_info in font_infos])
         for font_info in font_infos:
             response = requests.get(font_info.url, stream=True)
+            if font_info.filename is None:
+                continue
             font_info.downloaded_path = download_dir / font_info.filename
             with open(font_info.downloaded_path, 'wb') as file:
                 for chunk in response.iter_content(chunk_size=128):
@@ -441,7 +444,7 @@ class FontFinder:
         '''Returns a list of the `main_script` values for all the fonts known to this library.'''
         return sorted(set([info.main_script for info in self.known_fonts(filter_func)]))
 
-    def known_script_variants(self, filter_func = None) -> list[(str, str)]:
+    def known_script_variants(self, filter_func = None) -> list[tuple[str, str]]:
         '''Returns a list of `(main_script, script_variant)` tuples for all the fonts known to this library.'''
         # Use a dictionary as an ordered set
         return list({(info.main_script, info.script_variant): 1 for info in self.known_fonts(filter_func)}.keys())

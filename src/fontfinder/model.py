@@ -79,11 +79,13 @@ class FontInfo:
     downloaded_path: Path = Path()
     '''Path to the downloaded font on the local filesystem for installation. Empty if not set.'''
 
-    def __init__(self, main_script: str = None, script_variant: str = None, family_name: str = None,
-                 subfamily_name: str = None, postscript_name: str = None, form: 'FontForm' = None,
-                 width: 'FontWidth' = None, weight: 'FontWeight' = None, style: 'FontStyle' = None,
-                 format: 'FontFormat' = None, build: 'FontBuild' = None, tags: 'FontTag' = None, url: str  = None,
-                 downloaded_path: Path = None 
+    def __init__(self, main_script: str | None = None, script_variant: str | None = None,
+                 family_name: str | None = None, subfamily_name: str | None = None,
+                 postscript_name: str | None = None, form: 'FontForm | None' = None,
+                 width: 'FontWidth | None' = None, weight: 'FontWeight | None' = None,
+                 style: 'FontStyle | None' = None, format: 'FontFormat | None' = None,
+                 build: 'FontBuild | None' = None, tags: 'FontTag | None' = None, url: str | None  = None,
+                 downloaded_path: Path | None = None 
                 ):
 
         self.main_script = "" if main_script is None else main_script
