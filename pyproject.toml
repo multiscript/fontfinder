@@ -10,11 +10,11 @@ description = "Package for finding and installing fonts for Unicode scripts."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "platformdirs>=4.2.1",
-    "requests>=2.31",
-    "packaging>=24.1",
-    "unicodedataplus>=16.0.0",
-    "comtypes>=1.2.0;platform_system=='Windows'",
+    "comtypes>=1.4.11;platform_system=='Windows'",
+    "packaging>=25.0",
+    "platformdirs>=4.3.8",
+    "requests>=2.32.5",
+    "unicodedataplus>=16.0.0.post1",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -32,7 +32,7 @@ docs = [
   "pdoc"
 ]
 unihan = [
-  "unihan-etl>=0.34", "typing_extensions"
+  "unihan-etl>=0.37", "typing_extensions"
 ]
 
 [project.urls]
