@@ -333,6 +333,7 @@ class TestFontFinder:
 
     def test_unihan_generation(self):
         import unihan_etl.core
+        selected_fields = ('kTraditionalVariant', 'kSimplifiedVariant')
 
         with tempfile.TemporaryDirectory() as full_unihan_dir:
             full_unihan_path = Path(full_unihan_dir, "full_unihan.json").resolve()
@@ -342,7 +343,8 @@ class TestFontFinder:
                     "destination": str(full_unihan_path),
                     "work_dir": work_dir,
                     "format": "json",
-                    "cache": False
+                    "cache": False,
+                    "fields": selected_fields
                 }
                 packager = unihan_etl.core.Packager(packager_options)
                 packager.download()
