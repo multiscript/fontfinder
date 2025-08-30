@@ -62,8 +62,8 @@ work on other versions as well.
 1. `python3 -m venv venv` (Create a virtual environment.)
    - On Windows: `python -m venv venv`
 1. `source venv/bin/activate` (Activate the virtual environment.)
-   - In Windows cmd.exe: `venv\Scripts\\activate.bat`
-   - In Windows powershell: `.\\venv\Scripts\Activate.ps1` You may first need to run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+   - In Windows cmd.exe: `venv\\Scripts\\activate.bat`
+   - In Windows powershell: `.\\venv\\Scripts\\Activate.ps1` You may first need to run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 1. For development work...
    - `pip install -e .` (Creates an editable local install)
 1. ...or to build the package:
@@ -112,9 +112,9 @@ from fontfinder import noto
 class FontFinder:
     '''Main class for accessing this library's functionality.'''
     def __init__(self):
-        self._all_known_fonts = None
-        self._small_unihan_data_private = None
-        self._script_metadata_private = None
+        self._all_known_fonts: list[FontInfo] | None = None
+        self._small_unihan_data_private: dict[str, dict] | None = None
+        self._script_metadata_private: dict[str, dict] | None = None
         
         self.max_analyse_chars: int = 2048
         '''Maximum number of characters examined by `FontFinder.analyse().'''
@@ -488,17 +488,19 @@ class FontFinder:
         return [font_info for font_info in font_infos if font_info.url is not None and font_info.url != ""]
 
     @property
-    def _small_unihan_data(self):
+    def _small_unihan_data(self) ->  dict[str, dict]:
         if self._small_unihan_data_private is None:
             with open(_SMALL_UNIHAN_PATH, "r", encoding="utf-8") as small_unihan_file:
                 self._small_unihan_data_private = json.load(small_unihan_file)
+            assert self._small_unihan_data_private is not None
         return self._small_unihan_data_private
 
     @property
-    def _script_metadata(self):
+    def _script_metadata(self) ->  dict[str, dict]:
         if self._script_metadata_private is None:
             with open(_SCRIPT_METADATA_PATH, "r", encoding="utf-8") as script_metadata_file:
                 self._script_metadata_private = json.load(script_metadata_file)["scriptMetadata"]
+            assert self._script_metadata_private is not None
         return self._script_metadata_private
 
     def _text_info_to_font_infos(self, str_or_text_info):

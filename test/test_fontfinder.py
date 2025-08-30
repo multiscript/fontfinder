@@ -59,6 +59,7 @@ class FontFinderWithTestFonts(FontFinder):
         if self._all_known_fonts is None:
             # Add our test fonts to the cached collection
             super().known_fonts(filter_func)
+            assert self._all_known_fonts is not None
             self._all_known_fonts.extend(self.get_test_font_infos())
         return super().known_fonts(filter_func)
 
@@ -359,7 +360,6 @@ class TestFontFinder:
             if len(font_families) > 1:
                 print(f"{main_script}, {script_variant}:")
                 print(font_families)
-                print
 
     @pytest.mark.skip("Investigation test to examine script of emoji codepoints")
     def test_script_of_emoji(self):
