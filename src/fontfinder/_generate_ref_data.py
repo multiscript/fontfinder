@@ -51,7 +51,7 @@ def generate_small_unihan():
                     small_record = {key: value for key, value in large_record.items() if key in selected_fields}
                     if len(small_record) > 0:
                         small_records[large_record['char']] = small_record
-                json.dump(small_records, small_unihan_file)
+                json.dump(small_records, small_unihan_file, indent=4)
                 print(f"Save small Unihan data to {fontfinder._SMALL_UNIHAN_PATH}")
         
 
