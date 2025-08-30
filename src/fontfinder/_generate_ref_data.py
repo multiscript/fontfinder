@@ -26,30 +26,31 @@ def download_script_metadata_ref():
 def generate_small_unihan():
     '''Creates the subset of the Unicode Unihan database needed by `fontfinder`.'''
     import unihan_etl.core
+    selected_fields = ('kTraditionalVariant', 'kSimplifiedVariant')
 
-    with tempfile.TemporaryDirectory() as full_unihan_dir:
-        full_unihan_path = Path(full_unihan_dir, "full_unihan.json").resolve()
+    with tempfile.TemporaryDirectory() as large_unihan_dir:
+        large_unihan_path = Path(large_unihan_dir, "large_unihan.json").resolve()
 
         with tempfile.TemporaryDirectory() as work_dir:
             packager_options = {
-                "destination": str(full_unihan_path),
+                "destination": str(large_unihan_path),
                 "work_dir": work_dir,
                 "format": "json",
-                "cache": False
+                "cache": False,
+                "fields": selected_fields
             }
             packager = unihan_etl.core.Packager(packager_options)
             packager.download()
             packager.export()
 
-        with open(full_unihan_path) as full_unihan_file:
+        with open(large_unihan_path) as large_unihan_file:
             with open(fontfinder._SMALL_UNIHAN_PATH, "w", encoding="utf-8") as small_unihan_file:
-                full_records = json.load(full_unihan_file)
-                selected_keys = ['kTraditionalVariant', 'kSimplifiedVariant']
+                large_records = json.load(large_unihan_file)
                 small_records = {}
-                for full_record in full_records:
-                    small_entry = {key: value for key, value in full_record.items() if key in selected_keys}
-                    if len(small_entry) > 0:
-                        small_records[full_record['char']] = small_entry
+                for large_record in large_records:
+                    small_record = {key: value for key, value in large_record.items() if key in selected_fields}
+                    if len(small_record) > 0:
+                        small_records[large_record['char']] = small_record
                 json.dump(small_records, small_unihan_file)
                 print(f"Save small Unihan data to {fontfinder._SMALL_UNIHAN_PATH}")
         
