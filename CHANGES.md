@@ -1,3 +1,6 @@
+- v0.16.0:
+  - Update dependencies, including latest Noto font metadata and Unihan character database.
+  - Tested against Python 3.13.
 - v0.15.0:
   - Updated to Unicode 16.0.0
   - Fixed bug on macOS due to poor parsing of the macOS version number.
