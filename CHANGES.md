@@ -1,3 +1,5 @@
+- v0.16.1:
+  - Fix minor typos in v0.16.0 (from uncommitted changes).
 - v0.16.0:
   - Update dependencies, including latest Noto font metadata and Unihan character database.
   - Tested against Python 3.13.
